@@ -124,9 +124,12 @@ class AuditTests(unittest.TestCase):
 
     def test_malicious_filename_is_hashed_and_not_interpreted(self):
         name = '--option\tSENSITIVE_FILENAME\nfile.txt'
-        self.stage(name, 'safe')
-        # Introduce a content warning so output includes the opaque path identifier.
-        self.stage(name, '\x00')
+        # This adversarial INDEX entry cannot be a Win32 working filename.
+        # Relax NTFS validation only in this temporary fixture construction,
+        # never in the scanner or any real checkout. No file is created.
+        oid = self.command('hash-object', '-w', '--stdin', data=b'\0').decode().strip()
+        self.command('-c', 'core.protectNTFS=false', 'update-index', '--add',
+                     '--cacheinfo', f'100644,{oid},{name}')
         result = audit.audit(self.root)
         self.assertEqual(self.rules(result), {'BINARY_SKIPPED'})
         self.assertEqual(result['findings'][0]['path_id'], audit.path_id(name.encode()))
