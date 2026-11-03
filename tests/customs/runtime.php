@@ -114,7 +114,8 @@ $p=$service->projection($user,$id); $service->transition($actors['reviewer'],$id
 $p=$service->projection($user,$id); denyC(fn()=>$service->transition($actors['manager'],$id,$p['version'],'draft',true),409,'closed draft terminal');
 verifyC(count(array_filter($p['history'],fn($h)=>$h['event']==='status_change'))===4,'append only status history');
 verifyC(count(array_filter($p['history'],fn($h)=>$h['actor']===(int)$actors['reviewer']->id && $h['at']!==''))>=4,'status actor and timestamps');
-$browserId=$service->create($user,'CUSTOMS-BROWSER',$public,$private);
+$browserPublic=$public; $browserPublic['goods_summary']='Synthetic <script>window.customsLeak=1</script>';
+$browserId=$service->create($user,'CUSTOMS-BROWSER',$browserPublic,$private);
 $browserP=$service->projection($user,$browserId);
 $browserEvidence=$service->addEvidence($actors['source'],$browserId,$browserP['version'],'private.txt','PRIVATE_EVIDENCE_SENTINEL','text/plain');
 $native=$conf->entity; $conf->entity=2;
