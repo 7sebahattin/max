@@ -15,6 +15,8 @@ for args in (['docker','ps','-aq'],['docker','volume','ls','-q'],['docker','netw
     if result.stdout.strip():
         raise SystemExit('Refusing existing project resources')
 PYGUARD
+mkdir -p .local
+printf '%s' "$COMPOSE_PROJECT_NAME" > .local/branding-owned
 trap 'docker compose down --volumes --remove-orphans' EXIT
 bash scripts/maxcore_test.sh
 docker compose up -d --wait --wait-timeout 180

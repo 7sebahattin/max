@@ -70,4 +70,7 @@ jobs:
           retention-days: 7
       - name: Remove this isolated demo project's resources
         if: always()
-        run: docker compose down --volumes --remove-orphans
+        run: |
+          if [[ -f .local/branding-owned ]] && [[ "$(cat .local/branding-owned)" == "$COMPOSE_PROJECT_NAME" ]]; then
+            docker compose down --volumes --remove-orphans
+          fi
