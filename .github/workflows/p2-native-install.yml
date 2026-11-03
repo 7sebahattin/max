@@ -38,6 +38,16 @@ jobs:
       - name: Install real Dolibarr schema and demo administrator
         shell: bash
         run: P2_BROWSER=1 bash scripts/p2_install.sh
+      - name: Preserve synthetic browser evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p2-native-mobile-evidence
+          path: |
+            .local/p2-*.png
+            .local/p2-browser.json
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Stop isolated containers
         if: always()
         run: docker compose down

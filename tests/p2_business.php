@@ -131,9 +131,10 @@ nativeResult($foreign->addline('Synthetic USD goods', 10, 2, 0), $foreign, 'fore
 $foreign->fetch($foreign->id);
 checkPilot($foreign->multicurrency_code === 'USD' && abs($foreign->multicurrency_total_ht - 24) < 0.001, 'native fixed FX produces USD 24 from EUR 20');
 checkPilot((int)scalarPilot('SELECT COUNT(*) FROM '.MAIN_DB_PREFIX.'paiement_facture WHERE fk_facture='.$iid) === 0, 'draft invoice has no settlement');
-$langs->setDefaultLang('tr_TR'); $langs->loadLangs(['main','bills','orders']);
-checkPilot($langs->trans('Invoice') !== 'Invoice', 'native Turkish invoice translation');
-$langs->setDefaultLang('en_US');
+$turkish = new Translate('', $conf);
+$turkish->setDefaultLang('tr_TR'); $turkish->loadLangs(['main','bills','orders']);
+checkPilot($turkish->trans('Invoice') === 'Fatura', 'native Turkish invoice translation');
+$shipment->fetch($eid);
 foreach ([[$invoice,'crabe'],[$shipment,'rouget']] as [$object,$model]) {
     nativeResult($object->generateDocument($model, $langs), $object, 'generate native '.$model.' PDF');
 }
