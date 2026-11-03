@@ -73,7 +73,7 @@ foreach (['P2-SKU', 'P2-CARTON', 'P2-LOT'] as $ref) {
     $p = new Product($db); $p->ref = $ref; $p->label = $ref; $p->type = 0;
     $p->status = 1; $p->status_buy = 1; $p->tobatch = ($ref === 'P2-LOT' ? 1 : 0);
     $p->stockable_product = 1;
-    $p->fk_unit = (int)scalarPilot("SELECT rowid FROM ".MAIN_DB_PREFIX."c_units WHERE active=1 ORDER BY rowid LIMIT 1");
+    $p->fk_unit = (int)scalarPilot("SELECT rowid FROM ".MAIN_DB_PREFIX."c_units WHERE active=1 AND code='P' LIMIT 1");
     nativeResult($p->create($user), $p, 'create product '.$ref);
     $products[$ref] = $p;
 }
@@ -135,7 +135,7 @@ $turkish = new Translate('', $conf);
 $turkish->setDefaultLang('tr_TR'); $turkish->loadLangs(['main','bills','orders']);
 checkPilot($turkish->trans('Invoice') === 'Fatura', 'native Turkish invoice translation');
 $shipment->fetch($eid);
-foreach ([[$invoice,'crabe'],[$shipment,'rouget']] as [$object,$model]) {
+foreach ([[$invoice,'sponge'],[$shipment,'rouget']] as [$object,$model]) {
     nativeResult($object->generateDocument($model, $langs), $object, 'generate native '.$model.' PDF');
 }
 $pdfs = [];

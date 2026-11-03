@@ -18,7 +18,7 @@ The following are implemented in `tests/p2_business.php`; the final PR validatio
 | Order / shipment | Two-line order; native validation; dispatch 4 of 10 goods; 6 remain outstanding | native/configure; no custom loading/tare logic |
 | Draft finance | EUR 40 draft remains unissued/unsettled; separate fictional bank receipt 40 and statement reconciliation | native/configure; bank receipt is NOT an invoice payment |
 | Currency | Native USD currency/rate 1.2; EUR 20 yields USD 24 on a separate draft; no online rate provider | native/configure; live exchange rates deferred |
-| Documents | Native crabe invoice and rouget shipment generators | native/configure; customer-specific approved order templates may extend |
+| Documents | Native sponge invoice and rouget shipment generators | native/configure; customer-specific approved order templates may extend |
 | Reports | Native CSV fixture and genuine XLSX workbook | native/configure; role-scoped full dataset/report equivalence not certified |
 | Turkish | Native tr_TR Invoice translation resolves | native/configure; complete translation quality remains human review |
 | Mobile | Real browser login and 15 authenticated renders: partner/product/order/shipment/invoice lists at 360/390/768px; scroll widths and screenshots | native first; this is render smoke, NOT proof of task usability or accessibility |
