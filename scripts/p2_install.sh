@@ -35,6 +35,7 @@ chmod 600 .local/p2-admin-secret
 docker compose exec -T -w /opt/dolibarr/htdocs/install web php step5.php '' '' en_US set maxadmin "$admin_pass" "$admin_pass" 1 > .local/p2-install-admin.html
 unset admin_pass
 docker compose exec -T web php /checks/p2_verify.php
+docker compose exec -T web php /checks/p2_business.php
 # The installer must no longer be available after its lock was created.
 curl --fail --silent --show-error http://127.0.0.1:8080/ > .local/p2-home.html
 if grep -Eiq 'Fatal error|Uncaught .*Error|Parse error' .local/p2-home.html; then
