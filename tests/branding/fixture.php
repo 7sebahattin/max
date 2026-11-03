@@ -9,7 +9,7 @@ function brandingSnapshot() {
  $out=array();
  $r=$db->query("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity");
  while($v=$db->fetch_array($r)) $out['legal'][]=$v;
- foreach(array('facture','bank','bank_account','paiement') as $t) {
+ foreach(array('societe','facture','facturedet','bank','bank_account','paiement') as $t) {
   $r=$db->query('SELECT * FROM '.MAIN_DB_PREFIX.$t.' ORDER BY rowid');
   $out[$t]=array(); while($v=$db->fetch_array($r)) $out[$t][]=$v;
  }
@@ -26,13 +26,28 @@ if($mode==='prepare') {
   if(dolibarr_set_const($db,$k,$v,'chaine',0,'',1)<=0) throw new RuntimeException('Fixture constant failed');
  require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
  $bank=new Account($db); $bank->ref='BRAND-'.strtoupper($variant); $bank->label='Synthetic brand isolation fixture';
- $bank->country_id=1; $bank->currency_code='EUR'; $bank->type=1;
+ $bank->country_id=1; $bank->currency_code='EUR'; $bank->type=1; $bank->date_solde=dol_now();
  if($bank->create($user)<=0) throw new RuntimeException('Bank fixture failed');
  // Deliberately fictional, never used for payments or any transport.
  $r=$db->query("UPDATE ".MAIN_DB_PREFIX."bank_account SET iban_prefix='TEST-IBAN-".strtoupper($variant)."' WHERE rowid=".(int)$bank->id);
  if(!$r) throw new RuntimeException('Synthetic IBAN fixture failed');
  $r=activateModule('modSociete',1,1);
  if(!empty($r['errors'])) throw new RuntimeException('Native commercial module failed');
+ $r=activateModule('modFacture',1,1);
+ if(!empty($r['errors'])) throw new RuntimeException('Native draft module failed');
+ require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+ require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+ $customer=new Societe($db); $customer->name='Synthetic branding recipient'; $customer->client=1;
+ $customer->code_client='BRAND-RECIPIENT'; $customer->country_id=1;
+ if($customer->create($user)<=0) throw new RuntimeException('Recipient fixture failed');
+ $draft=new Facture($db); $draft->socid=$customer->id; $draft->date=dol_now(); $draft->type=0;
+ if($draft->create($user)<=0||$draft->addline('Synthetic draft isolation',1,1,0)<=0)
+  throw new RuntimeException('Unissued draft fixture failed');
+ $draft->fetch($draft->id);
+ if((int)$draft->statut!==0) throw new RuntimeException('Fixture must remain an unissued draft');
+ $image=imagecreatetruecolor(32,32);
+ imagefill($image,0,0,imagecolorallocate($image,$variant==='a'?30:180,90,130));
+ imagejpeg($image,DOL_DATA_ROOT.'/branding-fixture.jpg',85); imagedestroy($image);
  file_put_contents(DOL_DATA_ROOT.'/branding-state',brandingSnapshot());
 } elseif($mode==='verify') {
  if(file_get_contents(DOL_DATA_ROOT.'/branding-state')!==brandingSnapshot()) throw new RuntimeException('Brand changed issuer/tax/bank/invoice/payment state');

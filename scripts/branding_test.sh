@@ -10,4 +10,5 @@ bash scripts/maxcore_test.sh
 docker compose up -d --wait --wait-timeout 180
 docker compose exec -T web php /checks/branding/fixture.php prepare "$BRANDING_VARIANT"
 docker compose exec -T web sh -c 'find /opt/dolibarr/htdocs/custom/maxcore /checks/branding -name "*.php" -exec php -l {} \;'
+docker compose cp web:/var/lib/dolibarr/documents/branding-fixture.jpg .local/branding-fixture.jpg
 python3 tests/branding/browser.py

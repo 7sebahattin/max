@@ -99,7 +99,8 @@ def run():
             c.close()
         # Authorized configure role can upload through the same native role/CSRF path.
         c,page=login(browser,accounts['editor'])
-        assert post(c,page,{},('editor.png','image/png',png())).status==303
+        assert post(c,page,{},('editor.jpg','image/jpeg',Path('.local/branding-fixture.jpg').read_bytes())).status==303
+        assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo').body().startswith(b'\x89PNG'), 'JPEG was not normalized to PNG'
         c.close()
         c=browser.new_context(); page=c.new_page()
         page.goto(BASE+'/')
