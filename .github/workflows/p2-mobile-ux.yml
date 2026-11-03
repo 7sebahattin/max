@@ -73,4 +73,7 @@ jobs:
           retention-days: 7
       - name: Remove only this disposable project's resources
         if: always()
-        run: docker compose down --volumes --remove-orphans
+        run: |
+          if [[ '${{ matrix.suite }}' == 'maxcore' ]] || { [[ -f .local/mobile-owned ]] && [[ "$(cat .local/mobile-owned)" == "$COMPOSE_PROJECT_NAME" ]]; }; then
+            docker compose down --volumes --remove-orphans
+          fi

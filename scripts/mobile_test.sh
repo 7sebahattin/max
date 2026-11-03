@@ -14,6 +14,8 @@ for args in (['docker','ps','-aq'],['docker','volume','ls','-q'],['docker','netw
     if result.stdout.strip():
         raise SystemExit('Refusing existing project resources')
 PYGUARD
+mkdir -p .local
+printf '%s' "$COMPOSE_PROJECT_NAME" > .local/mobile-owned
 trap 'docker compose down --volumes --remove-orphans' EXIT
 P2_BROWSER=1 bash scripts/p2_install.sh
 docker compose up -d --wait --wait-timeout 180
