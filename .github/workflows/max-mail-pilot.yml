@@ -1,0 +1,57 @@
+name: MAX Mail native pilot
+on:
+  push:
+    branches: [feat/maxmail-native-imap-pilot]
+  pull_request:
+    paths: ['tests/mail/**', 'scripts/mail_*', 'docs/MAIL_NATIVE_GAP_REPORT.md', '.github/workflows/max-mail-pilot.yml']
+permissions:
+  contents: read
+jobs:
+  native-imap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: max-mail-${{ github.run_id }}-${{ github.run_attempt }}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact source and protocol/safety checks
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check.py
+          python3 -m unittest discover -s tests/mail -v
+          python3 -m compileall -q tests/mail
+          bash -n scripts/mail_test.sh
+      - name: Prepare synthetic secrets and browser
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          import secrets
+          p=Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Native install and actual fake-IMAP polling
+        run: bash scripts/mail_test.sh
+      - name: Synthetic numeric and command-name evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mail-native-evidence
+          path: |
+            .local/mail-report.json
+            .local/mail-protocol.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Owned project fallback cleanup
+        if: always()
+        run: |
+          if test -f .local/mail-owned && test "$(cat .local/mail-owned)" = "$COMPOSE_PROJECT_NAME"; then
+            docker compose -f compose.yaml -f tests/mail/compose.yaml down --volumes --remove-orphans
+          fi
