@@ -69,6 +69,7 @@ def run():
             assert 'kind=favicon' in page.locator('link[rel="shortcut icon"]').get_attribute('href')
             assert page.locator('a[href*="/maxcore/index.php"]').filter(has_text=NAME).count()>=1, 'Owned menu brand absent'
             assert OTHER not in page.locator('body').inner_text(), 'Other installation brand leaked'
+            page.screenshot(path=f'.local/branding-{VARIANT}-after-{path.strip("/").replace("/","-") or "home"}.png',full_page=True)
             checks.append({'surface':path,'status':response.status,'brand':NAME})
         # Mobile own pages must retain original nine strict viewport checks.
         for width in [360,390,768]:
@@ -92,13 +93,17 @@ def run():
         assert response.status==403 and 'MAXCORE_DISPLAY_NAME' not in response.text(), 'CSRF response leaked settings'
         page.goto(BASE+'/custom/maxcore/admin/setup.php')
         assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==NAME
+        protected_logo=c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo').body()
         c.close()
         for role in ['denied','reader']:
             c,page=login(browser,accounts[role])
             page.goto(BASE+'/')
             token=page.locator('meta[name=anti-csrf-newtoken]').get_attribute('content')
-            reply=c.request.post(BASE+'/custom/maxcore/admin/setup.php',multipart={'token':token,'MAXCORE_DISPLAY_NAME':'Forbidden','brand_logo':{'name':'brand.png','mimeType':'image/png','buffer':png()}})
+            reply=c.request.post(BASE+'/custom/maxcore/admin/setup.php',multipart={'token':token,'MAXCORE_DISPLAY_NAME':'Forbidden','brand_logo':{'name':'brand.png','mimeType':'image/png','buffer':png(17,17)}})
             assert reply.status==403 and 'MAXCORE_DISPLAY_NAME' not in reply.text(), 'Role upload denial failed'
+            page.goto(BASE+'/')
+            assert NAME in page.title(), 'Denied role changed central name'
+            assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo').body()==protected_logo, 'Denied role changed product artwork'
             c.close()
         # Authorized configure role can upload through the same native role/CSRF path.
         c,page=login(browser,accounts['editor'])

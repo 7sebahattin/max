@@ -9,7 +9,7 @@ This independent main-based lane follows the latest Active Codex B assignment in
 | MAX settings | Existing native configure/admin rights, forced native CSRF | One display name, bundled/uploaded logo and favicon selector, no PHP renames |
 | Authenticated HTML browser title | llxHeader hook + request-local MAIN_APPLICATION_TITLE/MAIN_HTML_TITLE | Native standard llxHeader pages; preserves page title/context; pages bypassing standard header need review |
 | Owned MAX navigation label | Own MAXMenu translation key in public native Translate cache | Changes our menu label without rewriting native commercial menu labels |
-| Native header | Append-only printTopRightMenu hook | Product logo/name; native user tools, menus and notices preserved |
+| Native header / mobile brand bar | Append-only printTopRightMenu and printMainArea hooks | Desktop badge and visible in-flow mobile product logo/name; native user tools, menus and notices preserved |
 | HTML favicon | Request-local native MAIN_FAVICON_URL | Standard header and login; bundled assets or current sanitized uploaded PNG; none keeps native fallback |
 | Native login | getLoginPageOptions + getLoginPageExtraContent | Title/favicon and appended separate product brand. Native login, true Dolibarr version marker, legal/company logo and notices remain |
 | Login primary/legal logo replacement | Native code selects company/theme logo | NOT replaced: no safe product-logo setter identified; separate appended product block is the supported alternative |
