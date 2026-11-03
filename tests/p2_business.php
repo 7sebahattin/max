@@ -73,6 +73,7 @@ foreach (['P2-SKU', 'P2-CARTON', 'P2-LOT'] as $ref) {
     $p = new Product($db); $p->ref = $ref; $p->label = $ref; $p->type = 0;
     $p->status = 1; $p->status_buy = 1; $p->tobatch = ($ref === 'P2-LOT' ? 1 : 0);
     $p->stockable_product = 1;
+    $p->fk_unit = (int)scalarPilot("SELECT rowid FROM ".MAIN_DB_PREFIX."c_units WHERE active=1 ORDER BY rowid LIMIT 1");
     nativeResult($p->create($user), $p, 'create product '.$ref);
     $products[$ref] = $p;
 }
@@ -102,7 +103,7 @@ nativeResult($shipment->addline($warehouses[0], $line, 4), $shipment, 'partial s
 $eid = nativeResult($shipment->create($user), $shipment, 'persist native shipment');
 nativeResult($shipment->valid($user), $shipment, 'validate partial shipment');
 $order->loadExpeditions(1);
-checkPilot((float)$order->expeditions[$line] === 4.0 && 10 - $order->expeditions[$line] === 6.0, 'six order units remain unshipped');
+checkPilot((float)$order->expeditions[$line] === 4.0 && 10.0 - (float)$order->expeditions[$line] === 6.0, 'six order units remain unshipped');
 checkPilot(stockPilot($sku,$warehouses[0]) === 10.0, 'shipment removes exactly four units after count adjustment');
 checkPilot(stockPilot($carton,$warehouses[0]) === 50.0, 'no implicit carton consumption configured');
 checkPilot((float)scalarPilot('SELECT SUM(value) FROM '.MAIN_DB_PREFIX.'stock_mouvement WHERE fk_product='.$sku) === 15.0, 'stock movements reconcile with two warehouses');
@@ -136,6 +137,14 @@ $langs->setDefaultLang('en_US');
 foreach ([[$invoice,'crabe'],[$shipment,'rouget']] as [$object,$model]) {
     nativeResult($object->generateDocument($model, $langs), $object, 'generate native '.$model.' PDF');
 }
+$pdfs = [];
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(DOL_DATA_ROOT, FilesystemIterator::SKIP_DOTS)) as $file) {
+    if (strtolower($file->getExtension()) === 'pdf') {
+        checkPilot(file_get_contents($file->getPathname(), false, null, 0, 5) === '%PDF-', 'generated document has PDF signature');
+        $pdfs[] = $file->getPathname();
+    }
+}
+checkPilot(count($pdfs) >= 2, 'invoice and shipment PDFs exist');
 require_once DOL_DOCUMENT_ROOT.'/core/modules/export/export_csvutf8.modules.php';
 $export = new ExportCsvUtf8($db); $path = DOL_DATA_ROOT.'/p2-native.csv';
 $export->open_file($path,$langs);

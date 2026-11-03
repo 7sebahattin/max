@@ -1,27 +1,50 @@
-# P2 — Native Dolibarr feature pilot (in progress)
+# P2 native workflow evidence and disposition
 
-**Owner authorized local P2 testing.** No live deployment or customer data is authorized.
-Track: [Issue #3](https://github.com/7sebahattin/max/issues/3).
+Owner authorized P2; [Issue #3](https://github.com/7sebahattin/max/issues/3), existing draft [PR #4](https://github.com/7sebahattin/max/pull/4). No deployment, merge or bespoke MAX modules. Original installation checkpoint: [run 41617811791](https://github.com/7sebahattin/max/actions/runs/41617811791), official 24.0.1 installer, 275 tables, demo administrator and install.lock.
 
-| Area | Planned evidence | Status |
+Reproduce with a fresh isolated stack using `bash scripts/p2_install.sh`. P2 CI also installs Playwright 1.56.0/Chromium and runs `P2_BROWSER=1`. Native business mutations are through Dolibarr classes; SQL in the pilot is read-only verification. Object IDs are printed as `P2 OBJECT IDS`, and synthetic screen captures/width measurements stay under ignored `.local/`. Do not publish installer HTML/config/password files.
+
+## Executable scenarios
+
+The following are implemented in `tests/p2_business.php`; the final PR validation comment links the tested SHA/run. A scenario is verified only if its PASS line exists in that run, not merely because its code is present.
+
+| Area | Assertions / evidence | Disposition |
 | --- | --- | --- |
-| Actual Dolibarr installation | Official installer step2 (schema and seed) and step5 (synthetic admin), not just installer prerequisites | PASS — GitHub Actions run 41617811791: official step2/step5, 275 tables, synthetic admin, install.lock |
-| CRM and suppliers | Create synthetic customer/supplier, read/write permissions | PENDING |
-| Stock and lots | Product, batch, two warehouses, transfer and stock reconciliation | PENDING |
-| Orders and dispatch | Sales order, partial shipment, stock transaction timing | PENDING |
-| Finance | Invoice, synthetic payment and different currencies | PENDING |
-| Document and reporting | Invoice and shipment PDF, standard Excel and custom gaps | PENDING |
-| Native mail collector | Assess supported behavior with fake/capture email only | PENDING |
-| Mobile user experience | Standard pages at 360/390/768 CSS px | PENDING |
-| Pallet/packaging | Existing standard features before any proposed custom code | PENDING |
+| CRM | Native customer, supplier, contact creation and contact reload/association | native/configure |
+| Permissions | Native unprivileged user and denied order validation; administrator succeeds | native/configure; full endpoint/warehouse role matrix remains manual |
+| Products / packaging | Three native SKUs: goods, carton and tracked lot | native/configure; no duplicate catalog |
+| Warehouses / stock | Receipt 20; transfer 5 between two warehouses; count adjustment -1; shipment -4; total native movements 15 | native/configure; count-adjustment API tested, full inventory-session UI not certified |
+| Batch | Native receipt 8 in P2-BATCH; transfer 3; balances 5/3 | native/configure |
+| Order / shipment | Two-line order; native validation; dispatch 4 of 10 goods; 6 remain outstanding | native/configure; no custom loading/tare logic |
+| Draft finance | EUR 40 draft remains unissued/unsettled; separate fictional bank receipt 40 and statement reconciliation | native/configure; bank receipt is NOT an invoice payment |
+| Currency | Native USD currency/rate 1.2; EUR 20 yields USD 24 on a separate draft; no online rate provider | native/configure; live exchange rates deferred |
+| Documents | Native crabe invoice and rouget shipment generators | native/configure; customer-specific approved order templates may extend |
+| Reports | Native CSV fixture and genuine XLSX workbook | native/configure; role-scoped full dataset/report equivalence not certified |
+| Turkish | Native tr_TR Invoice translation resolves | native/configure; complete translation quality remains human review |
+| Mobile | Real browser login and 15 authenticated renders: partner/product/order/shipment/invoice lists at 360/390/768px; scroll widths and screenshots | native first; this is render smoke, NOT proof of task usability or accessibility |
+| Mail | Two inactive native collector configs persist; MAIN_DISABLE_ALL_MAILS rejects outgoing transport | native collector baseline; fake IMAP ingestion/SMTP delivery, attachment matching and concurrency remain BLOCKED/not exercised |
+| Carton consumption | Stock product persists at 50 despite goods shipment when no consumption rule is configured | extend only after approved packaging needs; advanced consumption deferred |
 
-No MAX-specific order, mail, customs or HKS functional code has been added in this phase. Source and demo records are isolated. This table must be updated with actual evidence; CI passing installer alone **does not** justify claims about business operations.
+## Remaining acceptance limits (not PASS)
 
-## Verified P2 installation checkpoint — 2026-11-03
+- No validated/issued invoice, invoice settlement or regulated accounting submission: draft-only guard is intentional. Fictional bank reconciliation does not prove customer receivable settlement.
+- IMAP synchronization and SMTP capture protocol behavior are not demonstrated by disabled collector persistence. No collector polling/cron or provider credentials are enabled. Assess native collector attachment/matching behavior against a fake server before selecting a Mail Center replacement.
+- Mobile screen rendering cannot prove touch interaction, creation/upload tasks, overflow usability, screen-reader behavior or Turkish wording quality. Review generated screenshots and complete the phone task protocol in NATIVE_PILOT.md manually.
+- WSL2/Docker Desktop steps are documented in LOCAL_DEVELOPMENT.md; Windows execution is NOT RUN.
+- No packaging consumption engine is authorized. A configured product/BOM/kit pilot would be needed before concluding every native option is insufficient.
 
-- [GitHub Actions run 41617811791](https://github.com/7sebahattin/max/actions/runs/41617811791), commit `01dd08c9f8f00e508884c891cbf101a68f4ba443`: **SUCCESS**.
-- Dolibarr 24.0.1 official CLI installer, 275 MariaDB tables, synthetic administrator, standard commercial tables and `install.lock`: verified in the CI log.
-- First failed attempt refused an unchanged installer example and was corrected with an exact-example guard; second failed attempt ran the official CLI from the incorrect working directory and was corrected. Both were isolated CI failures with no live effects.
-- This success proves a **disposable CI/local sandbox install**, **not** that a publicly accessible MAX or a complete ERP/business workflow has been deployed.
-- Pending before the P2 pilot may be signed off: synthetic native object creation and operations, permissions, stock/lot transfer, partial shipping, invoice/payment, document generation, mobile UI, native mail assessment, and a native/custom scope decision matrix.
-- **No deployment to `max.sacai.tr`** and no approval to merge this P2 draft PR.
+## First-release scope decisions
+
+| Proposed capability | Classification | Reason / gate |
+| --- | --- | --- |
+| CRM, catalog, stock, warehouses, lots, orders, shipments, invoices, payments/bank | native/configure | Keep one commercial authority; partial evidence above, remaining finance acceptance explicit |
+| MAX brand vs legal identity, unified navigation | extend | Supported config/theme/hooks and native permissions; implementation requires later phase approval |
+| PO/LL/PC provenance, conflicts and protected manual overrides | extend | Link specialized document history to native order/shipment IDs; never a second order ledger |
+| Multi-account Mail Center and translation | extend (provisional) | Collector configuration exists; ingestion/approval gap still requires fake-transport evaluation; translation opt-in |
+| Customs declarations | new module | Supplementary declaration lifecycle linked to native entities; later approved phase |
+| Optional HKS | new module | Industry-specific mocked adapter; no notifications in P2 |
+| Approved report/Excel gaps | extend | Native formats work first; define exact datasets/permission rules before replacement |
+| Vehicle loading, general export packages, detailed material consumption | defer | Outside current release approval |
+| Old pallet/tare, weighbridge, personnel/NFC/foreman, custom export cost/profit, historical migration | excluded | Master scope, regardless of legacy availability |
+
+No evidence here approves a staging deployment, merge or custom-module implementation. Those are separate owner decisions; P2 authorization itself is already granted.
