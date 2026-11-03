@@ -108,6 +108,8 @@ def run():
         assert 'kind=favicon' in page.locator('link[rel="shortcut icon"]').get_attribute('href')
         page.screenshot(path=f'.local/branding-{VARIANT}-login.png',full_page=True)
         assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=../../conf').status==404
+        assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo&loginfunction=1&entity=2').status==404
+        assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo&file=conf.php').status==404
         assert c.request.post(BASE+'/custom/maxcore/asset.php?kind=logo').status==405
         browser.close()
     verify_state()
