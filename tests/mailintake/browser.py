@@ -2,10 +2,19 @@
 import hashlib
 import json
 import secrets
+import sys
 import subprocess
 from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
+
+def safe_failure(kind,value,trace):
+    # Playwright call logs may echo fill/password or response bytes on failure.
+    # Preserve failing location/exit status, never serialize exception payloads.
+    while trace and trace.tb_next: trace=trace.tb_next
+    line=trace.tb_lineno if trace else 0
+    print('FAIL native HTTP acceptance line '+str(line),file=sys.stderr)
+sys.excepthook=safe_failure
 
 BASE='http://127.0.0.1:8080'
 DATA=json.loads(Path('.local/mailintake-session.json').read_text())
@@ -22,6 +31,9 @@ def token(page):
     value=page.locator('meta[name="anti-csrf-newtoken"]').get_attribute('content')
     assert value,'Native CSRF token present'
     return value
+def source_calls():
+    data=json.loads(Path('.local/mailintake-state/seed.json').read_text())
+    return len(data['trace'])
 def forbidden(response,label):
     check(response.status==403,label+' status')
     text=response.text()
@@ -65,11 +77,15 @@ with sync_playwright() as p:
     cb,pb=sessions['download_beta']; quarantine=T['quarantine']
     forbidden(cb.request.get(path('download','?id='+str(quarantine['id'])+'&file='+str(quarantine['attachment']['id']))),'Quarantine requires review role')
     co,po=sessions['operator']; po.goto(path('index','?account='+str(A)))
+    calls=source_calls()
     r=co.request.post(path('api'),form={'token':token(po),'action':'poll','account':str(B)})
     forbidden(r,'Cross account poll')
+    check(source_calls()==calls,'Unauthorized poll never reaches IMAP')
     before=co.request.get(path('api','?account='+str(A))).body()
+    calls=source_calls()
     r=co.request.post(path('api'),form={'token':'invalid-intake-token','action':'poll','account':str(A)})
     check(r.status==403,'Invalid native CSRF rejected')
+    check(source_calls()==calls,'Invalid CSRF never reaches IMAP')
     check(co.request.get(path('api','?account='+str(A))).body()==before,'CSRF rejection leaves ledger unchanged')
     po.goto(path('index','?account='+str(A)))
     r=co.request.post(path('api'),form={'token':token(po),'action':'poll','account':str(A)})

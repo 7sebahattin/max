@@ -36,9 +36,29 @@ Polling defaults to disabled (`MAXMAIL_ENABLE_POLLING` absent/0). An explicitly 
 
 The native parser can buffer a server response; preflight/literal-size checks bound accepted data but do not certify memory limits against a deliberately hostile authenticated IMAP server. There is no claim of provider/production safety beyond this isolated pilot. Crash-left `.part` files remain private and require controlled operator cleanup; no broad automatic deletion/prune is performed. There is no business-record resurrection path.
 
-## Verification (in progress)
+## Verification
 
-`tests/mailintake/lab.py` and `seed.py` are newly written independent fixtures. Socket tests cover scoped same-Message-ID sources, real tagged NO after partial data, missing Message-ID and deleted UIDs. No fake SMTP, provider credential or real mail is used. Real pinned native install, concurrent workers, retry/epoch/private-download/role/CSRF/mobile and native snapshot tests are being added; do not claim them PASS until exact-head Actions evidence is recorded. Full local native Docker execution is BLOCKED by managed 8 GB/vfs storage; GitHub Actions runs the actual disposable installation. Credentials/raw mail/attachment bytes/installer output may never be artifacts.
+`tests/mailintake/lab.py` and `seed.py` are newly written independent fixtures. Five local/socket/Docker-ownership tests pass. The real native harness is implemented; its passing/failing exact-SHA results are recorded below and in draft PR #28. It does not import the original PR #23 suite or certify production providers.
+
+| Acceptance layer | Executable coverage |
+|---|---|
+| Independent socket laboratory | Two source accounts, reused Message-ID, missing header, deleted UID, tagged partial-data NO, native read-only UID map |
+| Pinned native runtime | Unchanged official P2 installer/commercial fixtures, actual module lifecycle/native grants, real TCPDF unknown/encrypted evidence |
+| Ledger/protocol | Sixteen replay polls, four concurrent workers, no duplicate rows/files, NO/backoff/recovery/three-attempt ceiling, incomplete/oversize response rejection, UIDVALIDITY reset, remote deletion/reappearance, credential rotation |
+| Server security | Nine native sessions, global plus mailbox scope, existing private file positive/negative integrity oracles, native CSRF, no IMAP on denied writes, no raw/quarantine download without review, scope revocation in existing session |
+| Review/UI | Human acknowledgement keeps quarantine, literal untrusted header rendering, Turkish surface, twelve 360/390/768 renders and keyboard-focusable inner table scrolling |
+| Preservation/privacy | Native ERP/stock/finance/legal/collector/agenda snapshots, no-send boundary, mode 0700/0600, no sensitive audit values, sanitized command/state-only artifacts |
+
+Run from a fresh checkout with Docker/Compose, generated disposable `.env`, Python and Playwright 1.56.0/Chromium:
+
+```sh
+python3 -m unittest discover -s tests/mailintake -v
+COMPOSE_PROJECT_NAME=max-mailintake-unique bash scripts/mailintake_test.sh
+```
+
+The runner refuses pre-existing project containers/volumes/networks before arming cleanup. It installs unchanged pinned main/P2, then enables and exercises MAX Mail only inside that fresh project. Cleanup removes owned resources and verifies absence. No skipped/xfail/continue-on-error path turns a protocol error into acceptance. Expected source failures must persist explicit retry/review states and prevent files; an unexpected assertion fails CI.
+
+Full local native Docker execution is **BLOCKED** by managed 8 GB/vfs storage; GitHub Actions runs the actual disposable installation. Allowlisted artifacts contain source ZIP, numeric/state-only reports, payload-free command trace and numeric mobile measurements. Credentials, raw mail, attachment bytes, native installer HTML, private session/seed/config, browser traces and screenshots are excluded. Browser failure output retains a failing location/exit status without serializing Playwright credential/response arguments.
 
 Rollback disables the module and preserves account ledger/history/private files. Discard only the owned disposable project to remove test data. Never merge or deploy automatically.
 
@@ -47,3 +67,5 @@ Rollback disables the module and preserves account ledger/history/private files.
 `23d761ef3737c498c656c63a39e4b93bde5ce46e` [41719884358](https://github.com/7sebahattin/max/actions/runs/41719884358): native install/P2/roles/PDF fixture creation passed, but initial two-account Message-ID assertion failed. This is not a passing intake result. A sanitized state/command projection is added to diagnose native parsing/verification without publishing raw messages, credentials or attachments. Final exact-head evidence follows in the draft PR.
 
 `3a123e3c366d6f5495d486a9ccafd92858cf3e9d` [41720632833](https://github.com/7sebahattin/max/actions/runs/41720632833): all eight source tuples/raw originals were retained, but native MIME construction failed closed (`blocked_mime_unverified`), so secondary Message-ID metadata was absent. Source inspection found the public `Message::make` factory calls `getMessageNumber`, which requests read-only `FETCH 1:* (UID)`. The independent laboratory had omitted that command. Add only that bounded mapping subset, without changing upstream or bypassing verification; direct intake UID/body/final-status checks remain authoritative. Add a socket regression for that exact read-only command and reject broad sequence-body FETCH.
+
+`8812caace84921d85aaa4357d8e5d35c41f336b9`: [native + independent tests 41721324695](https://github.com/7sebahattin/max/actions/runs/41721324695), [foundation 41721324719](https://github.com/7sebahattin/max/actions/runs/41721324719), [source audit 41721324750](https://github.com/7sebahattin/max/actions/runs/41721324750) all PASS. This proves the independent native protocol/ledger/HTTP pilot, including all synthetic failure assertions, not original PR #23 fixture-suite/provider/release certification. A final evidence/privacy follow-up adds explicit no-IMAP-on-denial checks and sanitized browser failure reporting; its exact head and CI are recorded in PR #28.

@@ -24,7 +24,7 @@ class IndependentWire(unittest.TestCase):
             with self.client(alias) as conn:
                 self.assertIn(str(uid).encode(),conn.uid('SEARCH',None,'UNDELETED')[1][0])
                 result=conn.uid('FETCH',str(uid),'(UID RFC822.SIZE BODY.PEEK[])')
-                self.assertEqual(result[0],'OK'); self.assertIn(b'<shared@intake.invalid>',result[1][0][1])
+                self.assertEqual(result[0],'OK'); self.assertTrue(b'<shared@intake.invalid>' in result[1][0][1])
         self.data['mailboxes'][0]['epoch']=9001; save_seed(self.path,self.data)
         with self.client('alpha') as conn: self.assertEqual(conn.uid('SEARCH',None,'UNDELETED')[0],'OK')
     def test_native_raw_factory_read_only_uid_mapping(self):
@@ -41,7 +41,7 @@ class IndependentWire(unittest.TestCase):
             self.assertEqual(status,'NO'); self.assertTrue(data[0][1])
         trace=read_seed(self.path)['trace']
         self.assertTrue(any(t['command']=='UID FETCH' and t['status']=='NO' for t in trace))
-        self.assertNotIn(self.data['mailboxes'][0]['secret'],str(trace))
+        self.assertFalse(self.data['mailboxes'][0]['secret'] in str(trace))
     def test_deleted_uid_and_missing_header_remain_controlled(self):
         self.data['mailboxes'][0]['items'][0]['deleted']=True; save_seed(self.path,self.data)
         with self.client('alpha') as conn:
