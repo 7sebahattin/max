@@ -3,6 +3,13 @@ require_once dirname(__DIR__).'/lib/maxcore.lib.php';
 class ActionsMaxcore {
  public $resprints='';
  public function __construct($db) {}
+ // Native menus resolve their labels before llxHeader; apply our own key earlier.
+ public function updateSession($parameters,&$object,&$action,$hookmanager) {
+  maxCoreApplyBrand(); return 0;
+ }
+ public function afterLogin($parameters,&$object,&$action,$hookmanager) {
+  maxCoreApplyBrand(); return 0;
+ }
  public function llxHeader($parameters,&$object,&$action,$hookmanager) {
   maxCoreApplyBrand(); return 0;
  }
