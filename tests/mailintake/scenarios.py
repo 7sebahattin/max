@@ -1,4 +1,5 @@
 """Real native PHP service against independent, private socket IMAP sources."""
+import atexit
 import concurrent.futures
 import json
 import subprocess
@@ -38,6 +39,15 @@ def add(uid,fault=None):
         if fault: b['faults'][str(uid)]=fault
     update(change)
 
+def diagnostic():
+    # Fixed metadata projection only; never raw mail, login, secrets or hashes.
+    try:
+        Path('.local/mailintake-report.json').write_text(json.dumps(stats(),indent=2))
+        Path('.local/mailintake-protocol.json').write_text(json.dumps({'trace':state()['trace']},indent=2))
+    except Exception:
+        print('Sanitized diagnostics unavailable',flush=True)
+atexit.register(diagnostic)
+
 # These are real TCPDF files generated in the native runtime, including encryption.
 private=Path('.local/mailintake-pdfs'); private.mkdir(exist_ok=True)
 for kind,uid in [('unknown',202),('locked',204)]:
@@ -49,7 +59,7 @@ for kind,uid in [('unknown',202),('locked',204)]:
         b=box(data,'beta'); b['items']=[wire(uid,kind,payload,kind+'.pdf',True) if x['uid']==uid else x for x in b['items']]
     update(replace)
 poll(); poll('beta','manager')
-s=stats(); check(len(s['entries'])==8 and s['shared_count']==2,'Same Message-ID in two accounts retained separately')
+s=stats(); print('Native initial metadata '+json.dumps(s),flush=True); check(len(s['entries'])==8 and s['shared_count']==2,'Same Message-ID in two accounts retained separately')
 check(int(entry(102)['stored'])==1,'Message without Message-ID retained by source identity')
 for uid,reason in [(202,'pdf_unknown_type'),(203,'pdf_invalid_signature'),(204,'pdf_encrypted'),(205,'attachment_oversized')]:
     e=entry(uid,2001); fs=files(e)
@@ -96,6 +106,17 @@ update(remove_sources); poll()
 check(int(entry(101)['remote_deleted'])==1 and int(entry(102)['remote_deleted'])==1,'Deleted and expunged sources retained as tombstones')
 update(lambda d: next(x for x in box(d,'alpha')['items'] if x['uid']==101).update(deleted=False)); poll()
 check(int(entry(101)['remote_deleted'])==1,'Source reappearance does not resurrect retired identity')
+# Authentication backoff and credential rotation preserve the ledger identity.
+update(lambda d: box(d,'alpha').update(reject_login=True))
+result=poll(); check(result['state']=='blocked' and result['code']=='connect_failed','Authentication failure has explicit provenance')
+s=stats(); a=next(x for x in s['accounts'] if int(x['rowid'])==int(entry(101)['fk_account']))
+check(a['state']=='retry_due' and int(a['connection_failures'])==1,'Connection failure persists bounded backoff')
+update(lambda d: box(d,'alpha').update(reject_login=False))
+rotation=Path('.local/mailintake-rotate.json'); rotation.write_text(json.dumps({'secret':box(state(),'alpha')['secret']})); rotation.chmod(0o600)
+subprocess.run(['docker','compose','cp',str(rotation),'web:/var/lib/dolibarr/documents/mailintake-rotate.json'],check=True,capture_output=True)
+subprocess.run(['docker','compose','exec','-T','web','chown','www-data:www-data','/var/lib/dolibarr/documents/mailintake-rotate.json'],check=True,capture_output=True)
+run('rotate','alpha'); rotation.unlink(); poll()
+check(int(entry(402)['attempts'])==3,'Credential rotation does not reset message retry ceiling')
 trace=state()['trace']
 check(not any(x['command'] in ['STORE','UID STORE','EXPUNGE','APPEND','COPY','UID COPY','MOVE','UID MOVE'] for x in trace),'Source mailbox remains read only')
 s=stats(); check(s['disk_files']==sum(int(x['stored']) for x in s['files']),'No duplicate or orphan final private file')

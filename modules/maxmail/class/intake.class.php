@@ -208,7 +208,7 @@ class MaxMailIntake
                 $mime=(new finfo(FILEINFO_MIME_TYPE))->buffer($bytes)?:'application/octet-stream';
                 $reason='';
                 if(strlen($bytes)>524288) $reason='attachment_oversized';
-                elseif(preg_match('/[\\\\\/\x00-\x1f\x7f]/',$name) || $name==='' || str_contains($name,'..')) $reason='unsafe_filename';
+                elseif(str_contains($name,'/') || str_contains($name,chr(92)) || preg_match('/[\x00-\x1f\x7f]/',$name) || $name==='' || str_contains($name,'..')) $reason='unsafe_filename';
                 elseif(str_ends_with(strtolower($name),'.pdf') || $mime==='application/pdf') {
                     $reason=!str_starts_with($bytes,'%PDF-') || !str_contains(substr($bytes,-1024),'%%EOF')?'pdf_invalid_signature':(str_contains($bytes,'/Encrypt')?'pdf_encrypted':'pdf_unknown_type');
                 } elseif($mime!=='text/plain' || !mb_check_encoding($bytes,'UTF-8') || str_contains($bytes,"\0")) $reason='unsupported_content';

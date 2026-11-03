@@ -35,13 +35,15 @@ class MaxMailProtocol
     }
     public function epoch(): int
     {
-        $status=$this->connection->examineFolder($this->folder);
-        if(!is_array($status) || !isset($status['uidvalidity']) || (int)$status['uidvalidity']<1) throw new MaxMailProtocolFailure('blocked_uidvalidity');
+        try { $status=$this->connection->examineFolder($this->folder); }
+        catch(Throwable $e) { throw new MaxMailProtocolFailure('blocked_uidvalidity'); }
+        if(!is_array($status) || !isset($status['uidvalidity']) || (int)$status['uidvalidity']<1 || (int)$status['uidvalidity']>4294967295) throw new MaxMailProtocolFailure('blocked_uidvalidity');
         return (int)$status['uidvalidity'];
     }
     public function uids(): array
     {
-        $reply=$this->connection->requestAndResponse('UID SEARCH',['UNDELETED']);
+        try { $reply=$this->connection->requestAndResponse('UID SEARCH',['UNDELETED']); }
+        catch(Throwable $e) { throw new MaxMailProtocolFailure('search_failed',true); }
         if(!is_array($reply)) throw new MaxMailProtocolFailure('search_failed',true);
         $uids=[]; $found=false;
         foreach($reply as $line) if(is_array($line) && ($line[0]??'')==='SEARCH') {

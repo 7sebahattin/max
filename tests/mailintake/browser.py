@@ -99,7 +99,7 @@ with sync_playwright() as p:
         check(response.status==(200 if enabled else 403),'Existing session reflects scope change')
     layout(pa,path('index'),'accounts'); layout(pa,path('index','?account='+str(A)),'inbox')
     layout(pr,path('message','?id='+str(quarantine['id'])),'message'); layout(pm,path('settings'),'settings')
-    pm.goto(path('index')); check(pm.locator('.maxmail-shell').inner_text().find('MAX Mail')>=0,'Turkish interface title')
+    pm.goto(path('index','?lang=tr_TR')); check('Yetkili posta hesapları' in pm.locator('.maxmail-shell').inner_text(),'Explicit Turkish native interface')
     before=cm.request.get(path('api','?account='+str(A))).body()
     cli('off'); check(cm.request.get(path('api','?account='+str(A))).status==403,'Disabled module denies existing session')
     cli('on'); check(cm.request.get(path('api','?account='+str(A))).body()==before,'Re-enabled module preserves ledger')

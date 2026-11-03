@@ -28,6 +28,7 @@ $sessionFile=DOL_DATA_ROOT.'/mailintake-session.json';
 if($command==='setup') {
     ensureM(empty(activateModule('modMaxmail',1,1)['errors']),'actual native module activation'); $conf->setValues($db); $user->getrights('',1);
     ensureM(count(rowsM("SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE module='maxmail'"))===5,'five native rights');
+    ensureM(getDolGlobalInt('MAXMAIL_ENABLE_POLLING')!==1,'polling defaults off');
     foreach(['MAXMAIL_ENABLE_POLLING','MAXMAIL_ALLOW_SYNTHETIC_IMAP'] as $key) ensureM(dolibarr_set_const($db,$key,'1','chaine',0,'',1)>0,'disposable intake authorization');
     $conf->setValues($db);
     ensureM(getDolGlobalString('MAIN_DISABLE_ALL_MAILS')==='1' && ini_get('sendmail_path')==='/bin/false','native no send boundary');
@@ -99,6 +100,9 @@ if($command==='off' || $command==='on') {
 }
 if($command==='verify' || $command==='publish-fixture') {
     ensureM(snapshotM()===file_get_contents(DOL_DATA_ROOT.'/mailintake-native-before'),'native ERP agenda legal and collector unchanged');
+    ensureM((fileperms(DOL_DATA_ROOT.'/maxmail') & 0777)===0700,'private storage directory mode');
+    foreach(glob(DOL_DATA_ROOT.'/maxmail/*.bin') as $file) ensureM(!is_link($file) && (fileperms($file) & 0777)===0600,'private immutable file mode');
+    ensureM(count(glob(DOL_DATA_ROOT.'/maxmail/*.part'))===0,'no incomplete file after handled tests');
     ensureM(getDolGlobalString('MAIN_DISABLE_ALL_MAILS')==='1' && ini_get('sendmail_path')==='/bin/false','no send unchanged');
     $columns=['entry'=>['subject','sender','message_id'],'account'=>['username','secret']];
     $events=json_encode(rowsM('SELECT event,code FROM '.MAIN_DB_PREFIX.'maxmail_event'));

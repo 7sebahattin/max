@@ -41,3 +41,7 @@ The native parser can buffer a server response; preflight/literal-size checks bo
 `tests/mailintake/lab.py` and `seed.py` are newly written independent fixtures. Socket tests cover scoped same-Message-ID sources, real tagged NO after partial data, missing Message-ID and deleted UIDs. No fake SMTP, provider credential or real mail is used. Real pinned native install, concurrent workers, retry/epoch/private-download/role/CSRF/mobile and native snapshot tests are being added; do not claim them PASS until exact-head Actions evidence is recorded. Full local native Docker execution is BLOCKED by managed 8 GB/vfs storage; GitHub Actions runs the actual disposable installation. Credentials/raw mail/attachment bytes/installer output may never be artifacts.
 
 Rollback disables the module and preserves account ledger/history/private files. Discard only the owned disposable project to remove test data. Never merge or deploy automatically.
+
+## CI investigation record
+
+`23d761ef3737c498c656c63a39e4b93bde5ce46e` [41719884358](https://github.com/7sebahattin/max/actions/runs/41719884358): native install/P2/roles/PDF fixture creation passed, but initial two-account Message-ID assertion failed. This is not a passing intake result. A sanitized state/command projection is added to diagnose native parsing/verification without publishing raw messages, credentials or attachments. Final exact-head evidence follows in the draft PR.
