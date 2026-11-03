@@ -1,0 +1,66 @@
+# Local preparation only. Never use as a production deployment manifest.
+name: max-local
+services:
+  db:
+    image: mariadb:11.4.13@sha256:d1891ede5a559f1086f55053bb8cc1569b0298338c4d72d71725a7f74f6ba620
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-max_demo}
+      MARIADB_USER: ${MARIADB_USER:-max_demo}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Set a disposable local DB password in .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set a distinct disposable root password in .env}
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+    volumes:
+      - database:/var/lib/mysql
+    networks: [sandbox]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    security_opt: [no-new-privileges:true]
+  web:
+    build:
+      context: .
+      dockerfile: deployment/local/Dockerfile
+      secrets: [proxy_ca]
+    ports: ["127.0.0.1:8080:80"]
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-max_demo}
+      MARIADB_USER: ${MARIADB_USER:-max_demo}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Set a disposable local DB password in .env}
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: localhost,127.0.0.1,db
+    volumes:
+      - ./.local/upstream:/opt/dolibarr:ro
+      - ./.local/conf:/opt/dolibarr/htdocs/conf
+      - ./.local/documents:/var/lib/dolibarr/documents
+      - ./modules:/opt/dolibarr/htdocs/custom:ro
+      - ./tests:/checks:ro
+    networks: [sandbox]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://127.0.0.1/install/check.php]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    security_opt: [no-new-privileges:true]
+networks:
+  sandbox:
+    internal: true
+volumes:
+  database:
+secrets:
+  proxy_ca:
+    file: ${MAX_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}

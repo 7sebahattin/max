@@ -4,9 +4,9 @@ Status: planned. Only PR-01 repository scaffolding is authorized at this time.
 
 | Milestone | Goal | Evidence required | Gate |
 | --- | --- | --- | --- |
-| PR-01 | Clean repository scaffold, architecture/security/branding/scope notes | Reviewed files, no secrets or imported customer data | Draft PR owner review |
-| PR-02 | Verify Dolibarr tagged version and reproducible local sandbox | Test container logs, version/extension matrix, demo fixtures | No real staging deploy until approved |
-| PR-03 | Standard ERP feature evaluation | Demo: partner, SKU, warehouse/lot, stock movement, sales order, shipment, invoice, bank payment, mobile usability | Gap assessment approved |
+| PR-01 | P0/P1 docs, release/runtime pins, safe local preparation and CI | Source audit, reproducible preparation checks, no secrets/data import | Draft PR architecture/code review; stop before P2 |
+| PR-02 | P2 clean native Dolibarr pilot using PR-01 pins/scaffolding | Full installation, demo fixtures, native/custom disposition and mobile findings | Begin only after PR-01 approval |
+| PR-03 | Close native pilot gaps and approve extension contracts | Role matrix, object relationships, document hooks and any unresolved native scenarios | Gap assessment approved |
 | PR-04 | MAX Core module | One Dolibarr login, branded menu and configuration, separate legal entity fields, RBAC, localization | Automated and manual validation |
 | PR-05 | Mail integration foundation | Multi-account read tests, safe send approval, fake SMTP, mock translations | No live email |
 | PR-06 | Advanced Orders/Documents | PO/LL/PC parsing, version source priority, exception handling, ERP order relationship, custom outputs | Representative synthetic document fixtures |

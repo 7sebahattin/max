@@ -23,3 +23,9 @@ Upstream code licenses and attribution remain intact; review the actual licensin
 
 ## Reporting
 Never put real credentials in issue text or test output. Record security findings in private issues with redacted reproduction details.
+
+## PR-01 enforceable local controls
+
+Compose publishes only loopback HTTP and no database port, uses an internal runtime network, clears runtime proxy variables and disables PHP sendmail. No mail/HKS/translation credentials or cron services exist. Upstream and MAX modules mount read-only; only local installer configuration and documents are writable. Local permissive directory modes support a disposable installer and must not be used on staging. Build downloads use TLS and a trusted CA secret mount.
+
+Future enablement flags are not sufficient safety barriers: tests must use fake providers and deployment must restrict egress. Staging requires HTTPS-only secure cookies (`session.cookie_secure=1`), native CSRF/authentication checks, explicit module permissions, read-only conf.php and `documents/install.lock` plus web-server installer denial. Source parsing requires size/resource limits, content validation and private storage; generated exports require formula-injection protection and row-level authorization.

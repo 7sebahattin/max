@@ -7,8 +7,8 @@ See [staging readiness checklist](../docs/STAGING_CHECKLIST.md) and [security ba
 - No production keys or .env files are stored here.
 - Do not assume a reachable DNS record, public server, Docker runtime, SSL/TLS certificate, database or storage.
 - Do not deploy automatically from `main` or from a pull request.
-- Select a pinned compatible Dolibarr tag only after verifying upstream compatibility and licensing.
+- Use the reviewed `upstream.lock.json` and runtime image digests; complete functional compatibility and license review before staging.
 - Restrict access to the development host and keep test data synthetic.
 - Require a separate owner-approved deployment procedure and rollback plan.
 
-Reproducible deployment code will be added in a later reviewed PR when an executable development environment is available.
+Local-only scaffolding is documented in [local development](../docs/LOCAL_DEVELOPMENT.md). It is not a production manifest. Host deployment remains a later separately approved phase.

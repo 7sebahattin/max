@@ -8,7 +8,7 @@ Pre-development bootstrap. No Dolibarr deployment, running application or produc
 
 - Repository: `7sebahattin/max` (private)
 - Target staging hostname: `max.sacai.tr` (requires DNS, TLS and hosting verification)
-- ERP foundation: official Dolibarr release, installed separately and pinned after compatibility verification
+- ERP foundation: Dolibarr 24.0.1, installed separately with verified SHA-256 and immutable runtime base references
 - MAX extensions: installable Dolibarr external modules under `htdocs/custom`
 - First milestone: [Issue #1](https://github.com/7sebahattin/max/issues/1)
 
@@ -26,7 +26,7 @@ Pre-development bootstrap. No Dolibarr deployment, running application or produc
 
 All changes go through focused feature branches and **draft pull requests**. Do not merge or deploy without explicit owner approval.
 
-See `docs/` once PR-01 is reviewed and merged.
+Start with [local preparation](docs/LOCAL_DEVELOPMENT.md), [architecture](docs/ARCHITECTURE.md), [scope](docs/PRODUCT_SCOPE.md), [acceptance criteria](docs/ACCEPTANCE.md), and [actual progress](docs/PROGRESS.md). PR-01 stops before the native ERP pilot; no application functionality is claimed yet.
 
 ## Licensing
 

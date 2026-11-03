@@ -1,9 +1,9 @@
 # MAX — Target Architecture (draft ADR-0001)
 
 ## Foundational decision
-MAX uses a supported, pinned, official **Dolibarr upstream release** as the ERP kernel. MAX proprietary-to-this-project functionality, subject to applicable upstream licenses, is implemented as independent external modules inside Dolibarr's supported `htdocs/custom` mechanism. No core forks.
+MAX uses a supported, pinned, official **Dolibarr upstream release** as the ERP kernel. Original MAX functionality, subject to applicable upstream licenses, is implemented as independent external modules inside Dolibarr's supported `htdocs/custom` mechanism. No core forks.
 
-Exact Dolibarr version and compatible PHP/MySQL versions remain **TBD until a tested deployment matrix** is available. This document does not claim staging is operational.
+Dolibarr **24.0.1** is pinned in `upstream.lock.json`. PHP 8.3.36 and MariaDB 11.4.13 are selected with immutable base-image references. See [compatibility evidence](COMPATIBILITY.md) for verified prerequisites and remaining runtime/functional checks. Staging is not deployed.
 
 ## Product layers
 1. **ERP kernel** — customers/suppliers, product catalog, lots, warehouse stock, orders, shipments, invoices, payments, bank.
@@ -42,7 +42,7 @@ Use native Dolibarr object APIs and hooks/trigger mechanisms rather than raw wri
 - Production migrations and schema updates require reviewed scripts, backups and rollback plans.
 
 ## Open architecture decisions
-- Official Dolibarr version to pin and tested PHP/DB runtime.
+- Complete runtime smoke and native ERP pilot on the pinned PHP/DB selection.
 - License compliance and redistribution terms for MAX extensions and packaged distributions.
 - Which native mail collector capabilities to reuse.
 - Shipment/packing, packaging-unit, stock-consumption behavior as confirmed by running demo.
@@ -51,3 +51,6 @@ Use native Dolibarr object APIs and hooks/trigger mechanisms rather than raw wri
 ## References
 - GitHub Issue #1 (approved scope).
 - Dolibarr official developer documentation and distribution; do not infer API or module path availability without confirming against the pinned version.
+
+## Decision record
+See [ADR-0001](adr/0001-native-first.md) and [native pilot protocol](NATIVE_PILOT.md).

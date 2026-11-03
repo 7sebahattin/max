@@ -36,3 +36,21 @@ This is a **requirements comparison, not a code migration**. Current behavior wa
 
 ## No-data-migration rule
 All implementation demos use generated test entities in an empty database. Historical records and documents remain in the legacy system unchanged.
+
+## Read-only audit evidence, 2026-11-03
+
+Reference snapshot: commit `ac1d55f400a2ef106ff239e1242c83ab63db76c0` in the owner-designated legacy repository. Only selected source, tests and documentation were read through GitHub. No legacy code was executed, downloaded into MAX, modified or reused. The behaviors below are discovery inputs; future implementations need approved synthetic acceptance cases.
+
+| Evidence path in reference snapshot | Behavior extracted | Disposition and MAX acceptance case |
+| --- | --- | --- |
+| `config/siparis_eslestir.php`, `scripts/siparis_core_smoke.php` | Document type detected from content; LL/PC can arrive before PO; older revisions stay linked but inactive; blank values do not erase data; manual edits lock fields; repeated processing is idempotent | Rebuild provenance/conflict extension around native orders/shipments. Reprocess a file twice, import older/newer revisions and preserve a manual value with an explicit conflict |
+| `config/siparis_eslestir.php` | Source priority is field-specific: loading date/place LL over PO, unloading date PC over LL, price from PC; quantity precedence manual then PC then LL then PO with separate source evidence | Make mappings configurable and tested; never generalize one priority order to every field or copy the legacy quantity engine |
+| `scripts/siparis_pdf_smoke.php`, `config/siparis_beyan.php` | Multi-page/multi-shipment parsing, payment-advice totals/currencies, declaration association and removal | Extend only parsing/matching gaps; native financial settlement remains authoritative. Test ambiguous matching and reject inconsistent totals |
+| `config/mail_sync.php` | Per-account/folder cursors, UIDVALIDITY rollover preserves history, duplicate handling must distinguish legitimate repeated Message-IDs | Native EmailCollector evaluation first; custom sync only for gaps. Test rollover, concurrent polls and two distinct messages sharing Message-ID |
+| `config/mail_translate.php` | Provider interface and disabled provider; provider-specific size limits | Opt-in translation abstraction with fake providers; disclose/minimize sent content, no paid/live provider in development |
+| `config/mail_outbox.php`, `scripts/mail_outbox_review_smoke.php` | Preview-content hash, approval, atomic send ownership, account identity changes invalidate approval; dedupe survives unknown/sent results; confirmed rejection differs from uncertain delivery | Rebuild missing controlled-outbox behavior; concurrent approval sends once; edited content requires new preview; timeout remains blocked pending reconciliation |
+| `beyan_parse.php`, `config/siparis_beyan.php` | POST/CSRF/permission gate; Turkish numbers and labeled/free-text extraction; unmatched lines returned; order/shipment declaration links | MAX Customs object with explicit validation and approval, source evidence and unresolved fields; never silently approve parsed text |
+| `scripts/hks_belirsiz_gonderim_smoke.php` | Firm-isolated uncertainty marker; normalized reference matching; audit redaction; human reconciliation before retry | Optional HKS only. Persist operation identity and unresolved outcome until reconciled. Do not copy legacy time-based marker expiry as permission to resend |
+| `config/xlsx_export.php`, `docs/EXCEL_EXPORT_ANALIZ.md` | Genuine XLSX, explicit text cells to prevent formulas, numeric/date types, currency separation, cell-count limits, filtered exports and export permission/audit | Native export first; custom gap reports must test formula injection, scoped rows, totals, types and memory limit. No import of old templates or reports for excluded modules |
+
+Source reference root: [read-only snapshot](https://github.com/7sebahattin/Yukleme_plani/tree/ac1d55f400a2ef106ff239e1242c83ab63db76c0). Native source presence is recorded in [pilot protocol](NATIVE_PILOT.md); actual behavior overlap remains a P2 gate. Pallet/tare, personnel, weighbridge and custom costing behavior is rejected regardless of legacy availability. Vehicle loading, general export packages and advanced packaging consumption remain deferred.

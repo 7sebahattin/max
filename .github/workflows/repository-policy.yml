@@ -1,32 +1,33 @@
-name: Repository policy
-
+name: Foundation checks
 on:
   pull_request:
   push:
-    branches:
-      - main
-
+    branches: [main, chore/pr-01-bootstrap]
 permissions:
   contents: read
-
 jobs:
   policy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Check required project documentation
-        shell: bash
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/check.py
+      - run: python3 -m py_compile scripts/prepare.py scripts/check.py
+      - run: bash -n scripts/smoke.sh
+  local-preparation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Generate disposable local credentials
         run: |
-          set -euo pipefail
-          for file in README.md AGENTS.md .gitignore .env.example docs/PRODUCT_SCOPE.md docs/ARCHITECTURE.md docs/ROADMAP.md docs/BRANDING.md docs/STAGING_CHECKLIST.md docs/SECURITY.md docs/LEGACY_FUNCTIONAL_MATRIX.md docs/LICENSE_REVIEW.md; do
-            test -s "$file" || { echo "::error::Missing $file"; exit 1; }
-          done
-      - name: Verify no populated secrets are committed
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git ls-files | grep -E '(^|/)(\.env|local\.php|id_rsa|credentials\.json)$'; then
-            echo "::error::A forbidden secret-like filename is tracked."
-            exit 1
-          fi
-          echo "Basic repository policy checks passed."
+          python3 - <<'PY'
+          from pathlib import Path
+          import secrets
+          p = Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PY
+      - run: scripts/smoke.sh
+      - name: Stop local containers
+        if: always()
+        run: docker compose down

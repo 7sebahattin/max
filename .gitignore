@@ -40,3 +40,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Downloaded upstream, local config, test database and documents
+/.local/
+__pycache__/

@@ -1,6 +1,6 @@
 # MAX Validation Strategy
 
-No executable checks have been run for this branch because the prior cloud workspace failed to start and no command runner is available from the GitHub-only workflow.
+PR-01 checks: `python3 scripts/check.py`, Python compilation, `bash -n scripts/smoke.sh`, Compose validation and `scripts/smoke.sh`. See [progress](../docs/PROGRESS.md) for actual execution evidence and the local disk blocker. The smoke checks PHP extensions, a temporary SQL table and the installer prerequisites page; it does not install or validate ERP workflows.
 
 ## Planned test layers
 - Static repository policy (brand independence, no accidental secrets, no upstream core edits).

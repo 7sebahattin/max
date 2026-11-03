@@ -1,0 +1,6 @@
+**
+!deployment/
+!deployment/local/
+!deployment/local/Dockerfile
+!deployment/local/apache.conf
+!deployment/local/php.ini
