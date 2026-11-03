@@ -82,6 +82,12 @@ class AuditTests(unittest.TestCase):
         self.assertEqual(len(result['findings']), 2)
         self.assertNotIn('synthetic-secret-value', json.dumps(result))
 
+    def test_encrypted_private_key_and_other_ssh_names(self):
+        self.stage('config/key.txt', '-----BEGIN ' + 'ENCRYPTED PRIVATE KEY-----')
+        self.stage('config/id_ecdsa', 'not opened')
+        self.stage('config/id_dsa', 'not opened')
+        self.assertEqual(self.rules(audit.audit(self.root)), {'SECRET_MARKER', 'CREDENTIAL_NAME'})
+
     def test_credential_names_and_prohibited_paths_never_read(self):
         for path in ['.env', 'config/id_rsa', 'credentials.json', '.local/generated.php', 'htdocs/main.inc.php', 'vendor/pkg/file.php', 'modules/pkg/vendor/file.php']:
             self.stage(path, 'MUST_NOT_OPEN')

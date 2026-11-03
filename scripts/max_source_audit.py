@@ -19,7 +19,7 @@ RULES = {
     'UNMERGED_INDEX': 'fail', 'EXCEPTION_INVALID': 'fail',
 }
 SECRET = re.compile(
-    r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'
+    r'-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----'
     r'|\bgh[pousr]_[A-Za-z0-9]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{40,}\b'
     r'|\bAKIA[A-Z0-9]{16}\b'
     r'|(?i:\b(?:password|passwd|api_key|api_secret|access_token|smtp_password)\b[\"\']?\s*[:=]\s*[\"\'][^\"\'\r\n]{12,}[\"\'])'
@@ -58,7 +58,7 @@ def structure(path):
     name = p.name.lower()
     rules = []
     if (name == '.env' or name.startswith('.env.') and name != '.env.example'
-            or name in {'id_rsa', 'id_ed25519', 'credentials.json', 'credentials.yml', 'credentials.yaml', 'conf.php'}
+            or name in {'id_rsa', 'id_ed25519', 'id_dsa', 'id_ecdsa', 'credentials.json', 'credentials.yml', 'credentials.yaml', 'conf.php'}
             or p.suffix.lower() in {'.key', '.pem', '.p12', '.pfx', '.sql'}):
         rules.append('CREDENTIAL_NAME')
     if (any(s in {'.local', '.git'} for s in parts)
