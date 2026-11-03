@@ -30,6 +30,13 @@ def login(browser, account):
 def measure(page, width, path, phase):
     page.evaluate('document.fonts.ready')
     row = page.evaluate("""() => ({
+        header_contained:[...document.querySelectorAll('table.table-fiche-title tr.toptitle')].every(tr=>{
+            const parent=tr.getBoundingClientRect();
+            return [...tr.children].every(n=>{
+                const r=n.getBoundingClientRect();
+                return !r.width || !r.height || r.bottom<=parent.bottom+1;
+            });
+        }),
         header_overlaps:[...document.querySelectorAll('table.table-fiche-title tr.toptitle')].reduce((sum,tr)=>{
             const rects=[...tr.children].map(n=>n.getBoundingClientRect()).filter(r=>r.width>0 && r.height>0);
             for(let i=0;i<rects.length;i++) for(let j=i+1;j<rects.length;j++) {
@@ -55,6 +62,7 @@ def measure(page, width, path, phase):
     if phase=='after':
         assert row['viewport']==width and row['body']<=width and row['document']<=width, 'Page overflow: '+json.dumps(row)
         assert row['header_overlaps']==0, 'Native header controls overlap: '+json.dumps(row)
+        assert row['header_contained'], 'Native header controls escape fixed row height: '+json.dumps(row)
 
 def run():
     with sync_playwright() as p:

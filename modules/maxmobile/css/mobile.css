@@ -33,3 +33,7 @@
  .maxmobile-page table.table-fiche-title tr.toptitle>td.col-title{flex:1 1 calc(100% - 50px);width:auto}
  .maxmobile-page table.table-fiche-title .select2-container{max-width:100%}
 }
+@media(max-width:768px){
+ /* Include the native right-pane ID: form-nested rows otherwise outrank the class-only rule. */
+ body.maxmobile-page #id-right table.table-fiche-title tr.toptitle{height:auto;min-height:0}
+}
