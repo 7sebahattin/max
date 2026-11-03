@@ -49,6 +49,7 @@ class Protocol(unittest.TestCase):
         state_write(self.path, self.state)
         with self.connect('a') as conn:
             self.assertEqual(conn.uid('FETCH', '101', '(RFC822.TEXT)')[0], 'NO')
+            self.assertEqual(state_read(self.path)['faults'][-1], {'account':'a','fault':'fetch_no','uid':True})
         self.state['accounts']['a']['fail_fetch'] = False
         state_write(self.path, self.state)
         with self.connect('a') as conn:

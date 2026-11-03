@@ -29,3 +29,5 @@ for kind in container volume network; do
  test -z "$count"
 done
 echo 'PASS owned mail project teardown'
+# Intentionally strict: native product gaps must stay visible, never xfail/skip/continue-on-error.
+python3 tests/mail/product_contracts.py

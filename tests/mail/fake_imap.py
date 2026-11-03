@@ -116,6 +116,8 @@ class Handler(socketserver.StreamRequestHandler):
                         self.send(f'* {seq} FETCH (UID {msg["uid"]} FLAGS ({" ".join(msg.get("flags", []))}))')
                         continue
                     if acc.get('fail_fetch'):
+                        state.setdefault('faults', []).append({'account':self.account,'fault':'fetch_no','uid':uid})
+                        state_write(self.server.state_path, state)
                         finish('NO', 'temporary fixture fetch failure')
                         return
                     raw = base64.b64decode(msg['raw'])
