@@ -3,6 +3,8 @@
 if (PHP_SAPI !== 'cli') exit(2);
 chdir('/opt/dolibarr/htdocs'); require 'master.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+// Official Cronjob bootstrap also loads date.lib.php before collector execution.
+require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollector.class.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectoraction.class.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectorfilter.class.php';
