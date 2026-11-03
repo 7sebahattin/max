@@ -72,3 +72,19 @@ The four-source identity contract tests whether native agenda alone is an adequa
 A malformed-message fixture omits the RFC Message-ID header (separate from the malformed PDF attachment). Socket tests verify the fake server preserves the missing identity on the wire. Native polling/replay is exercised after the regular cases; no synthetic replacement identity or guessed document type is injected. This does not implement quarantine/review storage.
 
 Every poll compares both fixture Message-ID counts and **all newly created native agenda actions** against a pre-poll baseline, including missing-Message-ID replay. This catches hidden actions with empty/generated identities rather than filtering them out of duplicate checks.
+
+## Exact-SHA CI evidence
+
+| Tested commit | Run | Actual outcome |
+|---|---|---|
+| `a98dba1559e3fa9df096988403afc0dcf74f1140` | [41692920377](https://github.com/7sebahattin/max/actions/runs/41692920377) | FAIL: missing native action/filter includes in fixture; corrected |
+| `2cb89a4d9e4f7e35d41f667f9b108220f2d2aab4` | [41696452070](https://github.com/7sebahattin/max/actions/runs/41696452070) | FAIL: direct CLI bootstrap lacked native scheduler date library; corrected |
+| `d19993e9940eebbd4d5db2df7646e3dcb28c4aea` | [41697160525](https://github.com/7sebahattin/max/actions/runs/41697160525) | FAIL: real FETCH NO was incorrectly reported as native success; preserved as product gap |
+| `1e2808e633f2b43e4398a1963b28d4ec3e48da65` | [41699695697](https://github.com/7sebahattin/max/actions/runs/41699695697) | Native installation/P2, five protocol/safety tests, wire characterization, malformed-message replay, cron, HTTP ACL, native snapshots, no-send and teardown **PASS**; separate strict native-only MAX contracts **FAIL (2), BLOCKED** |
+| `1e2808e633f2b43e4398a1963b28d4ec3e48da65` | [Foundation 41699695690](https://github.com/7sebahattin/max/actions/runs/41699695690), [Windows/Linux audit 41699695523](https://github.com/7sebahattin/max/actions/runs/41699695523) | PASS |
+
+Downloaded and inspected artifact `mail-native-evidence` (ID `13261394606`, SHA-256 `db1802c5a7f2c0b6344dc615f6fd921f04c0b4eb5a962559a86d161b5cbb595c`): only numeric/hash mail reports and sanitized command/fault metadata. Every poll's full new-agenda count equals the fixture-scoped count. Missing-Message-ID polling/replay creates no additional agenda action; that is **not** a quarantine/review intake record. The raw source stays in the fake mailbox. The bundled backend's observed tagged-NO failure is backend-specific; the PHP IMAP-extension backend is **NOT TESTED**, not declared broken. The cross-account agenda Message-ID identity limitation is in the collector's common recordevent action.
+
+Local: five real socket/Docker safety tests, 40 existing doctor/source-audit tests, four MAX Core assertion regressions, policy/index audit, Python compilation and shell syntax passed. Full native local runtime remains BLOCKED by managed Docker storage. Actual native evidence above comes from GitHub Actions. The PR conversation records the final documentation commit's exact-head results separately; no self-referential SHA claim.
+
+Review requested in draft PR #23: optional native collector usefulness, blocked mailbox-scoped identity/private intake requirements, retry/error propagation and the no-send boundary. Owner action is architectural review of a later MAX Mail intake design; no production provider configuration, real credentials, translation or SMTP authorization is requested or assumed in this pilot. No other PR, core file, merge or live deployment changed.
