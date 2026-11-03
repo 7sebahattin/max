@@ -20,8 +20,8 @@ class modMaxorders extends DolibarrModules {
  public function init($options='') {
   $r=$this->db->query("SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE id BETWEEN 61014001 AND 61014003 AND module <> 'maxorders'");
   if(!$r || $this->db->num_rows($r)) { $this->error='MAX Orders permission ID conflict'; return -1; }
-  if($this->_load_tables('/maxorders/sql/')<0) return -1;
-  $this->remove($options); return $this->_init([],$options);
+  $schema=require __DIR__.'/../../lib/schema.php';
+  $this->remove($options); return $this->_init($schema,$options);
  }
  public function remove($options='') { return $this->_remove([],$options); }
 }

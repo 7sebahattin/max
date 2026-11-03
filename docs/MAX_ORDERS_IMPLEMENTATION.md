@@ -16,7 +16,7 @@ To link a packet, a reviewer enters an existing native order ID and explicitly c
 
 ## Storage and lifecycle
 
-Seven namespaced tables hold packet, immutable revision, immutable source facts, per-document current facts, manual locks, conflicts and value-free audit events. Module SQL creation runs through Dolibarr's supported `_load_tables` lifecycle. Disabling removes menus/rights through the native lifecycle, preserves records, and denies module services/screens; enabling restores access. Module ID 610140 and rights 61014001–61014003 are prototype allocations with collision checks, not a claim of global registry reservation.
+Seven namespaced tables hold packet, immutable revision, immutable source facts, per-document current facts, manual locks, conflicts and value-free audit events. Module SQL creation runs through Dolibarr's supported `_init` SQL-array lifecycle with namespaced CREATE IF NOT EXISTS statements in PHP; repository policy forbids standalone `.sql` files. Disabling removes menus/rights through the native lifecycle, preserves records, and denies module services/screens; enabling restores access. Module ID 610140 and rights 61014001–61014003 are prototype allocations with collision checks, not a claim of global registry reservation.
 
 Every read/write service and HTTP boundary checks module state, native user rights and entity. All POST screens use native session CSRF tokens. Input has bounded typed allowlists, output is escaped, no filesystem paths are accepted, and storage errors omit SQL/payload. Packet row locks and database uniqueness serialize replay/revision changes. MariaDB 11.4 is the tested DB; PostgreSQL compatibility is **NOT CERTIFIED** because the atomic upserts use MariaDB syntax. No sensitive payload is written to application logs. Authorized reviewers can see source values in module records; audit events store actor/action/provenance, not raw metadata.
 
@@ -49,3 +49,5 @@ Acceptance includes actual module SQL/install/lifecycle, native role grants, LL-
 Only synthetic screenshots and viewport reports/source-only module ZIP are artifacts. Private credentials, installer output and `.env` are excluded. No deployment or merge step exists. Local full runtime is **BLOCKED** by managed 8 GB/vfs Docker storage; actual native integration runs in GitHub Actions. Exact-SHA results and failed attempts will be recorded below.
 
 Rollback: disable MAX Orders via native module administration; retain its records for audit. Deleting a disposable CI project removes its synthetic database. No native records/core files need rollback.
+
+Initial `166e561741d56e7cd5658bbaa15ee72c1f5cf2ed` policy failure: standalone module SQL was rejected by existing `scripts/check.py`. Replaced within owned module files using the supported native `_init` lifecycle; shared policy stays unchanged.
