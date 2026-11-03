@@ -53,7 +53,7 @@ foreach(['denied'=>0,'reader'=>61014001,'intake'=>61014002,'reviewer'=>61014003,
  $a->getrights('',1); $actors[$role]=$a; $accounts[$role]=['login'=>$a->login,'password'=>$pass];
 }
 $before=snapshotO(); $service=new MaxOrdersPacket($db);
-$ingest=fn($kind,$doc,$rev,$facts)=>$service->ingest($actors['intake'],$c->id,'PACK-100',$kind,$doc,$rev,json_encode($facts));
+$ingest=fn($kind,$doc,$rev,$facts)=>$service->ingest($actors['intake'],$c->id,'PACK-100',$kind,$doc,$rev,json_encode((object)$facts));
 $r=$ingest('LL','LL-1',1,['quantity'=>'98','sku'=>'DEMO']); $id=$r['packet'];
 ok($service->packet($user,$id)->status==='provisional','LL first provisional');
 $r=$ingest('PO','PO-1',2,['quantity'=>'100','sku'=>'DEMO','packaging'=>'CASE']); ok($r['packet']===$id,'PO later same packet');
