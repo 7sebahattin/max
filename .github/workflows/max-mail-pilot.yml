@@ -36,6 +36,8 @@ jobs:
           python3 -m playwright install --with-deps chromium
       - name: Native install and actual fake-IMAP polling
         run: bash scripts/mail_test.sh
+      - name: Strict native-only MAX contracts (BLOCKED gaps are not waived)
+        run: python3 tests/mail/product_contracts.py
       - name: Synthetic numeric and command-name evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

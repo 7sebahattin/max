@@ -14,7 +14,7 @@ class NativeProductContracts(unittest.TestCase):
         cls.report=json.loads(Path('.local/mail-report.json').read_text())
         cls.protocol=json.loads(Path('.local/mail-protocol.json').read_text())
 
-    def test_distinct_accounts_do_not_lose_same_message_id(self):
+    def test_native_agenda_alone_preserves_account_scoped_intake(self):
         first_b=next(row for row in self.report if row['account']=='b')
         self.assertEqual(first_b['events'],4,
             'BLOCKED: four distinct account messages produced only three agenda events; Message-ID collides across accounts')
