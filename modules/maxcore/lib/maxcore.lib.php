@@ -6,7 +6,7 @@ function maxCoreCan($actor,$right) {
 }
 function maxCoreRequire($right) {
  global $user;
- if(!isModEnabled('maxcore') || !maxCoreCan($user,$right)) { http_response_code(403); accessforbidden(); }
+ if(!isModEnabled('maxcore') || !maxCoreCan($user,$right)) { http_response_code(403); accessforbidden('', 0, 0, 1); }
 }
 function maxCoreSettings() {
  return array('MAXCORE_DISPLAY_NAME'=>getDolGlobalString('MAXCORE_DISPLAY_NAME','MAX'),

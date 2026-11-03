@@ -50,12 +50,12 @@ def run():
                     print('PASS denied GET body '+role+'/'+kind)
             if role in ['denied','reader','editor']:
                 # Obtain a real session token even for the no-MAX-rights native user.
-                page.goto(BASE+'/')
-                token=page.locator('meta[name=anti-csrf-newtoken]').get_attribute('content')
                 targets=['admin/status.php']
                 if role in ['denied','reader']:
                     targets.append('admin/setup.php')
                 for target in targets:
+                    page.goto(BASE+'/')
+                    token=page.locator('meta[name=anti-csrf-newtoken]').get_attribute('content')
                     response=context.request.post(BASE+'/custom/maxcore/'+target,form={'token':token,'MAXCORE_DISPLAY_NAME':'Forbidden'})
                     assert_denied(response.status,response.text(),['Synthetic Display'])
                     print('PASS denied POST body '+role+'/'+target)
