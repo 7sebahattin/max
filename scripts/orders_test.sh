@@ -16,7 +16,7 @@ printf '%s' "$COMPOSE_PROJECT_NAME" > .local/orders-owned
 trap 'docker compose down --volumes --remove-orphans' EXIT
 bash scripts/p2_install.sh
 docker compose up -d --wait --wait-timeout 180
-docker compose exec -T web sh -c 'find /opt/dolibarr/htdocs/custom/maxorders /checks/orders -name "*.php" -exec php -l {} \;'
+docker compose exec -T web sh -c 'find /opt/dolibarr/htdocs/custom/maxorders /checks/orders -name "*.php" -print0 | xargs -0 -n1 php -l'
 docker compose exec -T web php /checks/orders/runtime.php setup
 docker compose exec -T web php /checks/orders/runtime.php toggle
 docker compose cp web:/var/lib/dolibarr/documents/orders-accounts.json .local/orders-accounts.json
