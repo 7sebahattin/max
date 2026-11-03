@@ -1,0 +1,33 @@
+name: Foundation checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/check.py
+      - run: python3 -m py_compile scripts/prepare.py scripts/check.py
+      - run: bash -n scripts/smoke.sh
+  local-preparation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Generate disposable local credentials
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import secrets
+          p = Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PY
+      - run: scripts/smoke.sh
+      - name: Stop local containers
+        if: always()
+        run: docker compose down

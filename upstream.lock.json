@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/Dolibarr/dolibarr",
+  "version": "24.0.1",
+  "tag_object": "d519ccf48dd8fb1c9e2d284ccd941f60aff55494",
+  "commit": "b7958385f00a92219f76a4dfea67dae93df97a25",
+  "archive_url": "https://codeload.github.com/Dolibarr/dolibarr/tar.gz/refs/tags/24.0.1",
+  "sha256": "cd5cb03c3f927007c7e4c63a02ebdebdcf81efd378603729bbcf6991ffa1b9c4",
+  "verified_on": "2026-11-03",
+  "signature": "unsigned upstream tag; HTTPS origin and archive checksum verified"
+}
