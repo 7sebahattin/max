@@ -12,6 +12,7 @@ steps=[]
 
 def poll(alias, expected, failure=False):
     run=subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','poll',alias],capture_output=True,text=True,check=False)
+    Path('.local/mail-protocol.json').write_text(json.dumps(state_read(STATE).get('commands',[]),indent=2))
     # Never echo native diagnostics/credentials if JSON parsing fails.
     try:
         result=json.loads(run.stdout.strip())
