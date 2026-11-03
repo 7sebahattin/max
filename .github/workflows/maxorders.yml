@@ -1,0 +1,68 @@
+name: MAX Orders document packets
+on:
+  push:
+    branches: [feat/maxorders-document-packets]
+  pull_request:
+    paths: ['modules/maxorders/**', 'tests/orders/**', 'scripts/orders_*', 'docs/MAX_ORDERS_IMPLEMENTATION.md', '.github/workflows/maxorders.yml']
+permissions:
+  contents: read
+jobs:
+  native-orders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: max-orders-${{ github.run_id }}-${{ github.run_attempt }}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact source and module/safety checks
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check.py
+          python3 -m unittest discover -s tests/orders -v
+          python3 -m compileall -q tests/orders
+          bash -n scripts/orders_test.sh
+      - name: Build source-only installable module package
+        run: |
+          python3 - <<'PYPACK'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          Path('.local').mkdir(exist_ok=True)
+          with ZipFile('.local/maxorders-module.zip','w',ZIP_DEFLATED) as package:
+              for p in sorted(Path('modules/maxorders').rglob('*')):
+                  if p.is_file(): package.write(p,'maxorders/'+p.relative_to('modules/maxorders').as_posix())
+          PYPACK
+      - name: Prepare synthetic secrets and browser
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          import secrets
+          p=Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Native install and document packet acceptance
+        run: bash scripts/orders_test.sh
+      - name: Synthetic responsive screens and source-only module package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: orders-module-evidence
+          path: |
+            .local/orders-mobile.json
+            .local/orders-*.png
+            .local/maxorders-module.zip
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Owned project fallback cleanup
+        if: always()
+        run: |
+          if test -f .local/orders-owned && test "$(cat .local/orders-owned)" = "$COMPOSE_PROJECT_NAME"; then
+            docker compose down --volumes --remove-orphans
+          fi
