@@ -8,3 +8,15 @@
  .maxmobile-page .maxmobile-table-scroll:focus-visible{outline:3px solid #1769aa;outline-offset:2px}
  .maxmobile-page .maxmobile-scroll-help{font-size:.9rem;white-space:normal;overflow-wrap:anywhere}
 }
+@media(max-width:768px){
+ /* Native title/filter/pagination is a layout table, separate from the data table. */
+ .maxmobile-page table.table-fiche-title,
+ .maxmobile-page table.table-fiche-title>tbody{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page table.table-fiche-title tr.toptitle{display:flex;flex-wrap:wrap;width:100%;min-width:0;gap:.5rem}
+ .maxmobile-page table.table-fiche-title tr.toptitle>td{display:block;box-sizing:border-box;flex:1 1 100%;width:100%;max-width:100%;min-width:0;text-align:left;white-space:normal}
+ .maxmobile-page table.table-fiche-title .titre{white-space:normal;overflow-wrap:anywhere}
+ .maxmobile-page div.pagination{position:static;float:none;box-sizing:border-box;width:100%;max-width:100%;height:auto;min-width:0}
+ .maxmobile-page div.pagination ul{display:flex;flex-wrap:wrap;box-sizing:border-box;width:100%;max-width:100%;padding:0;gap:.3rem}
+ .maxmobile-page div.pagination ul li{position:static;float:none;min-width:0;max-width:100%}
+ .maxmobile-page li.paginationafterarrows{display:flex;flex-wrap:wrap;gap:.25rem}
+}
