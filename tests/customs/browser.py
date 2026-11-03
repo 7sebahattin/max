@@ -65,6 +65,11 @@ with sync_playwright() as p:
         result=api(context)
         expected={'contact':{'contact'},'analysis':{'analysis'},'source':{'source'},'manager':{'contact','analysis','source'}}.get(role,set())
         assert set(result.get('restricted',{}))==expected,'Unexpected field projection'
+        if role=='viewer':
+            english=page.goto(BASE+f'/custom/maxcustoms/card.php?id={fixture["id"]}&lang=en_US')
+            assert english.status==200 and 'Local unsubmitted draft' in page.locator('body').inner_text(),'English surface failed'
+            private_absent(english.text())
+            page.goto(BASE+f'/custom/maxcustoms/card.php?id={fixture["id"]}&lang=tr_TR')
         if not expected:
             private_absent(response.text()); private_absent(json.dumps(result))
             assert not page.locator('.maxcustoms-shell [name=contact],.maxcustoms-shell [name=analysis],.maxcustoms-shell [name=source]').count()
@@ -87,8 +92,11 @@ with sync_playwright() as p:
             denied(context.request.post(BASE+'/custom/maxcustoms/index.php',form={'token':'invalid','action':'create','ref':'CSRF-FORBIDDEN','office':'NO'}))
             page.reload(); page.wait_for_load_state('networkidle')
             page.locator('section[data-maxcustoms=edit] [name=office]').fill('Browser synthetic office')
+            page.locator('section[data-maxcustoms=edit] [name=goods_summary]').fill('Synthetic <script>window.customsLeak=1</script>')
             page.locator('section[data-maxcustoms=edit] button').click(); page.wait_for_load_state('networkidle')
             assert api(context)['fields']['office']=='Browser synthetic office','Valid public edit failed'
+            assert page.evaluate('typeof window.customsLeak')=='undefined','Source text executed script'
+            assert '<script>window.customsLeak=1</script>' in page.locator('main.maxcustoms-shell').inner_text(),'Source text was not safely rendered'
         if role=='matcher':
             page.reload(); page.wait_for_load_state('networkidle')
             section=page.locator('[data-maxcustoms=match]')
