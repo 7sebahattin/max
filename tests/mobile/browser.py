@@ -76,7 +76,15 @@ def run():
                         assert field.count(), 'Native filters missing'
                         field.focus()
                         assert field.evaluate('(n)=>n===document.activeElement'), 'Filter cannot receive keyboard focus'
-                        assert page.locator('[name=button_search], [name=button_removefilter]').count()>0, 'Native filter actions missing'
+                        search=page.locator('button.button_search[name=button_search_x]').first
+                        assert search.count()>0, 'Native filter actions missing'
+                        search.focus()
+                        assert search.evaluate('(n)=>n===document.activeElement'), 'Search action cannot receive keyboard focus'
+                        selection=region.locator('input[type=checkbox][name="toselect[]"]')
+                        if selection.count():
+                            selection.first.check()
+                            assert selection.first.is_checked(), 'Row selection failed'
+                            selection.first.uncheck()
                         assert page.locator('.pagination, .liste_titre').count()>0, 'Native list navigation absent'
             if phase=='before':
                 assert any(r['body']>r['width'] for r in measurements), 'Baseline defect not reproduced'
