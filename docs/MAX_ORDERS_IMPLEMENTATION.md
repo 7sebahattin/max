@@ -53,3 +53,17 @@ Rollback: disable MAX Orders via native module administration; retain its record
 Initial `166e561741d56e7cd5658bbaa15ee72c1f5cf2ed` policy failure: standalone module SQL was rejected by existing `scripts/check.py`. Replaced within owned module files using the supported native `_init` lifecycle; shared policy stays unchanged.
 
 CI `8d05832aaae8ddceca6d597dd04414900f464dea`: [41693951557](https://github.com/7sebahattin/max/actions/runs/41693951557) passed installed lifecycle, runtime, HTTP and nine strict viewport tests. Artifact `orders-module-evidence` contains source ZIP, nine synthetic PNGs and measured page widths exactly 360/390/768. Screenshots inspected. Follow-up improves collision review to show actual changed field values instead of hashes, localizes source field/status labels, and records the conflict intake actor; latest SHA is retested separately.
+
+## Recorded CI evidence
+
+| Exact tested commit | Run | Outcome |
+|---|---|---|
+| `166e561741d56e7cd5658bbaa15ee72c1f5cf2ed` | [41693735286](https://github.com/7sebahattin/max/actions/runs/41693735286) | FAIL: repository policy forbids standalone SQL; fixed with native `_init` SQL array |
+| `903afb15b95a1cc2ff1c3c7edb745d10589ffcb4` | [41693837291](https://github.com/7sebahattin/max/actions/runs/41693837291) | FAIL: empty fixture facts encoded as JSON array; fixed to explicit object without relaxing validation |
+| `dca18e70edadb0a214c3b028c99fc747cb324bca` | [41695001192](https://github.com/7sebahattin/max/actions/runs/41695001192) | PASS: field-level collision review and translated values |
+| `4afdb4086db9ee88b13b551aebca318e953eef6e` | [41695347661](https://github.com/7sebahattin/max/actions/runs/41695347661) | PASS: full native/P2 + installed module + HTTP/CSRF/Turkish + nine viewport cases + teardown |
+| `4afdb4086db9ee88b13b551aebca318e953eef6e` | [Foundation 41695347671](https://github.com/7sebahattin/max/actions/runs/41695347671), [source audit 41695348203](https://github.com/7sebahattin/max/actions/runs/41695348203) | PASS |
+
+Local verification: one real Docker ownership/refusal test, 40 existing doctor/source-audit tests, four MAX Core assertion tests, repository policy/index-source audit, shell/Python compilation and PHP 8.3 syntax checks passed. Full local native integration remains BLOCKED by storage; the green native results above are actual GitHub Actions runs. The PR conversation records the final documentation commit's exact-head CI separately, avoiding a self-referential commit claim.
+
+Owner review: native all-customer scope is required for this MVP; assigned-customer-only access, cross-database certification, commercial license/registry review and all deferred business-policy choices remain outside this acceptance. Review draft PR #24 before enabling this optional module anywhere beyond disposable test data. No production access, merge or deployment performed.
