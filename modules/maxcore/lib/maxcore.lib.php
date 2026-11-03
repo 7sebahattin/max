@@ -6,7 +6,7 @@ function maxCoreCan($actor,$right) {
 }
 function maxCoreRequire($right) {
  global $user;
- if(!isModEnabled('maxcore') || !maxCoreCan($user,$right)) accessforbidden();
+ if(!isModEnabled('maxcore') || !maxCoreCan($user,$right)) { http_response_code(403); accessforbidden(); }
 }
 function maxCoreSettings() {
  return array('MAXCORE_DISPLAY_NAME'=>getDolGlobalString('MAXCORE_DISPLAY_NAME','MAX'),
@@ -14,12 +14,14 @@ function maxCoreSettings() {
   'MAXCORE_FAVICON'=>getDolGlobalString('MAXCORE_FAVICON','max-icon.svg'));
 }
 function maxCoreValidate($input) {
- $name=trim((string)($input['MAXCORE_DISPLAY_NAME']??''));
+ if(!isset($input['MAXCORE_DISPLAY_NAME']) || !is_string($input['MAXCORE_DISPLAY_NAME'])) throw new InvalidArgumentException('MAXInvalidBrand');
+ $name=trim($input['MAXCORE_DISPLAY_NAME']);
  if($name==='' || mb_strlen($name,'UTF-8')>80 || preg_match('/[\\x00-\\x1f\\x7f<>]/u',$name)!==0)
   throw new InvalidArgumentException('MAXInvalidBrand');
  $out=array('MAXCORE_DISPLAY_NAME'=>$name);
  foreach(array('MAXCORE_LOGO','MAXCORE_FAVICON') as $key) {
-  $value=(string)($input[$key]??'');
+  if(!isset($input[$key]) || !is_string($input[$key])) throw new InvalidArgumentException('MAXInvalidAsset');
+  $value=$input[$key];
   if(!in_array($value,array('none','max.svg','max-icon.svg'),true)) throw new InvalidArgumentException('MAXInvalidAsset');
   $out[$key]=$value;
  }

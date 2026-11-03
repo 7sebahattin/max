@@ -5,6 +5,8 @@ module=root/'modules/maxcore'
 for path in module.rglob('*.php'):
     text=path.read_text()
     assert 'NOCSRFCHECK' not in text and 'NOLOGIN' not in text
+    assert 'MAIN_INFO_SOCIETE_' not in text, 'Module must not hardcode native legal identity'
+    assert not re.search(r'SoapClient|smtp_connect|mail\s*\(',text,re.I)
     assert not re.search(r'CREATE\s+TABLE|UPDATE\s+llx_|INSERT\s+INTO\s+llx_',text,re.I)
 for name in ['index.php','admin/setup.php','admin/status.php']:
     text=(module/name).read_text()
