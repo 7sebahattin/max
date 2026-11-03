@@ -13,5 +13,5 @@ $settings=array('url_root'=>'http://127.0.0.1:8080','document_root'=>$base,'url_
  'db_collation'=>'utf8mb4_unicode_ci','authentication'=>'dolibarr','prod'=>'0','instance_unique_id'=>bin2hex(random_bytes(24)));
 $out="<?php\n";
 foreach($settings as $key=>$value) $out.='$dolibarr_main_'.$key.' = '.var_export($value,true).";\n";
-file_put_contents($path,$out,LOCK_EX); chmod($path,0640);
+file_put_contents($path,$out,LOCK_EX); chown($path,'www-data'); chmod($path,0640);
 echo "Fresh independent module sandbox configured\n";
