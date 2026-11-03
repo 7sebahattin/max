@@ -5,7 +5,7 @@ python3 scripts/prepare.py
 trap 'docker compose down' EXIT
 docker compose build
 docker compose up -d --wait --wait-timeout 180
-docker compose exec -T web sh -c 'find /opt/dolibarr/htdocs/custom/maxcore /checks/maxcore -name "*.php" -exec php -l {} \\;'
+docker compose exec -T web sh -c 'find /opt/dolibarr/htdocs/custom/maxcore /checks/maxcore -name "*.php" -exec php -l {} \;'
 docker compose exec -T web php /checks/maxcore/configure.php
 docker compose exec -T -w /opt/dolibarr/htdocs/install web php step2.php set en_US > .local/maxcore-schema.html
 module_admin_pass="$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
