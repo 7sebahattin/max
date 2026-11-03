@@ -30,7 +30,7 @@ if ($mode==='setup') {
  good(ini_get('sendmail_path')==='/bin/false','no-send PHP boundary');
  $state=json_decode(file_get_contents('/mail-state/state.json'),true);
  foreach($state['accounts'] as $alias=>$account) {
-  $c=new EmailCollector($db); $c->ref='Fixture '.$alias; $c->label=$c->ref; $c->entity=1;
+  $c=new EmailCollector($db); $c->ref='FIXTURE-'.strtoupper($alias); $c->label='Fixture '.$alias; $c->entity=1;
   $c->host='fakeimap'; $c->port=1143; $c->imap_encryption=''; $c->hostcharset='UTF-8'; $c->norsh=1; $c->acces_type=0;
   $c->login=$account['login']; $c->password=$account['password']; $c->source_directory='Orders'; $c->target_directory='';
   $c->maxemailpercollect=20; $c->status=1; $c->filters=[];
@@ -44,8 +44,8 @@ if ($mode==='setup') {
  echo "PASS native active collectors configured\n";
 } elseif ($mode==='poll') {
  $alias=$argv[2]??'';
- $id=(int)scalarMail("SELECT rowid FROM ".MAIN_DB_PREFIX."emailcollector_emailcollector WHERE ref='Fixture ".$db->escape($alias)."'");
- $c=new EmailCollector($db); good($c->fetch($id)>0,'fetch collector');
+ good(in_array($alias,['a','b'],true),'collector alias');
+ $c=new EmailCollector($db); good($c->fetch(0,'FIXTURE-'.strtoupper($alias))>0,'fetch collector');
  // Native diagnostics can contain raw mail. Never emit them, even on failure.
  $errorClass='none'; ob_start(); try { $result=$c->doCollectOneCollector(0); } catch(Throwable $e) { $result=-99; $errorClass=get_class($e); } finally { ob_end_clean(); }
  $metadata=[];

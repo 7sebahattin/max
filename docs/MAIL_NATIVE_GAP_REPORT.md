@@ -50,3 +50,5 @@ Local: three real socket IMAP unittest cases passed. Full native runtime local e
 Rollback: disable/delete the disposable native collectors or discard the isolated project. No core/database migration or live deployment exists.
 
 CI attempt `a98dba1559e3fa9df096988403afc0dcf74f1140`: [41692920377](https://github.com/7sebahattin/max/actions/runs/41692920377) failed at active collector creation because the fixture omitted native EmailCollectorAction/Filter includes. The baseline native installer/P2 passed; project cleanup ran. Fixture includes corrected without core changes.
+
+CI attempts `5c1b7dc`, `bfc7cf9`, `1965055` and `64b9970` failed at the fixture collector lookup before polling. Native `CommonObject::createCommon()` sanitizes references with `dol_string_nospecial` (spaces become underscores); the fixture incorrectly queried the unsanitized display reference. Corrected to stable `FIXTURE-A/B` references and native `EmailCollector::fetch(0, ref)`, with separate labels. Sanitized precondition/stack-location diagnostics are retained; raw native mail/debug/credentials stay suppressed.
