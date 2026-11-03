@@ -15,7 +15,7 @@ docker compose build
 docker compose up -d --wait --wait-timeout 180
 docker compose exec -T web php /checks/p2_config.php
 # step2 is the documented official installer schema/data creation script.
-docker compose exec -T web php /opt/dolibarr/htdocs/install/step2.php set en_US > .local/p2-install-schema.html
+docker compose exec -T -w /opt/dolibarr/htdocs/install web php step2.php set en_US > .local/p2-install-schema.html
 # Verify schema before proceeding. A plain exit code/HTTP 200 is not sufficient.
 docker compose exec -T web php -r '
 $db = new mysqli("db", getenv("MARIADB_USER"), getenv("MARIADB_PASSWORD"), getenv("MARIADB_DATABASE"));
@@ -32,7 +32,7 @@ admin_pass="$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
 printf '%s\n' "$admin_pass" > .local/p2-admin-secret
 chmod 600 .local/p2-admin-secret
 # Official step5 arguments: versionfrom versionto selectlang action login pass pass_verif lockinstall
-docker compose exec -T web php /opt/dolibarr/htdocs/install/step5.php '' '' en_US set maxadmin "$admin_pass" "$admin_pass" 1 > .local/p2-install-admin.html
+docker compose exec -T -w /opt/dolibarr/htdocs/install web php step5.php '' '' en_US set maxadmin "$admin_pass" "$admin_pass" 1 > .local/p2-install-admin.html
 unset admin_pass
 docker compose exec -T web php /checks/p2_verify.php
 # The installer must no longer be available after its lock was created.
