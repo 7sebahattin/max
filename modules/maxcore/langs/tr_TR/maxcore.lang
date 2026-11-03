@@ -29,3 +29,8 @@ MAXPrototypeNotice=Prototip modül. Bu sayfa entegrasyon açmaz, yerel kullanıc
 
 MAXUploadLogo=Logo yükle (PNG/JPEG, en fazla 1 MiB, 2048×2048)
 MAXInvalidUpload=Geçersiz logo dosyası
+MAXAssetNone=Yok (yerel varsayılan)
+MAXAssetLogo=MAX logosu
+MAXAssetIcon=MAX simgesi
+MAXAssetUploaded=Yüklenen logo
+MAXUseLogoFavicon=Mevcut veya yeni yüklenen logoyu kullan

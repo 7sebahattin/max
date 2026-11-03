@@ -59,6 +59,8 @@ def run():
         assert asset.status==200 and asset.headers['content-type']=='image/png'
         assert asset.headers['x-content-type-options']=='nosniff' and b'inert_payload' not in asset.body(), 'Active tail or metadata survived re-encoding'
         assert asset.body().startswith(b'\x89PNG') and b'<svg' not in asset.body(), 'Unsafe image served'
+        favicon=c.request.get(BASE+'/custom/maxcore/asset.php?kind=favicon')
+        assert favicon.status==200 and favicon.headers['content-type']=='image/png' and favicon.body()==asset.body(), 'Configured favicon artwork did not propagate'
         # Every claimed authenticated surface: own heading, native header/menu/title/favicon.
         for path in ['/', '/societe/list.php','/custom/maxcore/index.php','/custom/maxcore/admin/setup.php']:
             response=page.goto(BASE+path+'?lang=tr_TR')

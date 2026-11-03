@@ -28,8 +28,10 @@ foreach(array('MAXCORE_LOGO'=>'MAXLogo','MAXCORE_FAVICON'=>'MAXFavicon') as $key
  $assets=array('none','max.svg','max-icon.svg');
  if(maxCoreIsUploadedAsset($s[$key])) $assets[]=$s[$key];
  if($key==='MAXCORE_FAVICON') $assets[]='logo';
- foreach($assets as $asset)
-  print '<option value="'.$asset.'"'.($s[$key]===$asset?' selected':'').'>'.dol_escape_htmltag($asset).'</option>';
+ foreach($assets as $asset) {
+  $assetLabel=$langs->trans(maxCoreIsUploadedAsset($asset)?'MAXAssetUploaded':array('none'=>'MAXAssetNone','max.svg'=>'MAXAssetLogo','max-icon.svg'=>'MAXAssetIcon','logo'=>'MAXUseLogoFavicon')[$asset]);
+  print '<option value="'.$asset.'"'.($s[$key]===$asset?' selected':'').'>'.dol_escape_htmltag($assetLabel).'</option>';
+ }
  print '</select>';
 }
 print '<label for="brand_logo">'.$langs->trans('MAXUploadLogo').'</label><input type="file" id="brand_logo" name="brand_logo" accept="image/png,image/jpeg">';

@@ -29,3 +29,8 @@ MAXPrototypeNotice=Prototype module. This page does not enable integrations, man
 
 MAXUploadLogo=Upload logo (PNG/JPEG, up to 1 MiB, 2048×2048)
 MAXInvalidUpload=Invalid logo file
+MAXAssetNone=None (native fallback)
+MAXAssetLogo=MAX logo
+MAXAssetIcon=MAX icon
+MAXAssetUploaded=Uploaded logo
+MAXUseLogoFavicon=Use current or newly uploaded logo
