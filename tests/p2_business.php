@@ -34,7 +34,7 @@ function stockPilot(int $product, int $warehouse): float {
 }
 $user->fetch('', 'maxadmin');
 checkPilot($user->id > 0 && $user->admin == 1, 'installed demo administrator');
-foreach (['modSociete','modFournisseur','modProduct','modStock','modProductBatch','modCommande','modExpedition','modFacture','modBanque','modMulticurrency','modExport','modEmailCollector'] as $module) {
+foreach (['modSociete','modFournisseur','modProduct','modStock','modProductBatch','modCommande','modExpedition','modFacture','modBanque','modMultiCurrency','modExport','modEmailCollector'] as $module) {
     $result = activateModule($module, 1, 1);
     checkPilot(empty($result['errors']), 'native module '.$module);
 }
