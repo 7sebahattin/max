@@ -112,6 +112,13 @@ def run():
         assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo&loginfunction=1&entity=2').status==404
         assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo&file=conf.php').status==404
         assert c.request.post(BASE+'/custom/maxcore/asset.php?kind=logo').status==405
+        subprocess.run(['docker','compose','exec','-T','web','php','/checks/maxcore/toggle.php','off'],check=True)
+        page.goto(BASE+'/')
+        assert NAME not in page.title(), 'Disabled module kept global title override'
+        assert c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo').status==404, 'Disabled module still serves product artwork'
+        subprocess.run(['docker','compose','exec','-T','web','php','/checks/maxcore/toggle.php','on'],check=True)
+        page.goto(BASE+'/')
+        assert NAME in page.title() and NAME in page.locator('.maxcore-login-brand').inner_text(), 'Brand did not survive re-enable'
         browser.close()
     verify_state()
     Path(f'.local/branding-{VARIANT}-report.json').write_text(json.dumps({'variant':VARIANT,'brand':NAME,'surfaces':checks,'status':'pass'},indent=2))

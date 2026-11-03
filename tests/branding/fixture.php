@@ -22,7 +22,7 @@ if($mode==='prepare') {
  // Only this test fixture writes synthetic legal identity, before the brand tests.
  foreach(array('MAIN_INFO_SOCIETE_NOM'=>'Synthetic Legal '.strtoupper($variant),
   'MAIN_INFO_SOCIETE_IDPROF1'=>'TEST-TAX-'.strtoupper($variant),
-  'MAIN_INFO_SOCIETE_ADDRESS'=>'Synthetic Address '.strtoupper($variant)) as $k=>$v)
+  'MAIN_INFO_SOCIETE_ADDRESS'=>'Synthetic Address '.strtoupper($variant),'MAIN_INFO_SOCIETE_COUNTRY'=>'1:FR:France') as $k=>$v)
   if(dolibarr_set_const($db,$k,$v,'chaine',0,'',1)<=0) throw new RuntimeException('Fixture constant failed');
  require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
  $bank=new Account($db); $bank->ref='BRAND-'.strtoupper($variant); $bank->label='Synthetic brand isolation fixture';
@@ -35,6 +35,8 @@ if($mode==='prepare') {
  if(!empty($r['errors'])) throw new RuntimeException('Native commercial module failed');
  $r=activateModule('modFacture',1,1);
  if(!empty($r['errors'])) throw new RuntimeException('Native draft module failed');
+ $conf->setValues($db); $user->getrights('',1);
+ $mysoc->name='Synthetic Legal '.strtoupper($variant); $mysoc->country_id=1; $mysoc->country_code='FR'; $mysoc->currency_code='EUR';
  require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
  require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
  $customer=new Societe($db); $customer->name='Synthetic branding recipient'; $customer->client=1;
