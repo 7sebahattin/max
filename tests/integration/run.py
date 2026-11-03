@@ -143,6 +143,10 @@ def execute(pilot):
         report['pilot_exit_code'] = result.returncode
         require(result.returncode == 0, 'Native pilot failed; inspect preceding test output')
         report.update(evidence(pilot, local))
+        if pilot == 'p2':
+            # Inspect approved native layout without modifying it; still this owned DB/context.
+            call(['docker', 'compose', 'up', '-d', '--wait', '--wait-timeout', '180'])
+            call([sys.executable, 'tests/integration/p2_layout.py'])
         call(['git', 'diff', '--exit-code', 'HEAD', '--'])
         report['status'] = 'pass'
     except (ValueError, KeyError, TypeError, OSError, subprocess.SubprocessError):

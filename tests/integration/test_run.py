@@ -100,7 +100,7 @@ class IsolationTests(unittest.TestCase):
                 runner.evidence('maxcore', local)
 
     def test_native_failure_evidence_failure_and_cleanup_failure_stay_failed(self):
-        for scenario in ('pass', 'pilot-fails', 'evidence-fails', 'cleanup-fails', 'unsafe-config'):
+        for scenario in ('pass', 'pilot-fails', 'evidence-fails', 'diagnostic-fails', 'cleanup-fails', 'unsafe-config'):
             with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp)
                 (root / 'upstream.lock.json').write_text(json.dumps({'version': '24.0.1', 'commit': 'b' * 40}))
@@ -114,6 +114,8 @@ class IsolationTests(unittest.TestCase):
                         if scenario == 'unsafe-config':
                             value['networks']['sandbox']['internal'] = False
                         return subprocess.CompletedProcess(args, 0, stdout=json.dumps(value))
+                    if args[-1] == 'tests/integration/p2_layout.py' and scenario == 'diagnostic-fails':
+                        raise subprocess.CalledProcessError(8, args)
                     if args[:3] == ['docker', 'compose', 'down'] and scenario == 'cleanup-fails':
                         raise subprocess.CalledProcessError(9, args)
                     code = 17 if args[0] == 'bash' and scenario == 'pilot-fails' else 0

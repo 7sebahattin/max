@@ -80,6 +80,7 @@ jobs:
           name: integration-${{ matrix.pilot }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .local/integration-${{ matrix.pilot }}.json
+            .local/integration-p2-layout.json
             .local/p2-browser.json
             .local/p2-*.png
             .local/maxcore-mobile.json
