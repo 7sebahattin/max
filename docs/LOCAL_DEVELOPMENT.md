@@ -31,3 +31,16 @@ Stop without deleting data: `docker compose down`. Reset only disposable local d
 A full run is `scripts/smoke.sh`; it starts only this local Compose stack and always stops its containers afterward. Database volume survives. See [acceptance](ACCEPTANCE.md) and [progress](PROGRESS.md) for actual results and limitations.
 
 Docker internal networks do not publish ports. The local gateway joins a frontend bridge and the private sandbox to expose the UI while keeping PHP business logic/database without direct Internet egress. Only the gateway has frontend connectivity; it is not a general outbound proxy.
+
+## P2 native business pilot and Windows onboarding
+
+P2 local/CI testing is approved; PR-01 approval warnings describe history. Run `bash scripts/p2_install.sh` only with a fresh disposable `max_demo` database/configuration. It invokes official installer stages and native business APIs, not a customer migration. CI additionally runs `tests/p2_browser.py` using pinned Playwright 1.56.0/Chromium. To run that locally, install that Python package and Chromium in a virtual environment, then use `P2_BROWSER=1 bash scripts/p2_install.sh`. Screenshots and measurements remain in ignored `.local/`; no passwords or customer records are published.
+
+Windows checklist (documented, not yet certified on a Windows machine):
+
+1. Install WSL2 with an Ubuntu distribution; enable Docker Desktop's WSL2 integration for that distribution and Linux containers. Run all commands in the WSL Bash shell, not native PowerShell.
+2. Clone into the WSL Linux filesystem (for example `~/src/max`) to avoid Windows bind-mount ACL/performance surprises. Check Python 3.12+, curl, Git and Docker Compose v2 from that same shell.
+3. Follow the random `.env` credential and trusted-CA preparation instructions above. Ensure localhost port 8080 is free. `docker compose config --quiet` must pass before installation.
+4. Verify localhost forwarding from Windows to WSL manually. A passing Linux CI run is not evidence that Docker Desktop sharing, Windows browser routing or ACLs work on that machine.
+
+Reset only this disposable pilot: stop with `docker compose down`; after confirming the database contains synthetic records only, remove its volume using `docker compose down --volumes`. Delete only `.local/conf`, `.local/documents`, `.local/p2-admin-secret` and generated `.local/p2-*` evidence, then rerun prepare/install. Keep the verified upstream cache. Do not run reset on a customer/staging host or reuse its credentials. Installer-generated configuration/admin files are disposable secrets; never attach them or installer HTML to a PR. Local directory ACLs are not staging recommendations.

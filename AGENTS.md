@@ -25,8 +25,8 @@ Read [GitHub Issue #1](https://github.com/7sebahattin/max/issues/1) and `docs/PR
 6. Record decisions and deviations in `docs/`; keep a traceable GitHub issue/PR link.
 7. Distinguish completed work from proposals. Avoid speculative estimates and invented API behavior.
 
-## Immediate milestone
-PR-01 is repository bootstrap, architecture documentation, and safe local/staging preparation only. **Do not begin functional module rewrites in PR-01.**
+## Current milestone
+PR-01 is merged and P2 local/CI native functional testing is owner-authorized (Issue #3, PR #4). Continue on feat/p2-native-dolibarr-pilot without asking for P2 approval again. No bespoke MAX modules, live deployment or merge is authorized.
 
 ## Foundation checks
 Run `python3 scripts/check.py`, Python compilation, shell syntax and Compose validation. Use `scripts/smoke.sh` on a capable local/CI runner. Never mark a skipped or blocked test as passing. Read `upstream.lock.json` and `docs/COMPATIBILITY.md` before changing dependencies. Keep `.local/` ignored; never edit downloaded upstream. Paid extensions require explicit owner approval. PR-01 approval is required before P2; deployment always needs distinct approval.

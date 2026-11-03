@@ -117,6 +117,18 @@ $bank->country_id = 1; $bank->currency_code = 'EUR'; $bank->type = 1; $bank->dat
 $bid = nativeResult($bank->create($user), $bank, 'create fictional bank account');
 $bankline = nativeResult($bank->addline(dol_now(), 'VIR', 'Synthetic receipt - not invoice settlement', 40, '', 0, $user), $bank, 'fictional bank receipt');
 checkPilot((float)scalarPilot('SELECT amount FROM '.MAIN_DB_PREFIX.'bank WHERE rowid='.$bankline) === 40.0, 'fictional receipt persisted separately from unissued invoice');
+$bankEntry = new AccountLine($db); $bankEntry->fetch($bankline); $bankEntry->num_releve = 'P2-SYNTHETIC-STATEMENT';
+nativeResult($bankEntry->update_conciliation($user, 0, 1), $bankEntry, 'reconcile fictional bank entry');
+checkPilot((int)scalarPilot('SELECT rappro FROM '.MAIN_DB_PREFIX.'bank WHERE rowid='.$bankline) === 1, 'fictional statement reconciliation persisted');
+$currency = new MultiCurrency($db); $currency->code = 'USD'; $currency->name = 'Synthetic USD';
+nativeResult($currency->create($user), $currency, 'configure native foreign currency');
+nativeResult($currency->addRate(1.2), $currency, 'fixed synthetic FX rate without provider');
+$foreign = new Facture($db); $foreign->socid = $cid; $foreign->date = dol_now(); $foreign->type = 0;
+$foreign->multicurrency_code = 'USD'; $foreign->multicurrency_tx = 1.2;
+nativeResult($foreign->create($user), $foreign, 'create foreign currency draft');
+nativeResult($foreign->addline('Synthetic USD goods', 10, 2, 0), $foreign, 'foreign draft line');
+$foreign->fetch($foreign->id);
+checkPilot($foreign->multicurrency_code === 'USD' && abs($foreign->multicurrency_total_ht - 24) < 0.001, 'native fixed FX produces USD 24 from EUR 20');
 checkPilot((int)scalarPilot('SELECT COUNT(*) FROM '.MAIN_DB_PREFIX.'paiement_facture WHERE fk_facture='.$iid) === 0, 'draft invoice has no settlement');
 $langs->setDefaultLang('tr_TR'); $langs->loadLangs(['main','bills','orders']);
 checkPilot($langs->trans('Invoice') !== 'Invoice', 'native Turkish invoice translation');
