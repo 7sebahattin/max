@@ -1,0 +1,69 @@
+name: MAX Customs draft MVP
+on:
+  pull_request:
+    paths: ['modules/maxcustoms/**', 'tests/customs/**', 'scripts/customs_*', 'docs/MAX_CUSTOMS_IMPLEMENTATION.md', '.github/workflows/maxcustoms.yml']
+permissions:
+  contents: read
+jobs:
+  customs-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: max-customs-${{ github.run_id }}-${{ github.run_attempt }}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Source policy, syntax and ownership refusal
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check.py
+          python3 scripts/max_source_audit.py --json
+          python3 -m unittest discover -s tests/customs -v
+          python3 -m compileall -q tests/customs
+          bash -n scripts/customs_test.sh
+          find modules/maxcustoms tests/customs -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Source-only installable ZIP
+        run: |
+          python3 - <<'PYPACK'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          Path('.local').mkdir(exist_ok=True)
+          with ZipFile('.local/maxcustoms-module.zip','w',ZIP_DEFLATED) as z:
+              for p in sorted(Path('modules/maxcustoms').rglob('*')):
+                  if p.is_file(): z.write(p,'maxcustoms/'+p.relative_to('modules/maxcustoms').as_posix())
+          PYPACK
+      - name: Synthetic environment and browser
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          import secrets
+          p=Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Real native install, privacy, workflow and mobile acceptance
+        run: bash scripts/customs_test.sh
+      - name: Public synthetic screenshots and numeric evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: customs-module-evidence
+          path: |
+            .local/maxcustoms-module.zip
+            .local/customs-layout.json
+            .local/customs-summary.json
+            .local/customs-view-*.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Owned project cleanup fallback
+        if: always()
+        run: |
+          if test -f .local/customs-owner && test "$(cat .local/customs-owner)" = "$COMPOSE_PROJECT_NAME"; then
+            docker compose -f compose.yaml down --volumes --remove-orphans
+          fi
