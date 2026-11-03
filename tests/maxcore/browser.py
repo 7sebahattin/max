@@ -17,7 +17,12 @@ def measure(page, width, screen):
         document_scroll_width: document.documentElement.scrollWidth,
         body_client_width: document.body.clientWidth,
         document_client_width: document.documentElement.clientWidth,
-        module_width: document.querySelector('.maxcore-shell').getBoundingClientRect().width
+        module_width: document.querySelector('.maxcore-shell').getBoundingClientRect().width,
+        native_boxes: Object.fromEntries(['#id-container','#id-left','#id-right','.tmenudiv','.login_block'].map(selector => {
+            const node=document.querySelector(selector);
+            const rect=node ? node.getBoundingClientRect() : null;
+            return [selector,rect ? {left:rect.left,right:rect.right,width:rect.width} : null];
+        }))
     })""")
     metrics.update(width=width, screen=screen)
     measurements.append(metrics)

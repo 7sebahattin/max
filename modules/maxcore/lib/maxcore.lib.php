@@ -45,5 +45,5 @@ function maxCoreHeader($title) {
  $s=maxCoreSettings();
  if(in_array($s['MAXCORE_FAVICON'],array('max.svg','max-icon.svg'),true))
   $conf->global->MAIN_FAVICON_URL=dol_buildpath('/maxcore/img/'.$s['MAXCORE_FAVICON'],1);
- llxHeader('',$s['MAXCORE_DISPLAY_NAME'].' - '.$title,'','',0,0,array(),array('/maxcore/css/maxcore.css'));
+ llxHeader('',$s['MAXCORE_DISPLAY_NAME'].' - '.$title,'','',0,0,array(),array('/maxcore/css/maxcore.css'),'','maxcore-page');
 }
