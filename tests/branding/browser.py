@@ -104,7 +104,9 @@ def run():
         c.close()
         c=browser.new_context(); page=c.new_page()
         page.goto(BASE+'/')
-        assert NAME in page.title() and 'Dolibarr' in page.title(), 'Login brand/native version marker missing'
+        page.screenshot(path=f'.local/branding-{VARIANT}-login.png',full_page=True)
+        assert NAME in page.title() and '@ 24.0.1' in page.title(), 'Login brand/native version marker missing'
+        assert 'Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(), 'Visible upstream origin missing'
         assert NAME in page.locator('.maxcore-login-brand').inner_text()
         assert 'kind=favicon' in page.locator('link[rel="shortcut icon"]').get_attribute('href')
         page.screenshot(path=f'.local/branding-{VARIANT}-login.png',full_page=True)

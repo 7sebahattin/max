@@ -70,6 +70,8 @@ function maxCoreBrandMarkup($login=false) {
  $s=maxCoreSettings(); $url=maxCoreAssetUrl($s['MAXCORE_LOGO']);
  $out='<div class="maxcore-global-brand'.($login?' maxcore-login-brand':'').'">';
  if($url!=='') $out.='<img src="'.dol_escape_htmltag($url).'" alt="" width="32" height="32">';
- $out.='<span>'.dol_escape_htmltag($s['MAXCORE_DISPLAY_NAME']).'</span></div>';
+ $out.='<span>'.dol_escape_htmltag($s['MAXCORE_DISPLAY_NAME']).'</span>';
+ if($login) $out.='<small class="maxcore-origin">Dolibarr '.dol_escape_htmltag(DOL_VERSION).'</small>';
+ $out.='</div>';
  return $out;
 }
