@@ -50,8 +50,14 @@ def run():
         # Record native/global surfaces before change (synthetic only).
         page.goto(BASE+'/')
         page.screenshot(path=f'.local/branding-{VARIANT}-before.png',full_page=True)
-        response=post(c,page,{},('brand.png','image/png',png()+b'<?php inert_payload ?>'))
-        assert response.status==303, 'Valid upload did not save'
+        page.goto(BASE+'/custom/maxcore/admin/setup.php')
+        page.locator('[name=MAXCORE_DISPLAY_NAME]').fill(NAME)
+        page.locator('[name=MAXCORE_FAVICON]').select_option('logo')
+        page.locator('[name=brand_logo]').set_input_files({'name':'brand.png','mimeType':'image/png','buffer':png()+b'<?php inert_payload ?>'})
+        with page.expect_response(lambda r: '/custom/maxcore/admin/setup.php' in r.url and r.request.method=='POST') as saving:
+            page.locator('button[type=submit]').click()
+        page.wait_for_load_state('networkidle')
+        assert saving.value.status==303, 'Valid UI upload did not save'
         page.goto(BASE+'/custom/maxcore/admin/setup.php')
         saved=page.locator('[name=MAXCORE_LOGO]').input_value()
         assert saved.startswith('upload:') and len(saved)==75, 'Sanitized asset token missing'
