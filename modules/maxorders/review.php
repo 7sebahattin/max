@@ -20,12 +20,12 @@ try {
 moHeader($langs->trans('OrdersReview').' '.$d['packet']->match_ref);
 print '<section data-maxorders="review"><p role="status">'.moLabel($notice).'</p><p><a href="'.dol_buildpath('/maxorders/packet.php',1).'?id='.$id.'">'.moLabel('OrdersPacket').'</a></p>';
 moForm('lock',$id); print '<label>'.moLabel('OrdersField').'<select name="field">';
-foreach(['quantity','unit_price','sku','variant','packaging','currency'] as $field) print '<option>'.moEsc($field).'</option>';
+foreach(['quantity','unit_price','sku','variant','packaging','currency'] as $field) print '<option value="'.moEsc($field).'">'.moValue($field).'</option>';
 print '</select></label>'; moInput('value','OrdersValue');
 print '<label>'.moLabel('OrdersLocked').'<select name="locked"><option value="yes">'.moLabel('OrdersLock').'</option><option value="no">'.moLabel('OrdersUnlock').'</option></select></label>'; moButton('OrdersSaveLock');
 foreach($d['conflict'] as $c) {
  if($c->status!=='open') continue;
- print '<article><h2>'.moLabel('OrdersConflict').' #'.(int)$c->rowid.'</h2><p>'.moEsc($c->field_name).': '.moEsc($c->old_value).' → '.moEsc($c->new_value).' ('.moLabel('OrdersSource').' '.(int)$c->fk_revision.')</p>';
+ print '<article><h2>'.moLabel('OrdersConflict').' #'.(int)$c->rowid.'</h2><p>'.moValue($c->field_name).': '.moEsc($c->old_value).' → '.moEsc($c->new_value).' ('.moLabel('OrdersSource').' '.(int)$c->fk_revision.')</p>';
  moForm('resolve',$id); print '<input type="hidden" name="conflict" value="'.(int)$c->rowid.'"><label>'.moLabel('OrdersDecision').'<select name="decision">';
  foreach($c->reason==='revision_collision'?['acknowledge'=>'OrdersAcknowledge']:['keep_manual'=>'OrdersKeepManual','accept_source'=>'OrdersAcceptSource'] as $value=>$label) print '<option value="'.moEsc($value).'">'.moLabel($label).'</option>';
  print '</select></label>'; moButton('OrdersResolve'); print '</article>';

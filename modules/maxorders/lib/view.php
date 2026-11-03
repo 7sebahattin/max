@@ -1,6 +1,12 @@
 <?php
 // All content goes through HTML escaping; no raw metadata is logged.
 function moEsc($v) { return dol_escape_htmltag((string)$v); }
+function moValue($value) {
+ global $langs;
+ $key='OrdersValue_'.(string)$value;
+ $translated=$langs->trans($key);
+ return moEsc($translated===$key?$value:$translated);
+}
 function moLabel($key) { global $langs; return moEsc($langs->trans($key)); }
 function moHeader($title) { llxHeader('',$title,'','',0,0,[],['/maxorders/css/orders.css'],'','maxorders-page'); print '<main class="maxorders-shell"><h1>'.moEsc($title).'</h1><p>'.moLabel('OrdersNoEffects').'</p>'; }
 function moFooter() { global $db; print '<p>'.moLabel('OrdersAttribution').'</p></main>'; llxFooter(); $db->close(); }
@@ -12,6 +18,6 @@ function moTable($rows,$columns,$label) {
  print '<h2>'.moLabel($label).'</h2><div class="maxorders-scroll" tabindex="0" role="region" aria-label="'.moLabel($label).'"><table><thead><tr>';
  foreach($columns as $column=>$label) print '<th scope="col">'.moLabel($label).'</th>';
  print '</tr></thead><tbody>';
- foreach($rows as $row) { print '<tr>'; foreach($columns as $column=>$label) print '<td>'.moEsc($row->$column??'').'</td>'; print '</tr>'; }
+ foreach($rows as $row) { print '<tr>'; foreach($columns as $column=>$label) print '<td>'.(in_array($column,['field_name','status','decision','event'],true)?moValue($row->$column??''):moEsc($row->$column??'')).'</td>'; print '</tr>'; }
  print '</tbody></table></div>';
 }

@@ -11,7 +11,7 @@ if(($_SERVER['REQUEST_METHOD']??'')==='POST') {
 }
 moHeader($langs->trans('OrdersTitle')); if($notice) print '<p role="alert">'.moLabel($notice).'</p>';
 print '<section data-maxorders="inbox"><h2>'.moLabel('OrdersInbox').'</h2><ul>';
-foreach($packets->packets($user) as $p) print '<li><a href="'.dol_buildpath('/maxorders/packet.php',1).'?id='.(int)$p->rowid.'">'.moEsc($p->match_ref).'</a> — '.moEsc($p->status).'</li>';
+foreach($packets->packets($user) as $p) print '<li><a href="'.dol_buildpath('/maxorders/packet.php',1).'?id='.(int)$p->rowid.'">'.moEsc($p->match_ref).'</a> — '.moValue($p->status).'</li>';
 print '</ul></section>';
 if(MaxOrdersPacket::can($user,'intake')) {
  print '<section data-maxorders="intake"><h2>'.moLabel('OrdersIntake').'</h2><p>'.moLabel('OrdersMetadataOnly').'</p>';

@@ -78,7 +78,15 @@ class MaxOrdersPacket {
    $existing=$this->rows('SELECT * FROM '.$this->table('revision').' WHERE '.$scope.' AND revision_no='.$revision);
    if($existing) {
     $r=$existing[0]; $collision=$r->content_hash!==$hash;
-    if($collision) $this->conflict($id,$r->rowid,'document_content',$r->content_hash,$hash,'revision_collision',$actor);
+    if($collision) {
+     $previous=[];
+     foreach($this->rows('SELECT field_name,field_value FROM '.$this->table('fact').' WHERE entity='.$this->entity.' AND fk_revision='.(int)$r->rowid) as $fact) $previous[$fact->field_name]=$fact->field_value;
+     foreach(array_unique(array_merge(array_keys($previous),array_keys($facts))) as $field) {
+      $old=array_key_exists($field,$previous)?$previous[$field]:'[missing]';
+      $new=array_key_exists($field,$facts)?$facts[$field]:'[missing]';
+      if($old!==$new) $this->conflict($id,$r->rowid,$field,$old,$new,'revision_collision',$actor);
+     }
+    }
     $this->db->commit(); return ['packet'=>$id,'revision'=>(int)$r->rowid,'status'=>$collision?'collision':'duplicate'];
    }
    $latest=$this->rows('SELECT MAX(revision_no) AS n FROM '.$this->table('revision').' WHERE '.$scope)[0]->n;

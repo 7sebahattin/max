@@ -61,8 +61,8 @@ $old=$ingest('PO','PO-1',1,['quantity'=>'10','packaging'=>'OLD']); ok($old['stat
 $d=$service->detail($user,$id); $n=count($d['revision']); $audit=count($d['audit']);
 $replay=$ingest('PO','PO-1',2,['packaging'=>'CASE','sku'=>'DEMO','quantity'=>'100.000']);
 ok($replay['status']==='duplicate' && count($service->detail($user,$id)['revision'])===$n && count($service->detail($user,$id)['audit'])===$audit,'canonical retry idempotent');
-$collision=$ingest('PO','PO-1',2,['quantity'=>'999']); ok($collision['status']==='collision','same version collision preserved');
-$collision=$ingest('PO','PO-1',2,['quantity'=>'999']);
+$collision=$ingest('PO','PO-1',2,['quantity'=>'999','sku'=>'DEMO','packaging'=>'CASE']); ok($collision['status']==='collision','same version collision preserved');
+$collision=$ingest('PO','PO-1',2,['quantity'=>'999','sku'=>'DEMO','packaging'=>'CASE']);
 ok(count($service->detail($user,$id)['conflict'])===1,'collision replay deduplicated');
 $service->lockField($actors['reviewer'],$id,'quantity','100');
 $ingest('PO','PO-1',3,['quantity'=>'120','sku'=>'','packaging'=>'']);
