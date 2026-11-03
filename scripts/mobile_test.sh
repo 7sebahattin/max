@@ -4,6 +4,16 @@ cd "$(dirname "$0")/.."
 export DOCKER_HOST=unix:///var/run/docker.sock
 unset DOCKER_CONTEXT DOCKER_TLS DOCKER_TLS_VERIFY DOCKER_CERT_PATH
 test -n "$COMPOSE_PROJECT_NAME"
+python3 - "$COMPOSE_PROJECT_NAME" <<'PYGUARD'
+import re, subprocess, sys
+project=sys.argv[1]
+if not re.fullmatch('max-mobile-[a-z0-9][a-z0-9_-]*',project):
+    raise SystemExit('Refusing project outside the disposable mobile prefix')
+for args in (['docker','ps','-aq'],['docker','volume','ls','-q'],['docker','network','ls','-q']):
+    result=subprocess.run(args+['--filter','label=com.docker.compose.project='+project],check=True,capture_output=True,text=True)
+    if result.stdout.strip():
+        raise SystemExit('Refusing existing project resources')
+PYGUARD
 trap 'docker compose down --volumes --remove-orphans' EXIT
 P2_BROWSER=1 bash scripts/p2_install.sh
 docker compose up -d --wait --wait-timeout 180

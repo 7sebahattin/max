@@ -38,6 +38,8 @@ jobs:
           python -m compileall -q tests/mobile
           python -m unittest discover -s tests/maxcore -p test_browser_assertions.py -v
           bash -n scripts/mobile_test.sh
+      - name: Refuse adoption of existing Docker projects
+        run: python tests/mobile/safety.py
       - name: Disposable credentials and pinned browser
         run: |
           python - <<'PY'
