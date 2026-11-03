@@ -18,7 +18,7 @@ docker compose exec -T web php /checks/runtime.php
 curl --fail http://127.0.0.1:8080/install/check.php
 ```
 
-`MAX_CA_BUNDLE` selects the trusted CA bundle mounted as a BuildKit secret for HTTPS package downloads. In a managed proxy environment keep injected proxy settings, use its trusted bundle, and follow its Docker CA guidance. Never disable TLS checks. Compose clears runtime proxy variables because the internal sandbox must not reach external providers. Build network access is separate from the runtime network.
+Export `MAX_CA_BUNDLE` before running prepare.py to select a trusted CA bundle (default `/etc/ssl/certs/ca-certificates.crt`). The script stages this public trust material under ignored `.local/build-ca.pem` for a BuildKit secret mount, avoiding Compose/Bake external-filesystem restrictions. It is never copied into image layers. In a managed proxy environment keep injected proxy settings, use its trusted bundle, and follow its Docker CA guidance. Never disable TLS checks. Compose clears runtime proxy variables because the internal sandbox must not reach external providers. Build network access is separate from the runtime network.
 
 The verified archive is extracted under ignored `.local/upstream`; it is never committed. Do not edit that tree. To verify a fresh source tree, stop the stack, remove only `.local/upstream` and rerun prepare. A checksum match covers the downloaded archive, not subsequent manual edits. The app mounts upstream read-only, overlays isolated writable configuration and document directories, and mounts MAX module source read-only under `htdocs/custom`. There are no executable modules yet.
 

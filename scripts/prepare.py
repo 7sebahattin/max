@@ -13,6 +13,10 @@ root = Path(__file__).resolve().parents[1]
 lock = json.loads((root / "upstream.lock.json").read_text())
 local = root / ".local"
 local.mkdir(exist_ok=True)
+# CA certificates are public trust material; stage inside the build workspace
+# for Compose/Bake filesystem restrictions without adding them to the image.
+ca_bundle = Path(os.environ.get("MAX_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt"))
+shutil.copyfile(ca_bundle, local / "build-ca.pem")
 archive = local / "dolibarr.tar.gz"
 if not archive.exists():
     subprocess.run(["curl", "--fail", "--location", "--retry", "2", lock["archive_url"], "--output", str(archive)], check=True)

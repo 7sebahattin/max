@@ -63,4 +63,4 @@ volumes:
   database:
 secrets:
   proxy_ca:
-    file: ${MAX_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}
+    file: ./.local/build-ca.pem
