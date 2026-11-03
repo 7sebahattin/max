@@ -3,6 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export DOCKER_HOST=unix:///var/run/docker.sock
 unset DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+export COMPOSE_FILE=compose.yaml
 case "${COMPOSE_PROJECT_NAME:-}" in max-orders-*) ;; *) echo 'Require unique max-orders- project' >&2; exit 2;; esac
 for kind in container volume network; do
  case "$kind" in container) found="$(docker ps -aq --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME")";;

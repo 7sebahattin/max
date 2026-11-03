@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS llx_maxorders_conflict (
  rowid integer AUTO_INCREMENT PRIMARY KEY, entity integer NOT NULL, fk_packet integer NOT NULL, fk_revision integer NOT NULL,
  field_name varchar(32) NOT NULL, old_value varchar(255) NOT NULL, new_value varchar(255) NOT NULL,
  reason varchar(32) NOT NULL, status varchar(16) NOT NULL, decision varchar(32) NULL,
+ fk_user_author integer NOT NULL,
  fk_user_resolver integer NULL, date_resolved datetime NULL,
  UNIQUE KEY uk_maxorders_conflict (entity,fk_packet,fk_revision,field_name,reason)
 ) ENGINE=innodb

@@ -1,7 +1,5 @@
 name: MAX Orders document packets
 on:
-  push:
-    branches: [feat/maxorders-document-packets]
   pull_request:
     paths: ['modules/maxorders/**', 'tests/orders/**', 'scripts/orders_*', 'docs/MAX_ORDERS_IMPLEMENTATION.md', '.github/workflows/maxorders.yml']
 permissions:

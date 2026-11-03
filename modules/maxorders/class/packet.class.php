@@ -61,8 +61,9 @@ class MaxOrdersPacket {
  private function audit($id,$actor,$event,$revision=0,$field='') {
   $this->q('INSERT INTO '.$this->table('audit').' (entity,fk_packet,fk_revision,event,field_name,fk_user_author,datec) VALUES ('.$this->entity.','.(int)$id.','.(int)$revision.','.$this->s($event).','.$this->s($field).','.(int)$actor->id.','.$this->s($this->db->idate(dol_now())).')');
  }
- private function conflict($id,$revision,$field,$old,$new,$reason) {
-  $this->q('INSERT INTO '.$this->table('conflict').' (entity,fk_packet,fk_revision,field_name,old_value,new_value,reason,status) VALUES ('.$this->entity.','.(int)$id.','.(int)$revision.','.$this->s($field).','.$this->s($old).','.$this->s($new).','.$this->s($reason).",'open') ON DUPLICATE KEY UPDATE rowid=rowid");
+ private function conflict($id,$revision,$field,$old,$new,$reason,$actor) {
+  $result=$this->q('INSERT INTO '.$this->table('conflict').' (entity,fk_packet,fk_revision,field_name,old_value,new_value,reason,fk_user_author,status) VALUES ('.$this->entity.','.(int)$id.','.(int)$revision.','.$this->s($field).','.$this->s($old).','.$this->s($new).','.$this->s($reason).','.(int)$actor->id.",'open') ON DUPLICATE KEY UPDATE rowid=rowid");
+  if($this->db->affected_rows($result)>0) $this->audit($id,$actor,'conflict_open',$revision,$field);
  }
  public function ingest($actor,$customer,$reference,$kind,$document,$revision,$json) {
   $this->guard($actor,'intake'); $this->customer($customer);
@@ -77,7 +78,7 @@ class MaxOrdersPacket {
    $existing=$this->rows('SELECT * FROM '.$this->table('revision').' WHERE '.$scope.' AND revision_no='.$revision);
    if($existing) {
     $r=$existing[0]; $collision=$r->content_hash!==$hash;
-    if($collision) $this->conflict($id,$r->rowid,'document_content',$r->content_hash,$hash,'revision_collision');
+    if($collision) $this->conflict($id,$r->rowid,'document_content',$r->content_hash,$hash,'revision_collision',$actor);
     $this->db->commit(); return ['packet'=>$id,'revision'=>(int)$r->rowid,'status'=>$collision?'collision':'duplicate'];
    }
    $latest=$this->rows('SELECT MAX(revision_no) AS n FROM '.$this->table('revision').' WHERE '.$scope)[0]->n;
@@ -89,7 +90,7 @@ class MaxOrdersPacket {
     if($status!=='received' || $value==='') continue;
     $this->q('INSERT INTO '.$this->table('current').' (entity,fk_packet,kind,doc_key,field_name,field_value,revision_no,fk_revision) VALUES ('.$this->entity.','.$id.','.$this->s($kind).','.$this->s($doc).','.$this->s($field).','.$this->s($value).','.$revision.','.$rid.') ON DUPLICATE KEY UPDATE field_value=VALUES(field_value),revision_no=VALUES(revision_no),fk_revision=VALUES(fk_revision)');
     $locks=$this->rows('SELECT * FROM '.$this->table('lock').' WHERE '.$this->where($id).' AND field_name='.$this->s($field).' AND is_locked=1');
-    if($locks && $locks[0]->field_value!==$value) $this->conflict($id,$rid,$field,$locks[0]->field_value,$value,'manual_lock');
+    if($locks && $locks[0]->field_value!==$value) $this->conflict($id,$rid,$field,$locks[0]->field_value,$value,'manual_lock',$actor);
    }
    $this->audit($id,$actor,'intake',$rid); $this->db->commit(); return ['packet'=>$id,'revision'=>$rid,'status'=>$status];
   } catch(Throwable $e) { $this->db->rollback(); throw $e; }
