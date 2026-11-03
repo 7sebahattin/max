@@ -1,0 +1,32 @@
+name: Repository policy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required project documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in README.md AGENTS.md .gitignore .env.example docs/PRODUCT_SCOPE.md docs/ARCHITECTURE.md docs/ROADMAP.md docs/BRANDING.md docs/STAGING_CHECKLIST.md docs/SECURITY.md docs/LEGACY_FUNCTIONAL_MATRIX.md docs/LICENSE_REVIEW.md; do
+            test -s "$file" || { echo "::error::Missing $file"; exit 1; }
+          done
+      - name: Verify no populated secrets are committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)(\.env|local\.php|id_rsa|credentials\.json)$'; then
+            echo "::error::A forbidden secret-like filename is tracked."
+            exit 1
+          fi
+          echo "Basic repository policy checks passed."
