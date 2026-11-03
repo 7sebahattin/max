@@ -38,6 +38,17 @@ if($command==='setup') {
         $state['boxes'][$box['alias']]=$mail->createAccount($user,['label'=>'Sandbox '.$box['alias'],'host'=>'fakeimap','port'=>1143,'transport'=>'synthetic','username'=>$box['login'],'password'=>$box['secret'],'folder'=>'INBOX']);
     }
     $first=$seed['mailboxes'][0];
+    $encrypted=rowsM('SELECT secret FROM '.MAIN_DB_PREFIX.'maxmail_account WHERE rowid='.$state['boxes']['alpha'])[0]->secret;
+    ensureM(str_starts_with($encrypted,'dolcrypt:') && $encrypted!==$first['secret'] && dolDecrypt($encrypted)===$first['secret'],'native credential encrypted roundtrip');
+    $savedKey=$conf->file->instance_unique_id; $savedAlternate=$conf->file->dolcrypt_key??null;
+    $conf->file->instance_unique_id=''; $conf->file->dolcrypt_key='';
+    deniedM(fn()=>$mail->createAccount($user,['label'=>'No key','host'=>'fakeimap','port'=>1143,'transport'=>'synthetic','username'=>'nokey@intake.invalid','password'=>$first['secret'],'folder'=>'INBOX']),409,'missing key blocks credential persistence');
+    $conf->file->instance_unique_id=$savedKey; $conf->file->dolcrypt_key=$savedAlternate;
+    $dolibarr_disable_dolcrypt_for_debug=1;
+    deniedM(fn()=>$mail->configure($user,$state['boxes']['alpha'],$first['secret'],null),409,'plaintext fallback blocks credential rotation');
+    unset($dolibarr_disable_dolcrypt_for_debug);
+    deniedM(fn()=>$mail->configure($user,$state['boxes']['alpha'],'dolcrypt:unsupported:synthetic:cipher',null),409,'already encoded input rejected');
+    ensureM(count(rowsM('SELECT rowid FROM '.MAIN_DB_PREFIX.'maxmail_account'))===2 && rowsM('SELECT secret FROM '.MAIN_DB_PREFIX.'maxmail_account WHERE rowid='.$state['boxes']['alpha'])[0]->secret===$encrypted,'blocked crypto writes preserve accounts');
     deniedM(fn()=>$mail->createAccount($user,['label'=>'Duplicate','host'=>'fakeimap','port'=>1143,'transport'=>'synthetic','username'=>$first['login'],'password'=>$first['secret'],'folder'=>'INBOX']),409,'duplicate account identity denied');
     $permissions=['denied'=>[],'operator'=>['view','poll'],'reader_alpha'=>['view'],'reader_beta'=>['view'],
         'download_alpha'=>['view','download'],'download_beta'=>['view','download'],'reviewer'=>['view','review','download'],

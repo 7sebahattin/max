@@ -82,6 +82,15 @@ class MaxMailIntake
         }
         return $out;
     }
+    private function encryptSecret(string $plain): string
+    {
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
+        $encrypted=dolEncrypt($plain);
+        // Native helper can silently return plaintext when key/OpenSSL/debug
+        // configuration is unavailable. Never persist that fallback.
+        if(!is_string($encrypted) || $encrypted===$plain || !str_starts_with($encrypted,'dolcrypt:') || dolDecrypt($encrypted)!==$plain) throw new RuntimeException('MailEncryptionBlocked',409);
+        return $encrypted;
+    }
     public function createAccount($actor,array $data): int
     {
         $this->globalGuard($actor,'admin');
@@ -93,11 +102,11 @@ class MaxMailIntake
             || !is_string($password) || strlen($password)<1 || strlen($password)>256 || preg_match('/[\x00-\x1f\x7f]/',$password)) throw new InvalidArgumentException('MailInvalid',400);
         if($transport==='synthetic' && (getDolGlobalInt('MAXMAIL_ALLOW_SYNTHETIC_IMAP')!==1 || $host!=='fakeimap' || $port!==1143)) throw new RuntimeException('MailSyntheticDisabled',409);
         $key=hash('sha256',json_encode([$host,$port,$transport,$username,$folder],JSON_UNESCAPED_UNICODE));
-        require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
+        $encrypted=$this->encryptSecret($password);
         $this->db->begin();
         try {
             if($this->rows('SELECT rowid FROM '.$this->t('account').' WHERE entity='.$this->entity.' AND identity_hash='.$this->s($key))) throw new RuntimeException('MailDuplicateAccount',409);
-            $this->q('INSERT INTO '.$this->t('account').' (entity,label,identity_hash,host,port,transport,username,secret,folder,fk_user,datec) VALUES ('.$this->entity.','.$this->s($label).','.$this->s($key).','.$this->s($host).','.$port.','.$this->s($transport).','.$this->s($username).','.$this->s(dolEncrypt($password)).','.$this->s($folder).','.(int)$actor->id.','.$this->date().')');
+            $this->q('INSERT INTO '.$this->t('account').' (entity,label,identity_hash,host,port,transport,username,secret,folder,fk_user,datec) VALUES ('.$this->entity.','.$this->s($label).','.$this->s($key).','.$this->s($host).','.$port.','.$this->s($transport).','.$this->s($username).','.$this->s($encrypted).','.$this->s($folder).','.(int)$actor->id.','.$this->date().')');
             $id=(int)$this->db->last_insert_id($this->t('account'));
             $this->event($actor,$id,0,'account_created'); $this->db->commit(); return $id;
         } catch(Throwable $e) { $this->db->rollback(); throw $e; }
@@ -122,12 +131,12 @@ class MaxMailIntake
         $this->account($actor,$account,'admin');
         if($newSecret!==null && (strlen($newSecret)<1 || strlen($newSecret)>256 || preg_match('/[\x00-\x1f\x7f]/',$newSecret))) throw new InvalidArgumentException('MailInvalid',400);
         if($newSecret===null && $active===null) throw new InvalidArgumentException('MailInvalid',400);
+        $encrypted=$newSecret!==null?$this->encryptSecret($newSecret):null;
         $this->lock($account); $this->db->begin();
         try {
             $this->fence();
             if($newSecret!==null) {
-                require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
-                $this->q('UPDATE '.$this->t('account').' SET secret='.$this->s(dolEncrypt($newSecret)).",connection_failures=0,retry_at=0,error_code='',state='pending' WHERE entity=".$this->entity.' AND rowid='.$account);
+                $this->q('UPDATE '.$this->t('account').' SET secret='.$this->s($encrypted).",connection_failures=0,retry_at=0,error_code='',state='pending' WHERE entity=".$this->entity.' AND rowid='.$account);
                 $this->event($actor,$account,0,'credential_rotated');
             }
             if($active!==null) {

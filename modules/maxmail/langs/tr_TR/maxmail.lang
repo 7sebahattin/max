@@ -121,3 +121,5 @@ MailEvent_poll_failed=Hesap denetimi başarısız
 MailEvent_identity_retired=Kaynak kullanımdan çıktı
 MailEvent_manual_retry_requested=Kullanıcı yeniden deneme istedi
 MailEvent_review_noted=Serbest bırakmadan inceleme kaydedildi
+MailEncryptionBlocked=Yerel parola şifrelemesi kullanılamıyor; kayıt BLOCKED
+MailReason_blocked_credentials=BLOCKED: Saklanan parola güvenle çözülemedi

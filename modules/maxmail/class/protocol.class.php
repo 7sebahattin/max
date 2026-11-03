@@ -22,9 +22,11 @@ class MaxMailProtocol
         if($plain && (getDolGlobalInt('MAXMAIL_ALLOW_SYNTHETIC_IMAP')!==1 || $account->host!=='fakeimap' || (int)$account->port!==1143)) throw new MaxMailProtocolFailure('blocked_plaintext');
         if(!$plain && !in_array($account->transport,['ssl','tls'],true)) throw new MaxMailProtocolFailure('blocked_transport');
         try {
+            $secret=dolDecrypt($account->secret);
+            if(!str_starts_with($account->secret,'dolcrypt:') || !is_string($secret) || $secret==='' || $secret===$account->secret) throw new MaxMailProtocolFailure('blocked_credentials');
             $manager=new \Webklex\PHPIMAP\ClientManager();
             $this->client=$manager->make(['host'=>$account->host,'port'=>(int)$account->port,'encryption'=>$plain?false:$account->transport,
-                'validate_cert'=>true,'timeout'=>5,'protocol'=>'imap','username'=>$account->username,'password'=>dolDecrypt($account->secret),'authentication'=>'login']);
+                'validate_cert'=>true,'timeout'=>5,'protocol'=>'imap','username'=>$account->username,'password'=>$secret,'authentication'=>'login']);
             $this->client->connect();
             $this->client->setTimeout(5);
             $this->connection=$this->client->getConnection();

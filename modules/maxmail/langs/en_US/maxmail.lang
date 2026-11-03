@@ -121,3 +121,5 @@ MailEvent_poll_failed=Mailbox poll failed
 MailEvent_identity_retired=Source retired
 MailEvent_manual_retry_requested=Human requested retry
 MailEvent_review_noted=Review recorded without release
+MailEncryptionBlocked=Native credential encryption unavailable; persistence BLOCKED
+MailReason_blocked_credentials=BLOCKED: Stored credential cannot be decrypted safely
