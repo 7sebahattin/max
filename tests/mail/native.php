@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollector.class.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectoraction.class.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectorfilter.class.php';
+set_exception_handler(function($e) { echo json_encode(['result'=>-100,'error_class'=>get_class($e),'source'=>basename($e->getFile()),'line'=>$e->getLine(),'events'=>-1,'sender_attribution'=>-1,'attachments'=>[]])."\n"; exit(3); });
 function good($ok, $label) { if (!$ok) throw new RuntimeException('FAIL '.$label); }
 good($dolibarr_main_db_host==='db' && $dolibarr_main_db_name==='max_demo' && DOL_VERSION==='24.0.1' && is_file(DOL_DATA_ROOT.'/install.lock'), 'disposable pinned install');
 $user->fetch('', 'maxadmin'); good($user->admin, 'native administrator');

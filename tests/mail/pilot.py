@@ -11,16 +11,17 @@ REPORT=Path('.local/mail-report.json')
 steps=[]
 
 def poll(alias, expected, failure=False):
-    run=subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','poll',alias],capture_output=True,text=True,check=True)
+    run=subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','poll',alias],capture_output=True,text=True,check=False)
     # Never echo native diagnostics/credentials if JSON parsing fails.
     try:
         result=json.loads(run.stdout.strip())
     except ValueError:
-        raise AssertionError('Native poll did not return safe JSON') from None
+        raise AssertionError(f'Native poll did not return safe JSON (exit {run.returncode})') from None
     steps.append(dict(account=alias, **result))
     REPORT.write_text(json.dumps(steps,indent=2))
     Path('.local/mail-protocol.json').write_text(json.dumps(state_read(STATE).get('commands',[]),indent=2))
-    assert result['events']==expected, f'Native event count mismatch: {result["events"]}, expected {expected}'
+    assert run.returncode==0, f'Native fixture failure: {result}'
+    assert result['events']==expected, f'Native event count mismatch: {result}, expected {expected}'
     assert (result['result']<0) if failure else (result['result']>0), 'Unexpected native polling status'
     assert result['sender_attribution']==expected, 'Sender attribution mismatch'
     return result
