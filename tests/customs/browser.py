@@ -45,7 +45,8 @@ def measure(page, width, screen):
 with sync_playwright() as p:
     browser=p.chromium.launch()
     manager_context=None
-    for role,account in accounts.items():
+    for role in ['denied','viewer','editor','matcher','source','reviewer','contact','analysis','manager','no-native']:
+        account=accounts[role]
         context=browser.new_context()
         context.route('**/*',lambda route:route.continue_() if route.request.url.startswith(BASE+'/') else route.abort())
         page=context.new_page(); page.goto(BASE+'/')
@@ -84,10 +85,12 @@ with sync_playwright() as p:
             denied(context.request.post(BASE+'/custom/maxcustoms/api.php',form={'token':'invalid','action':'edit','id':str(fixture['id']),'version':str(before['version']),'fields':'{"office":"FORBIDDEN-UPDATE"}'}))
             assert api(context)==before,'CSRF altered draft'
             denied(context.request.post(BASE+'/custom/maxcustoms/index.php',form={'token':'invalid','action':'create','ref':'CSRF-FORBIDDEN','office':'NO'}))
+            page.reload(); page.wait_for_load_state('networkidle')
             page.locator('section[data-maxcustoms=edit] [name=office]').fill('Browser synthetic office')
             page.locator('section[data-maxcustoms=edit] button').click(); page.wait_for_load_state('networkidle')
             assert api(context)['fields']['office']=='Browser synthetic office','Valid public edit failed'
         if role=='matcher':
+            page.reload(); page.wait_for_load_state('networkidle')
             section=page.locator('[data-maxcustoms=match]')
             section.locator('[name=customer]').fill(str(fixture['customer']))
             section.locator('[name=order]').fill(str(fixture['order']))
@@ -96,6 +99,7 @@ with sync_playwright() as p:
             section.locator('[name=confirm]').check(); section.locator('button').click(); page.wait_for_load_state('networkidle')
             assert len(api(context)['shipments'])==2,'Valid native link form failed'
         if role=='reviewer':
+            page.reload(); page.wait_for_load_state('networkidle')
             section=page.locator('[data-maxcustoms=status]')
             section.locator('[name=target]').select_option('reviewed')
             section.locator('[name=confirm]').check(); section.locator('button').click(); page.wait_for_load_state('networkidle')
@@ -114,6 +118,7 @@ with sync_playwright() as p:
             current=api(context)
             # Browser evidence is read-only after review; no implicit correction.
             if current['status']=='draft':
+                page.reload(); page.wait_for_load_state('networkidle')
                 page.locator('[name=evidence]').set_input_files({'name':'web.txt','mimeType':'text/plain','buffer':b'opaque synthetic evidence'})
                 page.locator('form[enctype] button').click(); page.wait_for_load_state('networkidle')
         if role=='manager':
