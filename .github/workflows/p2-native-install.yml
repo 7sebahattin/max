@@ -48,6 +48,7 @@ jobs:
             .local/p2-browser.json
           if-no-files-found: ignore
           retention-days: 7
+          include-hidden-files: true # explicit allowlist above; never upload .local wholesale
       - name: Stop isolated containers
         if: always()
         run: docker compose down
