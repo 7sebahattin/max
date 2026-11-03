@@ -20,3 +20,8 @@
  .maxmobile-page div.pagination ul li{position:static;float:none;min-width:0;max-width:100%}
  .maxmobile-page li.paginationafterarrows{display:flex;flex-wrap:wrap;gap:.25rem}
 }
+@media(max-width:768px){
+ .maxmobile-page .maxmobile-table-scroll button{min-width:44px;min-height:44px}
+ .maxmobile-page .maxmobile-table-scroll input:not([type=hidden]):not([type=checkbox]){min-height:44px}
+ .maxmobile-page div.pagination a.btnTitle{display:inline-flex;box-sizing:border-box;align-items:center;justify-content:center;min-width:44px;min-height:44px}
+}

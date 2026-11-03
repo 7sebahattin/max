@@ -86,6 +86,7 @@ def run():
                             assert selection.first.is_checked(), 'Row selection failed'
                             selection.first.uncheck()
                         assert page.locator('.pagination, .liste_titre').count()>0, 'Native list navigation absent'
+                        assert page.evaluate('document.body.scrollWidth<=innerWidth && document.documentElement.scrollWidth<=innerWidth'), 'Keyboard controls caused page overflow'
             if phase=='before':
                 assert any(r['body']>r['width'] for r in measurements), 'Baseline defect not reproduced'
         page.set_viewport_size(dict(width=360,height=900))
@@ -105,12 +106,15 @@ def run():
             page.set_viewport_size(dict(width=360,height=900))
             for path in PAGES:
                 response=page.goto(BASE+'/'+path)
+                assert 'Fatal error' not in response.text() and 'Parse error' not in response.text(), 'Native role page failed'
                 if role=='reader':
                     assert page.locator('table.liste').count()>=1, 'Read rights lost'
                     assert page.locator('body.maxmobile-page').count()==1, 'Reader adapter missing'
                 else:
                     assert page.locator('table.liste').count()==0, 'Native permissions bypassed'
                     assert not page.locator('.maxmobile-table-scroll').count(), 'Denied page contains table'
+                    denial=page.locator('div.error').first.inner_text()
+                    assert 'Access denied' in denial or 'Erişim reddedildi' in denial, 'Native permission denial missing'
                 print('PASS native mobile role '+role+'/'+path+' HTTP '+str(response.status),flush=True)
             context.close()
         context,page=login(browser,owner)
