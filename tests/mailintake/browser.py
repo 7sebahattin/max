@@ -55,6 +55,8 @@ with sync_playwright() as p:
         forbidden(context.request.get(path('settings')),role+' admin')
     ca,pa=sessions['reader_alpha']; check(pa.goto(path('index','?account='+str(A))).status==200,'Scoped inbox allowed')
     check('Sandbox beta' not in pa.locator('.maxmail-shell').inner_text(),'Other mailbox not listed')
+    check(pa.locator('.maxmail-shell img[data-intake]').count()==0 and pa.evaluate('window.intakeLeak') is None,'Untrusted source header never executed')
+    check('<img data-intake=probe' in pa.locator('.maxmail-shell').inner_text(),'Header escaped as literal text')
     cd,pd=sessions['download_alpha']
     normal=T['normal']; url=path('download','?id='+str(normal['id'])+'&file='+str(normal['attachment']['id']))
     r=cd.request.get(url); check(r.status==200 and hashlib.sha256(r.body()).hexdigest()==normal['attachment']['hash'],'Authorized text attachment integrity')

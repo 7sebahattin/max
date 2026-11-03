@@ -5,7 +5,7 @@ require dirname(__DIR__,3).'/main.inc.php';
 require_once __DIR__.'/../class/intake.class.php';
 $langs->load('maxmail@maxmail');
 function mailEscape($value): string { return dol_escape_htmltag((string)$value); }
-function mailLabel(string $key): string { global $langs; return mailEscape($langs->trans($key)); }
+function mailLabel(string $key): string { global $langs; return $key==='MailReason_'?'':mailEscape($langs->trans($key)); }
 function mailError(Throwable $e): void
 {
     $status=in_array($e->getCode(),[400,403,404,409],true)?$e->getCode():500;

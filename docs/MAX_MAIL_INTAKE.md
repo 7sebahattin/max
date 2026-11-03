@@ -4,7 +4,7 @@ Issue #25. Independent from current verified main `059315f42a858510d507c1a78c9b8
 
 ## Native-first boundary
 
-Reuse Dolibarr's bundled Webklex client and its **public** `requestAndResponse()` / `readResponse()` protocol API. The latter validates the final tagged OK/NO; the native collector's array FETCH helper did not. MAX issues UID SEARCH UNDELETED and single-UID FETCH, checks UID/size/literal completeness and UIDVALIDITY again before accepting bytes. No native collector status `1` is treated as proof. MIME decoding reuses the public in-memory `Message::make` factory with explicit option 0/empty flags, preventing implicit flag writes. No native library patch/subclass replacement, new transport dependency, native agenda/order/stock/invoice action or SMTP sender exists.
+Reuse Dolibarr's bundled Webklex client and its **public** `requestAndResponse()` / `readResponse()` protocol API. The latter validates the final tagged OK/NO; the native collector's array FETCH helper did not. MAX issues UID SEARCH UNDELETED and single-UID FETCH, checks UID/size/literal completeness and UIDVALIDITY again before accepting bytes. No native collector status `1` is treated as proof. MIME decoding reuses the public raw-message `Message::make` factory with explicit option 0/empty flags, preventing implicit flag writes. This factory also requests a read-only sequence→UID map; it is not an intake identity authority. No native library patch/subclass replacement, new transport dependency, native agenda/order/stock/invoice action or SMTP sender exists.
 
 ## Implemented model and interface
 
@@ -45,3 +45,5 @@ Rollback disables the module and preserves account ledger/history/private files.
 ## CI investigation record
 
 `23d761ef3737c498c656c63a39e4b93bde5ce46e` [41719884358](https://github.com/7sebahattin/max/actions/runs/41719884358): native install/P2/roles/PDF fixture creation passed, but initial two-account Message-ID assertion failed. This is not a passing intake result. A sanitized state/command projection is added to diagnose native parsing/verification without publishing raw messages, credentials or attachments. Final exact-head evidence follows in the draft PR.
+
+`3a123e3c366d6f5495d486a9ccafd92858cf3e9d` [41720632833](https://github.com/7sebahattin/max/actions/runs/41720632833): all eight source tuples/raw originals were retained, but native MIME construction failed closed (`blocked_mime_unverified`), so secondary Message-ID metadata was absent. Source inspection found the public `Message::make` factory calls `getMessageNumber`, which requests read-only `FETCH 1:* (UID)`. The independent laboratory had omitted that command. Add only that bounded mapping subset, without changing upstream or bypassing verification; direct intake UID/body/final-status checks remain authoritative. Add a socket regression for that exact read-only command and reject broad sequence-body FETCH.

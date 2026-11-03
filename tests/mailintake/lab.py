@@ -1,7 +1,7 @@
 """Independent tiny IMAP laboratory, purpose-built for Issue #25.
 
 No imports or copied fixtures from PR #23. Subset: LOGIN, EXAMINE/SELECT,
-UID SEARCH UNDELETED, single-UID metadata/full-message FETCH and LOGOUT.
+UID SEARCH UNDELETED, single-UID metadata/full-message FETCH, read-only sequence UID mapping and LOGOUT.
 Only synthetic private seed bytes; trace contains command/status/alias/UID.
 """
 import argparse
@@ -102,6 +102,14 @@ class Session(socketserver.StreamRequestHandler):
             self.line('* SEARCH'+(' '+' '.join(ids) if ids else ''))
             done(); return
         if verb=='NOOP': done(); return
+        if verb=='FETCH':
+            # Bundled Message::make -> setUid -> getMessageNumber requests this
+            # read-only mapping. It does not fetch body bytes or alter flags.
+            if command.upper() not in ('FETCH 1:* (UID)','FETCH 1:* UID'):
+                done('BAD'); return
+            for n,item in enumerate(box['items'],1):
+                self.line(f'* {n} FETCH (UID {item["uid"]})')
+            done(); return
         if verb!='UID FETCH':
             done('BAD'); return
         candidates=[(n+1,item) for n,item in enumerate(box['items']) if item['uid']==trace['uid']]

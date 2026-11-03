@@ -106,6 +106,8 @@ update(remove_sources); poll()
 check(int(entry(101)['remote_deleted'])==1 and int(entry(102)['remote_deleted'])==1,'Deleted and expunged sources retained as tombstones')
 update(lambda d: next(x for x in box(d,'alpha')['items'] if x['uid']==101).update(deleted=False)); poll()
 check(int(entry(101)['remote_deleted'])==1,'Source reappearance does not resurrect retired identity')
+update(lambda d: box(d,'alpha')['items'].append(wire(406,'html',subject='<img data-intake=probe src=x onerror=window.intakeLeak=1>')))
+poll(); check(int(entry(406)['stored'])==1,'Untrusted header retained only as source metadata')
 # Authentication backoff and credential rotation preserve the ledger identity.
 update(lambda d: box(d,'alpha').update(reject_login=True))
 result=poll(); check(result['state']=='blocked' and result['code']=='connect_failed','Authentication failure has explicit provenance')

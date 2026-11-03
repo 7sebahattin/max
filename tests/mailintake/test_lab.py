@@ -27,6 +27,13 @@ class IndependentWire(unittest.TestCase):
                 self.assertEqual(result[0],'OK'); self.assertIn(b'<shared@intake.invalid>',result[1][0][1])
         self.data['mailboxes'][0]['epoch']=9001; save_seed(self.path,self.data)
         with self.client('alpha') as conn: self.assertEqual(conn.uid('SEARCH',None,'UNDELETED')[0],'OK')
+    def test_native_raw_factory_read_only_uid_mapping(self):
+        with self.client('alpha') as conn:
+            status,data=conn.fetch('1:*','(UID)')
+            self.assertEqual(status,'OK')
+            self.assertTrue(any(b'UID 101' in line for line in data))
+            with self.assertRaises(imaplib.IMAP4.error): conn.fetch('1:*','(BODY[])')
+
     def test_final_no_after_partial_data_is_a_real_failure(self):
         self.data['mailboxes'][0]['faults']['101']='partial_no'; save_seed(self.path,self.data)
         with self.client('alpha') as conn:

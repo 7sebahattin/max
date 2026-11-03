@@ -97,7 +97,8 @@ class MaxMailProtocol
         if(preg_match_all('/^Content-Type:\s*multipart\//im',$raw)>12) throw new MaxMailProtocolFailure('blocked_mime_complexity');
         [$header,$body]=explode("\r\n\r\n",$raw,2);
         try {
-            // Public in-memory factory; explicit option 0 and empty flags prevent flag writes.
+            // Public raw-message factory also requests a read-only sequence/UID map.
+            // Intake identity/bytes already verified independently; no flag writes.
             $message=\Webklex\PHPIMAP\Message::make($uid,0,$this->client,$header."\r\n\r\n",$body,[],0,\Webklex\PHPIMAP\IMAP::ST_UID);
             $attachments=$message->getAttachments()->all();
             if(count($attachments)>10) throw new MaxMailProtocolFailure('blocked_attachment_count');

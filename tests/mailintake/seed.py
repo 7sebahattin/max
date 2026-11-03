@@ -6,13 +6,13 @@ from email.policy import SMTP
 from pathlib import Path
 from lab import save_seed
 
-def wire(uid,identity='shared',payload=b'Synthetic text\n',filename='note.txt',pdf=False):
+def wire(uid,identity='shared',payload=b'Synthetic text\n',filename='note.txt',pdf=False,subject=None):
     email=EmailMessage(policy=SMTP)
     email['Date']='Tue, 03 Nov 2026 10:00:00 +0000'
     email['From']='Source <sender@source.invalid>'
     email['Reply-To']='untrusted@lookalike.invalid'
     email['To']='receiver@intake.invalid'
-    email['Subject']='Synthetic intake '+str(uid)
+    email['Subject']=subject if subject is not None else 'Synthetic intake '+str(uid)
     if identity is not None: email['Message-ID']=f'<{identity}@intake.invalid>'
     email.set_content('Synthetic body; no classification or authorization.')
     email.add_attachment(payload,maintype='application' if pdf else 'text',subtype='pdf' if pdf else 'plain',filename=filename)
