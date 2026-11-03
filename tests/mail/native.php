@@ -43,6 +43,7 @@ if ($mode==='setup') {
  good($p->create($user)>0,'create native no-rights user'); $p->clearrights();
  file_put_contents(DOL_DATA_ROOT.'/mail-accounts.json',json_encode(['login'=>$p->login,'password'=>$password])); chmod(DOL_DATA_ROOT.'/mail-accounts.json',0600);
  file_put_contents(DOL_DATA_ROOT.'/mail-before',snapshotMail());
+ file_put_contents(DOL_DATA_ROOT.'/mail-agenda-before',(string)scalarMail('SELECT COUNT(*) FROM '.MAIN_DB_PREFIX.'actioncomm'));
  echo "PASS native active collectors configured\n";
 } elseif ($mode==='poll') {
  $alias=$argv[2]??'';
@@ -55,8 +56,9 @@ if ($mode==='setup') {
   if(is_object($attachment)) $metadata[]=['name'=>$attachment->getName(),'size'=>strlen($attachment->getContent()),'sha256'=>hash('sha256',$attachment->getContent()),'mime'=>$attachment->getMimeType()];
  }
  $events=(int)scalarMail("SELECT COUNT(*) FROM ".MAIN_DB_PREFIX."actioncomm WHERE email_msgid LIKE '%@fixture.invalid%'");
+ $totalNew=(int)scalarMail('SELECT COUNT(*) FROM '.MAIN_DB_PREFIX.'actioncomm')-(int)file_get_contents(DOL_DATA_ROOT.'/mail-agenda-before');
  $attribution=(int)scalarMail("SELECT COUNT(*) FROM ".MAIN_DB_PREFIX."actioncomm WHERE email_msgid LIKE '%@fixture.invalid%' AND email_from LIKE '%buyer@partner.invalid%'");
- echo json_encode(['result'=>$result,'error_class'=>$errorClass,'error_location'=>$errorLocation,'events'=>$events,'sender_attribution'=>$attribution,'attachments'=>$metadata])."\n";
+ echo json_encode(['result'=>$result,'error_class'=>$errorClass,'error_location'=>$errorLocation,'events'=>$events,'total_new_events'=>$totalNew,'sender_attribution'=>$attribution,'attachments'=>$metadata])."\n";
 } elseif ($mode==='cron') {
  $c=new EmailCollector($db); ob_start(); try { $result=$c->doCollect(); } finally { ob_end_clean(); }
  good($result===0,'actual scheduled polling'); echo "PASS actual native cron polling\n";

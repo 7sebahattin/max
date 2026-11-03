@@ -30,6 +30,7 @@ def poll(alias, expected, failure=False, observed_fetch_gap=False, phase=None):
         print('BLOCKED native fetch failure was reported as success; strict contract will fail')
     else:
         assert (result['result']<0) if failure else (result['result']>0), 'Unexpected native polling status'
+    assert result['total_new_events']==expected, 'Unexpected agenda action outside fixture Message-ID scope'
     assert result['sender_attribution']==expected, 'Sender attribution mismatch'
     return result
 
