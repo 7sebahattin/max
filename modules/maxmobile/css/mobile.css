@@ -37,3 +37,7 @@
  /* Include the native right-pane ID: form-nested rows otherwise outrank the class-only rule. */
  body.maxmobile-page #id-right table.table-fiche-title tr.toptitle{height:auto;min-height:0}
 }
+@media(max-width:768px){
+ .maxmobile-page .placeholder,.maxmobile-page .select2-selection__placeholder{color:#515a66;opacity:1}
+ .maxmobile-page input::placeholder{color:#515a66;opacity:1}
+}

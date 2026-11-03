@@ -82,6 +82,9 @@ def run():
                         region.wait_for()
                     measure(page,width,path,phase)
                     if phase=='after':
+                        placeholder=page.locator('.placeholder:visible').first
+                        if placeholder.count():
+                            assert placeholder.evaluate('(n)=>getComputedStyle(n).color')=='rgb(81, 90, 102)', 'Filter placeholder contrast override missing'
                         assert region.get_attribute('role')=='region' and region.get_attribute('aria-label')
                         region.focus()
                         assert region.evaluate('(n)=>n===document.activeElement'), 'Table not keyboard focusable'
