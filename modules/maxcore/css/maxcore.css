@@ -1,0 +1,14 @@
+.maxcore-shell{box-sizing:border-box;max-width:64rem;padding:1rem;margin:auto;overflow-wrap:anywhere}.maxcore-logo{max-width:12rem;max-height:5rem}.maxcore-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.75rem;padding:0;list-style:none}.maxcore-slots li{padding:1rem;border:1px solid #ccc;border-radius:.4rem}.maxcore-shell label{display:block;margin:1rem 0 .4rem}.maxcore-shell input:not([type=hidden]),.maxcore-shell select{box-sizing:border-box;max-width:100%;width:100%;min-height:44px}.maxcore-shell button,.maxcore-shell .butAction{min-height:44px;display:inline-flex;align-items:center}
+
+/* MAX pages only: native theme collapse threshold depends on menu count.
+   Stack the existing navigation and content; do not clip or hide overflow. */
+.maxcore-shell{min-width:0}
+.maxcore-logo{max-width:min(12rem,100%)}
+.maxcore-slots{grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr))}
+@media(max-width:768px){
+ body.maxcore-page #id-container{display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:0}
+ body.maxcore-page #id-left,body.maxcore-page #id-right{display:block;box-sizing:border-box;position:static;float:none;width:100%;max-width:100%;min-width:0}
+ body.maxcore-page .side-nav{box-sizing:border-box;position:static;max-width:100%;min-width:0}
+ body.maxcore-page div.fiche{box-sizing:border-box;min-width:0;margin-left:9px;margin-right:10px}
+ .maxcore-shell{width:100%}
+}
