@@ -6,8 +6,18 @@
  */
 declare(strict_types=1);
 $config = '/opt/dolibarr/htdocs/conf/conf.php';
-if (!is_file($config) || filesize($config) > 0) {
-    fwrite(STDERR, "Refusing to replace an existing Dolibarr configuration. Reset disposable local data first.\n");
+// The official installer prerequisite page runs as a Compose healthcheck and
+// copies conf.php.example to an empty conf.php. Recognize ONLY that exact stock
+// example (or an empty placeholder); refuse to touch a real configured install.
+if (!is_file($config)) {
+    fwrite(STDERR, "Disposable Dolibarr configuration placeholder missing.\n");
+    exit(2);
+}
+$current = file_get_contents($config);
+$example = file_get_contents($config . '.example');
+if ($current === false || $example === false ||
+    !in_array($current, ['', "<?php\n", $example], true)) {
+    fwrite(STDERR, "Refusing to overwrite an existing custom Dolibarr configuration.\n");
     exit(2);
 }
 $dbName = getenv('MARIADB_DATABASE');
