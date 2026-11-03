@@ -1,0 +1,54 @@
+name: P2 native Dolibarr installation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/p2-native-install.yml'
+      - 'scripts/p2_install.sh'
+      - 'scripts/prepare.py'
+      - 'scripts/check.py'
+      - 'tests/p2_*'
+      - 'deployment/local/**'
+      - 'compose.yaml'
+      - 'upstream.lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  clean-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Generate disposable DB credentials
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import secrets
+          from pathlib import Path
+          p = Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PY
+      - name: Install browser test tooling
+        run: |
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Install real Dolibarr schema and demo administrator
+        shell: bash
+        run: P2_BROWSER=1 bash scripts/p2_install.sh
+      - name: Preserve synthetic browser evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p2-native-mobile-evidence
+          path: |
+            .local/p2-*.png
+            .local/p2-browser.json
+          if-no-files-found: ignore
+          retention-days: 7
+          include-hidden-files: true # explicit allowlist above; never upload .local wholesale
+      - name: Stop isolated containers
+        if: always()
+        run: docker compose down
