@@ -1,0 +1,46 @@
+name: MAX Core module
+on:
+  pull_request:
+    paths:
+      - 'modules/maxcore/**'
+      - 'tests/maxcore/**'
+      - 'scripts/maxcore_*'
+      - 'docs/MAX_CORE_IMPLEMENTATION.md'
+      - '.github/workflows/maxcore.yml'
+permissions:
+  contents: read
+jobs:
+  native-module:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Static module invariants
+        run: python3 tests/maxcore/static.py
+      - name: Prepare synthetic environment and browser
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          import secrets
+          p=Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Real native install, enable/disable, permissions and browser
+        run: bash scripts/maxcore_test.sh
+      - name: Synthetic screenshots only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: maxcore-mobile
+          path: |
+            .local/maxcore-*.png
+            .local/maxcore-mobile.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Cleanup
+        if: always()
+        run: docker compose down
