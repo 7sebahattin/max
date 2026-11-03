@@ -40,6 +40,8 @@ jobs:
           python -m unittest discover -s tests/maxcore -p test_browser_assertions.py -v
           python -m compileall -q tests/branding
           bash -n scripts/branding_test.sh
+      - name: Refuse adoption of existing Docker projects
+        run: python tests/branding/safety.py
       - name: Fresh credentials and browser
         run: |
           python - <<'PY'
