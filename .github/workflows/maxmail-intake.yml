@@ -1,0 +1,25 @@
+name: MAX Mail safe intake
+on:
+  pull_request:
+    paths: ['modules/maxmail/**', 'tests/mailintake/**', 'scripts/mailintake_*', 'docs/MAX_MAIL_INTAKE.md', '.github/workflows/maxmail-intake.yml']
+permissions:
+  contents: read
+jobs:
+  source-and-independent-wire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact head, policy and source audit
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check.py
+          python3 scripts/max_source_audit.py --json
+      - name: Original module syntax and independent protocol laboratory
+        run: |
+          find modules/maxmail -name '*.php' -print0 | xargs -0 -n1 php -l
+          python3 -m compileall -q tests/mailintake
+          python3 -m unittest discover -s tests/mailintake -v
