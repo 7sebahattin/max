@@ -36,6 +36,7 @@ docker compose exec -T -w /opt/dolibarr/htdocs/install web php step5.php '' '' e
 unset admin_pass
 docker compose exec -T web php /checks/p2_verify.php
 docker compose exec -T web php /checks/p2_business.php
+docker compose exec -T web php -d "sendmail_path=php /checks/p2_capture_mail.php" /checks/p2_mail_capture.php
 # The installer must no longer be available after its lock was created.
 curl --fail --silent --show-error http://127.0.0.1:8080/ > .local/p2-home.html
 if grep -Eiq 'Fatal error|Uncaught .*Error|Parse error' .local/p2-home.html; then

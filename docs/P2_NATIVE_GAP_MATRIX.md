@@ -22,13 +22,13 @@ The following are implemented in `tests/p2_business.php`; the final PR validatio
 | Reports | Native CSV fixture and genuine XLSX workbook | native/configure; role-scoped full dataset/report equivalence not certified |
 | Turkish | Native tr_TR Invoice translation resolves | native/configure; complete translation quality remains human review |
 | Mobile | Real browser login and 15 authenticated renders: partner/product/order/shipment/invoice lists at 360/390/768px; scroll widths and screenshots | native first; this is render smoke, NOT proof of task usability or accessibility |
-| Mail | Two inactive native collector configs persist; MAIN_DISABLE_ALL_MAILS rejects outgoing transport | native collector baseline; fake IMAP ingestion/SMTP delivery, attachment matching and concurrency remain BLOCKED/not exercised |
+| Mail | Two inactive native collector configs persist; MAIN_DISABLE_ALL_MAILS rejects outgoing transport; separate CLI native CMailFile test captures MIME through a local-only sendmail replacement | native collector baseline; fake IMAP ingestion/SMTP protocol delivery, attachment matching and concurrency remain BLOCKED/not exercised |
 | Carton consumption | Stock product persists at 50 despite goods shipment when no consumption rule is configured | extend only after approved packaging needs; advanced consumption deferred |
 
 ## Remaining acceptance limits (not PASS)
 
 - No validated/issued invoice, invoice settlement or regulated accounting submission: draft-only guard is intentional. Fictional bank reconciliation does not prove customer receivable settlement.
-- IMAP synchronization and SMTP capture protocol behavior are not demonstrated by disabled collector persistence. No collector polling/cron or provider credentials are enabled. Assess native collector attachment/matching behavior against a fake server before selecting a Mail Center replacement.
+- IMAP synchronization and SMTP protocol behavior are not demonstrated by disabled collector persistence. The tested outgoing capture path uses no network and does not certify SMTP negotiation. No collector polling/cron or provider credentials are enabled. Assess native collector attachment/matching behavior against a fake server before selecting a Mail Center replacement.
 - Mobile screen rendering cannot prove touch interaction, creation/upload tasks, overflow usability, screen-reader behavior or Turkish wording quality. Review generated screenshots and complete the phone task protocol in NATIVE_PILOT.md manually.
 - WSL2/Docker Desktop steps are documented in LOCAL_DEVELOPMENT.md; Windows execution is NOT RUN.
 - No packaging consumption engine is authorized. A configured product/BOM/kit pilot would be needed before concluding every native option is insufficient.
