@@ -4,6 +4,8 @@ if (PHP_SAPI !== 'cli') exit(2);
 chdir('/opt/dolibarr/htdocs'); require 'master.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollector.class.php';
+require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectoraction.class.php';
+require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollectorfilter.class.php';
 function good($ok, $label) { if (!$ok) throw new RuntimeException('FAIL '.$label); }
 good($dolibarr_main_db_host==='db' && $dolibarr_main_db_name==='max_demo' && DOL_VERSION==='24.0.1' && is_file(DOL_DATA_ROOT.'/install.lock'), 'disposable pinned install');
 $user->fetch('', 'maxadmin'); good($user->admin, 'native administrator');

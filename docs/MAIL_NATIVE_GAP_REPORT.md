@@ -48,3 +48,5 @@ Future outgoing flow: draft → human approval → durable outbox → sending �
 Local: three real socket IMAP unittest cases passed. Full native runtime local execution is **BLOCKED** by the managed runner's 8 GB/vfs Docker storage; it is executed on disposable GitHub Actions instead. CI results and exact tested commits are appended below, including failed attempts. Safe artifacts are numeric/hash reports and command-name transcripts only; no state/password/raw mail/native debug output or installer HTML. New evidence does not imply production certification.
 
 Rollback: disable/delete the disposable native collectors or discard the isolated project. No core/database migration or live deployment exists.
+
+CI attempt `a98dba1559e3fa9df096988403afc0dcf74f1140`: [41692920377](https://github.com/7sebahattin/max/actions/runs/41692920377) failed at active collector creation because the fixture omitted native EmailCollectorAction/Filter includes. The baseline native installer/P2 passed; project cleanup ran. Fixture includes corrected without core changes.
