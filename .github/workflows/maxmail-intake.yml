@@ -23,3 +23,54 @@ jobs:
           find modules/maxmail -name '*.php' -print0 | xargs -0 -n1 php -l
           python3 -m compileall -q tests/mailintake
           python3 -m unittest discover -s tests/mailintake -v
+  native-intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: max-mailintake-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Package original module and prepare isolated credentials
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          import secrets
+          Path('.local').mkdir(exist_ok=True)
+          with ZipFile('.local/maxmail-module.zip','w',ZIP_DEFLATED) as z:
+              for p in sorted(Path('modules/maxmail').rglob('*')):
+                  if p.is_file(): z.write(p,'maxmail/'+p.relative_to('modules/maxmail').as_posix())
+          env=Path('.env')
+          env.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          env.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: Real native installation, protocol, concurrent ledger and HTTP acceptance
+        run: bash scripts/mailintake_test.sh
+      - name: Allowlisted sanitized evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: maxmail-safe-intake
+          path: |
+            .local/maxmail-module.zip
+            .local/mailintake-report.json
+            .local/mailintake-protocol.json
+            .local/mailintake-layout.json
+            .local/mailintake-summary.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Fresh owned project fallback cleanup
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f .local/mailintake-owner && "$(cat .local/mailintake-owner)" == "$COMPOSE_PROJECT_NAME" ]]; then
+            export DOCKER_HOST=unix:///var/run/docker.sock COMPOSE_FILE=compose.yaml:tests/mailintake/compose.yaml
+            unset DOCKER_CONTEXT DOCKER_TLS DOCKER_TLS_VERIFY DOCKER_CERT_PATH
+            docker compose down --volumes --remove-orphans
+          fi
