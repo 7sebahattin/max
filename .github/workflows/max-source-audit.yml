@@ -1,0 +1,41 @@
+name: MAX source audit
+on:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: max-source-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-audit:
+    name: Source audit (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Portable adversarial and no-mutation tests
+        run: python -m unittest discover -s tests -p test_max_source_audit.py -v
+      - name: Compile owned Python files
+        run: python -m py_compile scripts/max_source_audit.py tests/test_max_source_audit.py
+      - name: Audit tracked Git-index snapshot
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import sys
+          result = subprocess.run([sys.executable, 'scripts/max_source_audit.py', '--json'], capture_output=True, text=True, timeout=180)
+          report = json.loads(result.stdout)
+          print(json.dumps(report, indent=2))
+          assert result.returncode == report['exit_code'], 'Exit-code contract mismatch'
+          reviewed_only = report['status'] == 'warn' and all(f['excepted'] for f in report['findings'])
+          assert report['status'] == 'pass' or reviewed_only, 'Source audit requires fixes or exact reviewed exceptions'
