@@ -30,6 +30,14 @@ def login(browser, account):
 def measure(page, width, path, phase):
     page.evaluate('document.fonts.ready')
     row = page.evaluate("""() => ({
+        header_overlaps:[...document.querySelectorAll('table.table-fiche-title tr.toptitle')].reduce((sum,tr)=>{
+            const rects=[...tr.children].map(n=>n.getBoundingClientRect()).filter(r=>r.width>0 && r.height>0);
+            for(let i=0;i<rects.length;i++) for(let j=i+1;j<rects.length;j++) {
+                const a=rects[i],b=rects[j];
+                if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1 && Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1) sum++;
+            }
+            return sum;
+        },0),
         viewport:innerWidth,body:document.body.scrollWidth,document:document.documentElement.scrollWidth,
         wide:[...document.querySelectorAll('div.fiche *')].filter(n=>!n.closest('.maxmobile-table-scroll') && n.getBoundingClientRect().right>innerWidth && getComputedStyle(n).display!=='none').slice(0,20).map(n=>({tag:n.tagName,classes:[...n.classList].slice(0,4),width:n.getBoundingClientRect().width,right:n.getBoundingClientRect().right,white_space:getComputedStyle(n).whiteSpace})),
         boxes:Object.fromEntries(['#id-left','#id-right','div.fiche','.div-table-responsive','table.titre','div.pagination'].map(s => [
@@ -46,6 +54,7 @@ def measure(page, width, path, phase):
     print('MOBILE_LAYOUT '+json.dumps(row),flush=True)
     if phase=='after':
         assert row['viewport']==width and row['body']<=width and row['document']<=width, 'Page overflow: '+json.dumps(row)
+        assert row['header_overlaps']==0, 'Native header controls overlap: '+json.dumps(row)
 
 def run():
     with sync_playwright() as p:
@@ -78,6 +87,9 @@ def run():
                         assert field.evaluate('(n)=>n===document.activeElement'), 'Filter cannot receive keyboard focus'
                         search=page.locator('button.button_search[name=button_search_x]').first
                         assert search.count()>0, 'Native filter actions missing'
+                        search.click(trial=True)
+                        toolbar=page.locator('div.pagination a.btnTitle:visible').first
+                        if toolbar.count(): toolbar.click(trial=True)
                         search.focus()
                         assert search.evaluate('(n)=>n===document.activeElement'), 'Search action cannot receive keyboard focus'
                         selection=region.locator('input[type=checkbox][name="toselect[]"]')
