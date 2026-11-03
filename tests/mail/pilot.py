@@ -1,4 +1,5 @@
 """Drive actual native polling; publish numeric/hash evidence only."""
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -27,10 +28,14 @@ def poll(alias, expected, failure=False):
 r=poll('a',2)
 assert r['attachments'] and r['attachments'][0]['name']=='unknown.pdf', 'Native attachment metadata missing'
 assert r['attachments'][0]['size']==len(b'%PDF-broken')
+assert r['attachments'][0]['sha256']==hashlib.sha256(b'%PDF-broken').hexdigest()
+assert r['attachments'][0]['mime'] in ['application/pdf','text/plain']
 r=poll('b',3)  # Shared Message-ID suppresses a DIFFERENT account message: proven gap.
 assert r['attachments'][0]['name']=='facts.txt'
+assert r['attachments'][0]['mime']=='text/plain' and r['attachments'][0]['sha256']==hashlib.sha256(b'Synthetic attachment\n').hexdigest()
 poll('a',3); poll('b',3)
 subprocess.run(['docker','compose','restart','fakeimap'],check=True,stdout=subprocess.DEVNULL)
+subprocess.run(['docker','compose','up','-d','--wait','--wait-timeout','30','fakeimap'],check=True,stdout=subprocess.DEVNULL)
 poll('a',3)
 s=state_read(STATE)
 s['accounts']['a'].update(epoch=3001,messages=[message(101,'new-epoch'),message(102,'shared')])
@@ -42,8 +47,14 @@ state_write(STATE,s)
 poll('a',4,failure=True)
 s=state_read(STATE); s['accounts']['a']['fail_auth']=False; state_write(STATE,s)
 poll('a',5); poll('a',5)
+s=state_read(STATE); s['accounts']['b']['fail_fetch']=True
+s['accounts']['b']['messages'].append(message(203,'body-retry'))
+state_write(STATE,s)
+poll('b',5,failure=True)
+s=state_read(STATE); s['accounts']['b']['fail_fetch']=False; state_write(STATE,s)
+poll('b',6); poll('b',6)
 subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','cron'],check=True)
-poll('a',5); poll('b',5)
+poll('a',6); poll('b',6)
 s=state_read(STATE)
 assert {c['account'] for c in s['commands']} >= {'a','b'}
 assert {'LOGIN','SELECT','SEARCH','FETCH'} <= {c['command'] for c in s['commands']}
