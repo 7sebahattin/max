@@ -24,6 +24,10 @@ class ActionsMaxcore {
   $this->resprints=isModEnabled('maxcore')?maxCoreBrandMarkup():'';
   return 0; // Append only; preserve native menus, user controls and notices.
  }
+ public function printMainArea($parameters,&$object,&$action,$hookmanager) {
+  $this->resprints=isModEnabled('maxcore')?'<div class="maxcore-content-brand">'.maxCoreBrandMarkup().'</div>':'';
+  return 0; // In-flow mobile brand bar; no replacement of native main content.
+ }
  public function getLoginPageExtraContent($parameters,&$object,&$action,$hookmanager) {
   $this->resprints=isModEnabled('maxcore')?maxCoreBrandMarkup(true):'';
   return 0; // Append product brand; never replace native login/legal logo/notices.

@@ -64,8 +64,8 @@ def run():
             response=page.goto(BASE+path+'?lang=tr_TR')
             assert response.status==200
             assert NAME in page.title(), 'Brand absent from browser title'
-            assert NAME in page.locator('.maxcore-global-brand').inner_text(), 'Brand absent from native header'
-            assert page.locator('.maxcore-global-brand img').get_attribute('src').startswith('/custom/maxcore/asset.php')
+            assert NAME in page.locator('#id-top .maxcore-global-brand').inner_text(), 'Brand absent from native header'
+            assert page.locator('#id-top .maxcore-global-brand img').get_attribute('src').startswith('/custom/maxcore/asset.php')
             assert 'kind=favicon' in page.locator('link[rel="shortcut icon"]').get_attribute('href')
             assert page.locator('a[href*="/maxcore/index.php"]').filter(has_text=NAME).count()>=1, 'Owned menu brand absent'
             assert OTHER not in page.locator('body').inner_text(), 'Other installation brand leaked'
@@ -75,6 +75,9 @@ def run():
             page.set_viewport_size(dict(width=width,height=900))
             for path in ['/custom/maxcore/index.php','/custom/maxcore/admin/setup.php','/custom/maxcore/admin/status.php']:
                 page.goto(BASE+path+'?lang=tr_TR'); page.evaluate('document.fonts.ready')
+                bar=page.locator('.maxcore-content-brand .maxcore-global-brand')
+                assert bar.is_visible() and NAME in bar.inner_text(), 'Visible mobile product brand missing'
+                assert bar.locator('img').evaluate('(n)=>n.complete && n.naturalWidth>0'), 'Mobile uploaded logo did not decode'
                 dims=page.evaluate('({body:document.body.scrollWidth,document:document.documentElement.scrollWidth,viewport:innerWidth})')
                 page.screenshot(path=f'.local/branding-{VARIANT}-{width}-{path.split("/")[-1]}.png',full_page=True)
                 assert dims['body']<=width and dims['document']<=width and dims['viewport']==width, 'Brand caused mobile page overflow'

@@ -5,3 +5,9 @@
 @media(max-width:768px){.login_block_other .maxcore-global-brand{max-width:5rem}.maxcore-global-brand img{width:24px;height:24px}}
 
 .maxcore-login-brand{flex-direction:column;max-width:100%}.maxcore-origin{font-size:.8rem}
+
+.maxcore-content-brand{display:none}
+@media(max-width:768px){
+ .maxcore-content-brand{display:block;margin:.5rem 0}
+ .maxcore-content-brand .maxcore-global-brand{max-width:100%}
+}
