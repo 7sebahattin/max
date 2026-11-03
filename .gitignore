@@ -1,0 +1,42 @@
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+config/local.php
+**/config/local.php
+**/secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Dependency and build products
+/vendor/
+/node_modules/
+/dist/
+/build/
+/coverage/
+/.phpunit.cache/
+/.phpunit.result.cache
+
+# Local/ephemeral runtime
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.sqlite
+*.sqlite3
+/tmp/
+/cache/
+/data/
+/storage/
+/uploads/
+*.sql.gz
+*.tar.gz
+*.zip
+
+# OS and editor
+*.swp
+*.swo
+*~
