@@ -1,7 +1,5 @@
 name: MAX Mail native pilot
 on:
-  push:
-    branches: [feat/maxmail-native-imap-pilot]
   pull_request:
     paths: ['tests/mail/**', 'scripts/mail_*', 'docs/MAIL_NATIVE_GAP_REPORT.md', '.github/workflows/max-mail-pilot.yml']
 permissions:

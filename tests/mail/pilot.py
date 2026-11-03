@@ -18,6 +18,7 @@ def poll(alias, expected, failure=False):
         raise AssertionError('Native poll did not return safe JSON') from None
     steps.append(dict(account=alias, **result))
     REPORT.write_text(json.dumps(steps,indent=2))
+    Path('.local/mail-protocol.json').write_text(json.dumps(state_read(STATE).get('commands',[]),indent=2))
     assert result['events']==expected, f'Native event count mismatch: {result["events"]}, expected {expected}'
     assert (result['result']<0) if failure else (result['result']>0), 'Unexpected native polling status'
     assert result['sender_attribution']==expected, 'Sender attribution mismatch'

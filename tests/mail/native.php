@@ -46,14 +46,14 @@ if ($mode==='setup') {
  $id=(int)scalarMail("SELECT rowid FROM ".MAIN_DB_PREFIX."emailcollector_emailcollector WHERE ref='Fixture ".$db->escape($alias)."'");
  $c=new EmailCollector($db); good($c->fetch($id)>0,'fetch collector');
  // Native diagnostics can contain raw mail. Never emit them, even on failure.
- ob_start(); try { $result=$c->doCollectOneCollector(0); } catch(Throwable $e) { $result=-99; } finally { ob_end_clean(); }
+ $errorClass='none'; ob_start(); try { $result=$c->doCollectOneCollector(0); } catch(Throwable $e) { $result=-99; $errorClass=get_class($e); } finally { ob_end_clean(); }
  $metadata=[];
  foreach(($GLOBALS['attachments']??[]) as $attachment) {
   if(is_object($attachment)) $metadata[]=['name'=>$attachment->getName(),'size'=>strlen($attachment->getContent()),'sha256'=>hash('sha256',$attachment->getContent()),'mime'=>$attachment->getMimeType()];
  }
  $events=(int)scalarMail("SELECT COUNT(*) FROM ".MAIN_DB_PREFIX."actioncomm WHERE email_msgid LIKE '%@fixture.invalid%'");
  $attribution=(int)scalarMail("SELECT COUNT(*) FROM ".MAIN_DB_PREFIX."actioncomm WHERE email_msgid LIKE '%@fixture.invalid%' AND email_from LIKE '%buyer@partner.invalid%'");
- echo json_encode(['result'=>$result,'events'=>$events,'sender_attribution'=>$attribution,'attachments'=>$metadata])."\n";
+ echo json_encode(['result'=>$result,'error_class'=>$errorClass,'events'=>$events,'sender_attribution'=>$attribution,'attachments'=>$metadata])."\n";
 } elseif ($mode==='cron') {
  $c=new EmailCollector($db); ob_start(); try { $result=$c->doCollect(); } finally { ob_end_clean(); }
  good($result===0,'actual scheduled polling'); echo "PASS actual native cron polling\n";
