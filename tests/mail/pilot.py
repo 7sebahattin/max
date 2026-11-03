@@ -10,7 +10,7 @@ STATE=Path('.local/mail-state/state.json')
 REPORT=Path('.local/mail-report.json')
 steps=[]
 
-def poll(alias, expected, failure=False, observed_fetch_gap=False):
+def poll(alias, expected, failure=False, observed_fetch_gap=False, phase=None):
     run=subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','poll',alias],capture_output=True,text=True,check=False)
     Path('.local/mail-protocol.json').write_text(json.dumps(state_read(STATE).get('commands',[]),indent=2))
     # Never echo native diagnostics/credentials if JSON parsing fails.
@@ -18,7 +18,7 @@ def poll(alias, expected, failure=False, observed_fetch_gap=False):
         result=json.loads(run.stdout.strip())
     except ValueError:
         raise AssertionError(f'Native poll did not return safe JSON (exit {run.returncode})') from None
-    steps.append(dict(account=alias, phase='injected_fetch_failure' if observed_fetch_gap else 'poll', **result))
+    steps.append(dict(account=alias, phase=phase or ('injected_fetch_failure' if observed_fetch_gap else 'poll'), **result))
     REPORT.write_text(json.dumps(steps,indent=2))
     Path('.local/mail-protocol.json').write_text(json.dumps(state_read(STATE).get('commands',[]),indent=2))
     assert run.returncode==0, f'Native fixture failure: {result}'
@@ -63,6 +63,9 @@ s=state_read(STATE); s['accounts']['b']['fail_fetch']=False; state_write(STATE,s
 poll('b',6); poll('b',6)
 subprocess.run(['docker','compose','exec','-T','web','php','/checks/mail/native.php','cron'],check=True)
 poll('a',6); poll('b',6)
+s=state_read(STATE); s['accounts']['b']['messages'].append(message(204,None,'Missing mandatory Message-ID'))
+state_write(STATE,s)
+poll('b',6,phase='missing_message_id'); poll('b',6,phase='missing_message_id_replay')
 s=state_read(STATE)
 assert {c['account'] for c in s['commands']} >= {'a','b'}
 assert {'LOGIN','SELECT','SEARCH','FETCH'} <= {c['command'] for c in s['commands']}

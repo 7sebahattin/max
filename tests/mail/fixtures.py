@@ -8,7 +8,8 @@ from fake_imap import state_write
 
 def message(uid, message_id, body='Synthetic document', malformed=False):
     msg = EmailMessage(policy=SMTP)
-    msg['Message-ID'] = f'<{message_id}@fixture.invalid>'
+    if message_id is not None:
+        msg['Message-ID'] = f'<{message_id}@fixture.invalid>'
     msg['Date'] = 'Tue, 03 Nov 2026 12:00:00 +0000'
     msg['From'] = 'Buyer <buyer@partner.invalid>'
     msg['Reply-To'] = 'untrusted@partner-lookalike.invalid'

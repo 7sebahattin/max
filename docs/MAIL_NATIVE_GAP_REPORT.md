@@ -47,7 +47,7 @@ Future outgoing flow: draft → human approval → durable outbox → sending �
 
 ## Evidence and acceptance
 
-Local: three real socket IMAP unittest cases passed. Full native runtime local execution is **BLOCKED** by the managed runner's 8 GB/vfs Docker storage; it is executed on disposable GitHub Actions instead. CI results and exact tested commits are appended below, including failed attempts. Safe artifacts are numeric/hash reports and command-name transcripts only; no state/password/raw mail/native debug output or installer HTML. New evidence does not imply production certification.
+Local: four real socket IMAP unittest cases plus the real Docker ownership/refusal test passed. Full native runtime local execution is **BLOCKED** by the managed runner's 8 GB/vfs Docker storage; it is executed on disposable GitHub Actions instead. CI results and exact tested commits are appended below, including failed attempts. Safe artifacts are numeric/hash reports and command-name transcripts only; no state/password/raw mail/native debug output or installer HTML. New evidence does not imply production certification.
 
 Rollback: disable/delete the disposable native collectors or discard the isolated project. No core/database migration or live deployment exists.
 
@@ -68,3 +68,5 @@ The native default bundled backend uses **message sequence numbers** for its obs
 Private incoming attachment quarantine/intake remains **BLOCKED / NOT IMPLEMENTED** on the tested generic recordevent path. Native ticket/project/recordjoinpiece attachment APIs exist but their separate business-object permission/download behavior is **NOT TESTED** here; do not generalize this finding to claim Dolibarr has no private object attachments. Evaluate those APIs against future account-level intake requirements before choosing additional storage.
 
 The four-source identity contract tests whether native agenda alone is an adequate incoming ledger, not whether a future MAX design should duplicate ERP actions. A future account-scoped ledger can preserve all four incoming identities while linking several sources to one idempotent native business action. No policy authorizing duplicate order/finance actions is implied. The CI keeps native wire characterization and strict native-only MAX acceptance as distinct steps so their outcomes are reviewable.
+
+A malformed-message fixture omits the RFC Message-ID header (separate from the malformed PDF attachment). Socket tests verify the fake server preserves the missing identity on the wire. Native polling/replay is exercised after the regular cases; no synthetic replacement identity or guessed document type is injected. This does not implement quarantine/review storage.

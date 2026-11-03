@@ -55,6 +55,15 @@ class Protocol(unittest.TestCase):
         with self.connect('a') as conn:
             self.assertEqual(conn.uid('FETCH', '101', '(RFC822.HEADER)')[0], 'OK')
 
+    def test_malformed_message_is_preserved_without_guessed_identity(self):
+        self.state['accounts']['b']['messages']=[message(204,None)]
+        state_write(self.path,self.state)
+        with self.connect('b') as conn:
+            status,data=conn.uid('FETCH','204','(RFC822.HEADER)')
+            self.assertEqual(status,'OK')
+            self.assertNotIn(b'Message-ID:',data[0][1])
+            self.assertIn(b'From: Buyer',data[0][1])
+
     def test_auth_failure_is_closed(self):
         self.state['accounts']['a']['fail_auth'] = True
         state_write(self.path, self.state)
