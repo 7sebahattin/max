@@ -46,3 +46,5 @@ Review the supported bootstrap/layout, right IDs, CSRF/auth guards, asset/name v
 Scope remains a functional prototype awaiting review, not a commercially certified release. No merge, public/staging deployment, paid add-on, historical migration or real notification is authorized by this work.
 
 CI also builds an installable prototype ZIP rooted at maxcore/, containing module source only (no installer/config/accounts). The artifact includes this ZIP alongside synthetic screenshots. Directory installation is what runtime CI exercises; Dolibarr's ZIP-upload UI is not separately automated. In pinned 24.0.1, accessforbidden() renders a native denial but does not itself set HTTP 403; MAX guards explicitly set 403 before invoking that native helper. No core helper is replaced.
+
+Native CSRF compatibility detail: invalid tokens in 24.0.1 clear POST fields and expose errorcode=InvalidToken rather than terminating every request. The MAX bootstrap honors that native result with an explicit 403 before mutation; it does not replace native token generation/comparison. Browser tests also assert the brand is unchanged after this rejected POST.

@@ -29,9 +29,11 @@ def run():
                 assert response.status==403,'Reader POST denied server-side'
             if role in ['editor','owner']:
                 page.goto(BASE+'/custom/maxcore/admin/setup.php')
+                before=page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()
                 reply=context.request.post(BASE+'/custom/maxcore/admin/setup.php',form={'token':'invalid','MAXCORE_DISPLAY_NAME':'Forbidden'})
-                assert 'refused' in reply.text().lower() or reply.status==403,'Native CSRF missing'
+                assert reply.status==403,'Native CSRF missing'
                 page.goto(BASE+'/custom/maxcore/admin/setup.php')
+                assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==before,'Invalid CSRF mutated brand'
                 page.locator('[name=MAXCORE_DISPLAY_NAME]').fill('MAX Demo '+role)
                 page.locator('button[type=submit]').click(); page.wait_for_load_state('networkidle')
                 assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()=='MAX Demo '+role,'Brand save failed'
