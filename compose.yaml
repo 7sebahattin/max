@@ -24,11 +24,11 @@ services:
       retries: 30
     security_opt: [no-new-privileges:true]
   web:
+    image: max-local-runtime
     build:
       context: .
       dockerfile: deployment/local/Dockerfile
       secrets: [proxy_ca]
-    ports: ["127.0.0.1:8080:80"]
     environment:
       MARIADB_DATABASE: ${MARIADB_DATABASE:-max_demo}
       MARIADB_USER: ${MARIADB_USER:-max_demo}
@@ -56,7 +56,25 @@ services:
       timeout: 5s
       retries: 20
     security_opt: [no-new-privileges:true]
+  gateway:
+    image: max-local-runtime
+    ports: ["127.0.0.1:8080:80"]
+    volumes:
+      - ./deployment/local/gateway.conf:/etc/apache2/sites-available/000-default.conf:ro
+    environment:
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+    networks: [frontend, sandbox]
+    depends_on:
+      web:
+        condition: service_healthy
+    security_opt: [no-new-privileges:true]
 networks:
+  frontend: {}
   sandbox:
     internal: true
 volumes:
