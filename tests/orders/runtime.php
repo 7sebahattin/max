@@ -53,6 +53,14 @@ foreach(['denied'=>0,'reader'=>61014001,'intake'=>61014002,'reviewer'=>61014003,
  $a->getrights('',1); $actors[$role]=$a; $accounts[$role]=['login'=>$a->login,'password'=>$pass];
 }
 $before=snapshotO(); $service=new MaxOrdersPacket($db);
+// Missing keys and literal user text must never share a sentinel identity.
+$presence=$service->ingest($actors['intake'],$c->id,'PRESENCE-ONLY','PO','D-PRESENCE',1,'{"quantity":"1"}');
+$collisionPresence=$service->ingest($actors['intake'],$c->id,'PRESENCE-ONLY','PO','D-PRESENCE',1,'{"quantity":"1","sku":"[missing]"}');
+$pd=$service->detail($user,$presence['packet']);
+ok($collisionPresence['status']==='collision' && count($pd['conflict'])===1 && $pd['conflict'][0]->old_value!==$pd['conflict'][0]->new_value,'literal text cannot hide missing-field collision');
+$emptyPresence=$service->ingest($actors['intake'],$c->id,'EMPTY-PRESENCE','PO','D-EMPTY',1,'{"quantity":"1"}');
+$service->ingest($actors['intake'],$c->id,'EMPTY-PRESENCE','PO','D-EMPTY',1,'{"quantity":"1","sku":""}');
+ok(count($service->detail($user,$emptyPresence['packet'])['conflict'])===1,'absent and explicit empty remain distinct revision evidence');
 $ingest=fn($kind,$doc,$rev,$facts)=>$service->ingest($actors['intake'],$c->id,'PACK-100',$kind,$doc,$rev,json_encode((object)$facts));
 $r=$ingest('LL','LL-1',1,['quantity'=>'98','sku'=>'DEMO']); $id=$r['packet'];
 ok($service->packet($user,$id)->status==='provisional','LL first provisional');

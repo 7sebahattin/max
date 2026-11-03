@@ -26,6 +26,7 @@ print '<label>'.moLabel('OrdersLocked').'<select name="locked"><option value="ye
 foreach($d['conflict'] as $c) {
  if($c->status!=='open') continue;
  print '<article><h2>'.moLabel('OrdersConflict').' #'.(int)$c->rowid.'</h2><p>'.moValue($c->field_name).': '.moEsc($c->old_value).' → '.moEsc($c->new_value).' ('.moLabel('OrdersSource').' '.(int)$c->fk_revision.')</p>';
+ if($c->reason==='revision_collision') print '<p>'.moLabel('OrdersCollisionPresenceHint').'</p>';
  moForm('resolve',$id); print '<input type="hidden" name="conflict" value="'.(int)$c->rowid.'"><label>'.moLabel('OrdersDecision').'<select name="decision">';
  foreach($c->reason==='revision_collision'?['acknowledge'=>'OrdersAcknowledge']:['keep_manual'=>'OrdersKeepManual','accept_source'=>'OrdersAcceptSource'] as $value=>$label) print '<option value="'.moEsc($value).'">'.moLabel($label).'</option>';
  print '</select></label>'; moButton('OrdersResolve'); print '</article>';

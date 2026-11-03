@@ -82,3 +82,4 @@ OrdersValue_native_link=Native order link
 OrdersValue_resolve_keep_manual=Review: keep manual
 OrdersValue_resolve_accept_source=Review: accept source
 OrdersValue_resolve_acknowledge=Review: acknowledge collision
+OrdersCollisionPresenceHint=∅ means the field was absent; quotation marks show the supplied source text.

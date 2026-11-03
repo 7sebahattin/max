@@ -82,8 +82,8 @@ class MaxOrdersPacket {
      $previous=[];
      foreach($this->rows('SELECT field_name,field_value FROM '.$this->table('fact').' WHERE entity='.$this->entity.' AND fk_revision='.(int)$r->rowid) as $fact) $previous[$fact->field_name]=$fact->field_value;
      foreach(array_unique(array_merge(array_keys($previous),array_keys($facts))) as $field) {
-      $old=array_key_exists($field,$previous)?$previous[$field]:'[missing]';
-      $new=array_key_exists($field,$facts)?$facts[$field]:'[missing]';
+      $old=array_key_exists($field,$previous)?json_encode($previous[$field],JSON_UNESCAPED_UNICODE):'∅';
+      $new=array_key_exists($field,$facts)?json_encode($facts[$field],JSON_UNESCAPED_UNICODE):'∅';
       if($old!==$new) $this->conflict($id,$r->rowid,$field,$old,$new,'revision_collision',$actor);
      }
     }

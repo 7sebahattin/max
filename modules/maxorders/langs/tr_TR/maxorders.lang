@@ -82,3 +82,4 @@ OrdersValue_native_link=Dolibarr sipariş bağlantısı
 OrdersValue_resolve_keep_manual=İnceleme: manueli koru
 OrdersValue_resolve_accept_source=İnceleme: kaynağı kabul et
 OrdersValue_resolve_acknowledge=İnceleme: çakışma görüldü
+OrdersCollisionPresenceHint=∅ alanın bulunmadığını; tırnaklar sağlanan kaynak metnini gösterir.
