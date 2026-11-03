@@ -1,0 +1,10 @@
+/* Only five opt-in native lists; never suppress whole-document overflow. */
+@media (max-width:768px) {
+ .maxmobile-page #id-container{display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:0}
+ .maxmobile-page #id-left,.maxmobile-page #id-right{display:block;box-sizing:border-box;position:static;float:none;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page .side-nav{position:static;box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page div.fiche{min-width:0;box-sizing:border-box;margin-left:9px;margin-right:10px}
+ .maxmobile-page .maxmobile-table-scroll{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+ .maxmobile-page .maxmobile-table-scroll:focus-visible{outline:3px solid #1769aa;outline-offset:2px}
+ .maxmobile-page .maxmobile-scroll-help{font-size:.9rem;white-space:normal;overflow-wrap:anywhere}
+}

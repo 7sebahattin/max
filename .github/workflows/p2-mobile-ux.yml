@@ -1,0 +1,72 @@
+name: Native mobile UX
+on:
+  pull_request:
+    paths:
+      - 'modules/maxmobile/**'
+      - 'tests/mobile/**'
+      - 'scripts/mobile_*'
+      - 'docs/P2_MOBILE_UX.md'
+      - '.github/workflows/p2-mobile-ux.yml'
+permissions:
+  contents: read
+jobs:
+  isolated:
+    name: Mobile regression (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [mobile, maxcore]
+    env:
+      COMPOSE_PROJECT_NAME: max-mobile-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.suite }}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Static and repository checks
+        run: |
+          python scripts/check.py
+          python scripts/max_source_audit.py
+          python -m compileall -q tests/mobile
+          python -m unittest discover -s tests/maxcore -p test_browser_assertions.py -v
+          bash -n scripts/mobile_test.sh
+      - name: Disposable credentials and pinned browser
+        run: |
+          python - <<'PY'
+          import secrets
+          from pathlib import Path
+          p=Path('.env')
+          p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          p.chmod(0o600)
+          PY
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: P2 with before/after mobile UI
+        if: matrix.suite == 'mobile'
+        run: bash scripts/mobile_test.sh
+      - name: Preserve original MAX Core nine checks and native security
+        if: matrix.suite == 'maxcore'
+        run: bash scripts/maxcore_test.sh
+      - name: Synthetic visual and numeric evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mobile-${{ matrix.suite }}-${{ github.run_id }}
+          path: |
+            .local/mobile-before-*.png
+            .local/mobile-after-*.png
+            .local/mobile-measurements.json
+            .local/maxcore-*.png
+            .local/maxcore-mobile.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Remove only this disposable project's resources
+        if: always()
+        run: docker compose down --volumes --remove-orphans
