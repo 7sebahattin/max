@@ -42,5 +42,8 @@ if grep -Eiq 'Fatal error|Uncaught .*Error|Parse error' .local/p2-home.html; the
   echo "Fatal error on application landing page" >&2
   exit 3
 fi
+if [[ "${P2_BROWSER:-0}" == 1 ]]; then
+  python3 tests/p2_browser.py
+fi
 echo "P2 installed sandbox PASS; no staging deployment, no real emails or HKS."
 echo "Only local demo admin password is stored in ignored .local/p2-admin-secret"

@@ -130,5 +130,28 @@ $export->open_file($path,$langs);
 $export->write_record(['ref'=>'ref','qty'=>'qty'], (object)['ref'=>'P2-SKU','qty'=>4], $langs, ['ref'=>'Text','qty'=>'Numeric']);
 $export->close_file();
 checkPilot(str_contains(file_get_contents($path), 'P2-SKU'), 'native CSV writer persists fixture');
+require_once DOL_DOCUMENT_ROOT.'/core/modules/export/export_excel2007.modules.php';
+$xlsx = new ExportExcel2007($db);
+$xlsxPath = DOL_DATA_ROOT.'/p2-native.xlsx';
+$xlsx->open_file($xlsxPath,$langs);
+$xlsx->write_record(['ref'=>'ref','qty'=>'qty'], (object)['ref'=>'P2-SKU','qty'=>4], $langs, ['ref'=>'Text','qty'=>'Numeric']);
+$xlsx->close_file();
+$zip = new ZipArchive();
+checkPilot($zip->open($xlsxPath) === true && $zip->locateName('xl/workbook.xml') !== false, 'native genuine XLSX export');
+$zip->close();
+require_once DOL_DOCUMENT_ROOT.'/emailcollector/class/emailcollector.class.php';
+$collectors = [];
+foreach (['P2-MAIL-A','P2-MAIL-B'] as $ref) {
+    $collector = new EmailCollector($db); $collector->ref = $ref; $collector->label = $ref;
+    $collector->host = 'mail.example.invalid'; $collector->port = 993; $collector->login = 'synthetic@example.invalid';
+    $collector->password = ''; $collector->status = 0;
+    $mailid = nativeResult($collector->create($user), $collector, 'create inactive native collector '.$ref);
+    $copy = new EmailCollector($db); nativeResult($copy->fetch($mailid), $copy, 'reload inactive collector');
+    checkPilot((int)$copy->status === 0, 'collector remains disabled; no IMAP connection');
+    $collectors[] = $mailid;
+}
+require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+$mail = new CMailFile('P2 synthetic message', 'recipient@example.invalid', 'sender@example.invalid', 'Synthetic only');
+checkPilot(!$mail->sendfile() && str_contains($mail->error, 'MAIN_DISABLE_ALL_MAILS'), 'native outgoing mail gate prevents transport');
 echo 'P2 OBJECT IDS '.json_encode(['customer'=>$cid,'supplier'=>$sid,'contact'=>$contactid,'reader'=>$readerid,'warehouses'=>$warehouses,'products'=>[$sku,$carton,$lot],'order'=>$oid,'shipment'=>$eid,'draft_invoice'=>$iid,'bank'=>$bid])."\n";
 echo "P2 native business pilot PASS; UI/mail transport and advanced currency remain separately assessed.\n";

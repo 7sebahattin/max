@@ -7,7 +7,7 @@ on:
       - 'scripts/p2_install.sh'
       - 'scripts/prepare.py'
       - 'scripts/check.py'
-      - 'tests/p2_*.php'
+      - 'tests/p2_*'
       - 'deployment/local/**'
       - 'compose.yaml'
       - 'upstream.lock.json'
@@ -31,9 +31,13 @@ jobs:
           p.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
           p.chmod(0o600)
           PY
+      - name: Install browser test tooling
+        run: |
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
       - name: Install real Dolibarr schema and demo administrator
         shell: bash
-        run: bash scripts/p2_install.sh
+        run: P2_BROWSER=1 bash scripts/p2_install.sh
       - name: Stop isolated containers
         if: always()
         run: docker compose down
