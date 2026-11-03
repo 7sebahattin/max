@@ -20,9 +20,12 @@ MAXAttribution=Dolibarr ERP/CRM temelinde geliştirilmiştir. Kaynak projenin te
 MAXDisplayName=Uygulama görünen adı
 MAXLogo=Uygulama logosu
 MAXFavicon=MAX sayfa simgesi
-MAXAssetsHelp=Paket içindeki bir görseli veya none seçeneğini seçin. Bu prototip dosya yükleme veya uzak görsel adresi desteklemez.
+MAXAssetsHelp=Paket görseli seçin veya PNG/JPEG yükleyin. Yeni logoyu favicon olarak kullanmak için logo seçin. Uzak adresler reddedilir.
 MAXSaved=Marka ayarları kaydedildi. Yasal kimlik değiştirilmedi.
 MAXInvalidBrand=HTML ve kontrol karakteri içermeyen 1–80 karakterlik bir ad girin.
 MAXInvalidAsset=Paket içindeki bir görseli seçin.
 MAXSaveFailed=Marka ayarları kaydedilemedi.
 MAXPrototypeNotice=Prototip modül. Bu sayfa entegrasyon açmaz, yerel kullanıcıları yönetmez veya yasal kimliği değiştirmez.
+
+MAXUploadLogo=Logo yükle (PNG/JPEG, en fazla 1 MiB, 2048×2048)
+MAXInvalidUpload=Geçersiz logo dosyası

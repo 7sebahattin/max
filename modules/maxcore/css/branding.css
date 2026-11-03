@@ -1,0 +1,5 @@
+.maxcore-global-brand{display:inline-flex;align-items:center;gap:.4rem;max-width:12rem;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;font-size:.85rem}
+.maxcore-global-brand img{object-fit:contain;flex:none}
+.maxcore-global-brand span{min-width:0}
+.maxcore-login-brand{display:flex;justify-content:center;margin:1rem auto}
+@media(max-width:768px){.login_block_other .maxcore-global-brand{max-width:5rem}.maxcore-global-brand img{width:24px;height:24px}}

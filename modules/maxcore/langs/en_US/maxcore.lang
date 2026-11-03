@@ -20,9 +20,12 @@ MAXAttribution=Built on Dolibarr ERP/CRM. Upstream copyright and license notices
 MAXDisplayName=Application display name
 MAXLogo=Application logo
 MAXFavicon=MAX page icon
-MAXAssetsHelp=Choose a bundled asset or none. Uploads and remote image URLs are not supported in this prototype.
+MAXAssetsHelp=Choose a bundled image or upload PNG/JPEG. Select logo as favicon to use the new upload. External URLs are rejected.
 MAXSaved=Brand settings saved. Legal identity unchanged.
 MAXInvalidBrand=Use a plain display name of 1–80 characters without HTML or control characters.
-MAXInvalidAsset=Select a bundled image.
+MAXInvalidAsset=Select a bundled or validated uploaded image.
 MAXSaveFailed=Brand settings could not be saved.
 MAXPrototypeNotice=Prototype module. This page does not enable integrations, manage native users or alter legal identity.
+
+MAXUploadLogo=Upload logo (PNG/JPEG, up to 1 MiB, 2048×2048)
+MAXInvalidUpload=Invalid logo file

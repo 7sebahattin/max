@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/branding.lib.php';
 function maxCoreCan($actor,$right) {
  if(!empty($actor->socid)) return false;
  return $actor->hasRight('maxcore','admin') || $actor->hasRight('maxcore',$right)
@@ -22,7 +23,10 @@ function maxCoreValidate($input) {
  foreach(array('MAXCORE_LOGO','MAXCORE_FAVICON') as $key) {
   if(!isset($input[$key]) || !is_string($input[$key])) throw new InvalidArgumentException('MAXInvalidAsset');
   $value=$input[$key];
-  if(!in_array($value,array('none','max.svg','max-icon.svg'),true)) throw new InvalidArgumentException('MAXInvalidAsset');
+  if(!in_array($value,array('none','max.svg','max-icon.svg'),true)) {
+   if(!maxCoreIsUploadedAsset($value)) throw new InvalidArgumentException('MAXInvalidAsset');
+   maxCoreAssetPath($value);
+  }
   $out[$key]=$value;
  }
  return $out;
@@ -41,9 +45,6 @@ function maxCoreSave($input,$actor) {
  $db->commit();
 }
 function maxCoreHeader($title) {
- global $conf;
- $s=maxCoreSettings();
- if(in_array($s['MAXCORE_FAVICON'],array('max.svg','max-icon.svg'),true))
-  $conf->global->MAIN_FAVICON_URL=dol_buildpath('/maxcore/img/'.$s['MAXCORE_FAVICON'],1);
- llxHeader('',$s['MAXCORE_DISPLAY_NAME'].' - '.$title,'','',0,0,array(),array('/maxcore/css/maxcore.css'),'','maxcore-page');
+ maxCoreApplyBrand();
+ llxHeader('',$title,'','',0,0,array(),array('/maxcore/css/maxcore.css'),'','maxcore-page');
 }
