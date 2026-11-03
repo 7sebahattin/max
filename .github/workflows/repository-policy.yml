@@ -2,7 +2,7 @@ name: Foundation checks
 on:
   pull_request:
   push:
-    branches: [main, chore/pr-01-bootstrap]
+    branches: [main]
 permissions:
   contents: read
 jobs:

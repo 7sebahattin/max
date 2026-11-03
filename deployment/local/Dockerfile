@@ -9,6 +9,6 @@ RUN --mount=type=secret,id=proxy_ca,required=true \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j2 mysqli mbstring gd curl calendar simplexml intl zip soap \
     && rm -rf /var/lib/apt/lists/*
-COPY deployment/local/apache.conf /etc/apache2/conf-enabled/max-local.conf
+COPY deployment/local/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY deployment/local/php.ini /usr/local/etc/php/conf.d/max-local.ini
 WORKDIR /opt/dolibarr/htdocs
