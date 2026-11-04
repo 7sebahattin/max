@@ -1,0 +1,43 @@
+/* Only five opt-in native lists; never suppress whole-document overflow. */
+@media (max-width:768px) {
+ .maxmobile-page #id-container{display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:0}
+ .maxmobile-page #id-left,.maxmobile-page #id-right{display:block;box-sizing:border-box;position:static;float:none;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page .side-nav{position:static;box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page div.fiche{min-width:0;box-sizing:border-box;margin-left:9px;margin-right:10px}
+ .maxmobile-page .maxmobile-table-scroll{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+ .maxmobile-page .maxmobile-table-scroll:focus-visible{outline:3px solid #1769aa;outline-offset:2px}
+ .maxmobile-page .maxmobile-scroll-help{font-size:.9rem;white-space:normal;overflow-wrap:anywhere}
+}
+@media(max-width:768px){
+ /* Native title/filter/pagination is a layout table, separate from the data table. */
+ .maxmobile-page table.table-fiche-title,
+ .maxmobile-page table.table-fiche-title>tbody{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+ .maxmobile-page table.table-fiche-title tr.toptitle{display:flex;flex-wrap:wrap;width:100%;min-width:0;gap:.5rem}
+ .maxmobile-page table.table-fiche-title tr.toptitle>td{display:block;box-sizing:border-box;flex:1 1 100%;width:100%;max-width:100%;min-width:0;text-align:left;white-space:normal}
+ .maxmobile-page table.table-fiche-title .titre{white-space:normal;overflow-wrap:anywhere}
+ .maxmobile-page div.pagination{position:static;float:none;box-sizing:border-box;width:100%;max-width:100%;height:auto;min-width:0}
+ .maxmobile-page div.pagination ul{display:flex;flex-wrap:wrap;box-sizing:border-box;width:100%;max-width:100%;padding:0;gap:.3rem}
+ .maxmobile-page div.pagination ul li{position:static;float:none;min-width:0;max-width:100%}
+ .maxmobile-page li.paginationafterarrows{display:flex;flex-wrap:wrap;gap:.25rem}
+}
+@media(max-width:768px){
+ .maxmobile-page .maxmobile-table-scroll button{min-width:44px;min-height:44px}
+ .maxmobile-page .maxmobile-table-scroll input:not([type=hidden]):not([type=checkbox]){min-height:44px}
+ .maxmobile-page div.pagination a.btnTitle{display:inline-flex;box-sizing:border-box;align-items:center;justify-content:center;min-width:44px;min-height:44px}
+}
+@media(max-width:768px){
+ /* Native 60px layout-row height must grow after wrapping; keep controls in flow. */
+ .maxmobile-page table.table-fiche-title tr.toptitle{height:auto;min-height:0}
+ .maxmobile-page table.table-fiche-title tr.toptitle>td{height:auto;position:static}
+ .maxmobile-page table.table-fiche-title tr.toptitle>td.col-picto{flex:0 0 34px;width:34px}
+ .maxmobile-page table.table-fiche-title tr.toptitle>td.col-title{flex:1 1 calc(100% - 50px);width:auto}
+ .maxmobile-page table.table-fiche-title .select2-container{max-width:100%}
+}
+@media(max-width:768px){
+ /* Include the native right-pane ID: form-nested rows otherwise outrank the class-only rule. */
+ body.maxmobile-page #id-right table.table-fiche-title tr.toptitle{height:auto;min-height:0}
+}
+@media(max-width:768px){
+ .maxmobile-page .placeholder,.maxmobile-page .select2-selection__placeholder{color:#515a66;opacity:1}
+ .maxmobile-page input::placeholder{color:#515a66;opacity:1}
+}
