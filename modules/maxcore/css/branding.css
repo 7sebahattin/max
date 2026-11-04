@@ -1,0 +1,13 @@
+.maxcore-global-brand{display:inline-flex;align-items:center;gap:.4rem;max-width:12rem;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;font-size:.85rem}
+.maxcore-global-brand img{object-fit:contain;flex:none}
+.maxcore-global-brand span{min-width:0}
+.maxcore-login-brand{display:flex;justify-content:center;margin:1rem auto}
+@media(max-width:768px){.login_block_other .maxcore-global-brand{max-width:5rem}.maxcore-global-brand img{width:24px;height:24px}}
+
+.maxcore-login-brand{flex-direction:column;max-width:100%}.maxcore-origin{font-size:.8rem}
+
+.maxcore-content-brand{display:none}
+@media(max-width:768px){
+ .maxcore-content-brand{display:block;margin:.5rem 0}
+ .maxcore-content-brand .maxcore-global-brand{max-width:100%}
+}
