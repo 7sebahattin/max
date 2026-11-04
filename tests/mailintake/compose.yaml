@@ -1,0 +1,23 @@
+services:
+  fakeimap:
+    image: python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337
+    command: [python, /opt/lab/lab.py, /state/seed.json, --port, '1143']
+    volumes:
+      - ./tests/mailintake:/opt/lab:ro
+      - ./.local/mailintake-state:/state
+    environment:
+      PYTHONDONTWRITEBYTECODE: '1'
+      HTTP_PROXY: ''
+      HTTPS_PROXY: ''
+      ALL_PROXY: ''
+      http_proxy: ''
+      https_proxy: ''
+      all_proxy: ''
+    networks: [sandbox]
+    read_only: true
+    healthcheck:
+      test: [CMD, python, -c, "import socket; c=socket.create_connection(('127.0.0.1',1143),2); assert c.recv(100).startswith(b'* OK'); c.close()"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    security_opt: [no-new-privileges:true]
