@@ -4,7 +4,7 @@ Issue [#20](https://github.com/7sebahattin/max/issues/20). Source base independe
 
 ## One installation, one database
 
-`scripts/coenabled_test.sh` creates exactly one uniquely labeled local Compose project using unchanged main Compose plus the merged fake IMAP overlay. The unchanged official P2 installer runs once and populates native partners, products, stock/lots, orders, partial shipments, unissued draft invoices and harmless bank records. Core, Mobile, Orders, Customs and Mail are installed together through native activation APIs. Existing Orders/Customs/Mail fixture helpers and browser suites are executed read-only, without installing another ERP or creating another database.
+`scripts/coenabled_test.sh` creates exactly one uniquely labeled local Compose project using unchanged main Compose plus the merged fake IMAP overlay. The unchanged official P2 installer runs once and populates native partners, products, stock/lots, orders, partial shipments, unissued draft invoices and harmless bank records, including an explicitly nonbank fictional IBAN set through the native Account API. Core, Mobile, Orders, Customs and Mail are installed together through native activation APIs. Existing Orders/Customs/Mail fixture helpers and browser suites are executed read-only, without installing another ERP or creating another database.
 
 All commercial fixtures finish before the immutable snapshot boundary. The original helper snapshot files are explicitly initialized **once** to that shared populated baseline, using the exact merged hash contracts; standalone empty-database Core verification is not misrepresented as appropriate for a populated ERP. No baseline is refreshed after UI/intake begins. A broader independent hash protects native legal/tax/render constants, bank/account/IBAN, stock/lots/movements, orders/lines, shipments/lines, invoice totals/lines, payment/finance, agenda and native collector records. Database hostname/version, installation fingerprint and Docker container/image IDs establish identity across the whole run.
 
@@ -40,6 +40,10 @@ python3 -m unittest discover -s tests/coenabled -v
 COMPOSE_PROJECT_NAME=max-coenabled-unique bash scripts/coenabled_test.sh
 ```
 
-Local full native execution is **BLOCKED** by this managed environment's 8 GB/vfs capacity; real isolated execution is performed in GitHub Actions, not substituted with mocks. Exact SHA/run links, failed assertions, root causes, per-surface counts and cleanup outcome are recorded in the draft PR as execution completes. Current status: IMPLEMENTED, CI PENDING; no cross-module PASS claim yet.
+Local full native execution is **BLOCKED** by this managed environment's 8 GB/vfs capacity; real isolated execution is performed in GitHub Actions, not substituted with mocks. Exact SHA/run links, failed assertions, root causes, per-surface counts and cleanup outcome are recorded in the draft PR as execution completes. Current status: IMPLEMENTED, CI PENDING; six local evidence/cleanup/real-Docker guard tests PASS; no cross-module PASS claim yet.
 
 Physical phones, real WSL2/Docker Desktop workstation, full accessibility audit, provider/TLS/OAuth, PDF extraction/unlocking/automatic release, HKS SOAP and commercial distribution remain manual/BLOCKED gates. This test-only task authorizes no staging/live deployment, validated invoice or merge. Rollback discards only the owned synthetic project; module/data rollback is outside this test-only PR.
+
+## Execution history
+
+Initial exact head `5ef348cbd8657050d00e46cd3575aed86b613c84` [41984618161](https://github.com/7sebahattin/max/actions/runs/41984618161) FAILED at the new bootstrap helper, after the unchanged native P2/commercial installation passed. Docker identities were captured; cleanup succeeded and no acceptance manifest was emitted. The first bounded log projection omitted a generic native exception, so argument-free exception type/file/line/stack diagnostics and partial NOT_RUN viewport evidence were added. This is not a cross-module PASS or yet a diagnosed application defect.

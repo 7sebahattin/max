@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import runpy
+import shutil
 import sys
 from playwright.sync_api import Browser
 
@@ -47,6 +48,8 @@ def run(lane):
         result['last_passes']=[line for line in output.getvalue().splitlines() if re.fullmatch(r'PASS [A-Za-z0-9 /_+.,:()=-]{1,180}',line)][-12:]
         Path('.local/coenabled-evidence').mkdir(exist_ok=True)
         Path('.local/coenabled-evidence/'+lane+'-observer.json').write_text(json.dumps(result,indent=2))
+        metric={'core':'maxcore-mobile.json','orders':'orders-mobile.json','customs':'customs-layout.json','mail':'mailintake-layout.json'}[lane]
+        if Path('.local/'+metric).is_file(): shutil.copyfile('.local/'+metric,'.local/coenabled-evidence/'+lane+'-layout-raw.json')
     print('PASS' if result['passed'] else 'FAIL',lane,'browser observer',flush=True)
     if not result['passed']: raise SystemExit(1)
 

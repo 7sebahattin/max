@@ -4,7 +4,12 @@ if(PHP_SAPI!=='cli') exit(2);
 chdir('/opt/dolibarr/htdocs'); require 'master.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 function needE($value,string $label): void { if(!$value) throw new RuntimeException('ASSERT '.$label); }
-set_exception_handler(function($e) { $m=preg_match('/^ASSERT [A-Za-z0-9 _-]{1,140}$/D',$e->getMessage())?$e->getMessage():'coenabled native failure'; fwrite(STDERR,$m.' '.basename($e->getFile()).':'.$e->getLine()."\n"); exit(1); });
+set_exception_handler(function($e) {
+    $data=['type'=>get_class($e),'code'=>$e->getCode(),'file'=>basename($e->getFile()),'line'=>$e->getLine(),'trace'=>[]];
+    if(preg_match('/^ASSERT [A-Za-z0-9 _-]{1,140}$/D',$e->getMessage())) $data['assertion']=$e->getMessage();
+    foreach($e->getTrace() as $frame) $data['trace'][]=['file'=>basename($frame['file']??''),'line'=>$frame['line']??0,'function'=>$frame['function']??''];
+    fwrite(STDERR,'COENABLED_NATIVE_ERROR '.json_encode($data)."\n"); exit(1);
+});
 function rowsE(string $sql): array { global $db; $q=$db->query($sql); needE((bool)$q,'read query'); $out=[]; while($r=$db->fetch_array($q)) $out[]=$r; return $out; }
 function snapshotE(array $tables,string $legalPosition='last'): string {
     $out=[];
@@ -51,6 +56,9 @@ if($mode==='bootstrap') {
     }
     file_put_contents($root.'/maxcore-accounts.json',json_encode($accounts)); chmod($root.'/maxcore-accounts.json',0600);
     foreach(['MAIN_INFO_SOCIETE_IDPROF1'=>'SYNTHETIC-TAX-COENABLED','MAIN_INFO_SOCIETE_ADDRESS'=>'Synthetic address only'] as $key=>$value) needE(dolibarr_set_const($db,$key,$value,'chaine',0,'',1)>0,'synthetic legal fixture');
+    require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+    $bank=new Account($db); needE($bank->fetch((int)rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'bank_account ORDER BY rowid LIMIT 1')[0]['rowid'])>0,'native synthetic bank fixture');
+    $bank->iban='TEST-IBAN-COENABLED'; needE($bank->update_bban($user)>0,'native synthetic nonbank IBAN fixture');
     require_once DOL_DOCUMENT_ROOT.'/custom/maxcore/lib/maxcore.lib.php';
     maxCoreSave(['MAXCORE_DISPLAY_NAME'=>'Coenabled Initial','MAXCORE_LOGO'=>'max.svg','MAXCORE_FAVICON'=>'logo'],$user);
     $image=imagecreatetruecolor(32,32); imagefill($image,0,0,imagecolorallocate($image,30,90,130)); imagejpeg($image,$root.'/coenabled-logo.jpg',85); imagedestroy($image); chmod($root.'/coenabled-logo.jpg',0600);
@@ -61,6 +69,7 @@ if($mode==='freeze') {
     activationE();
     foreach(['societe','product','product_stock','product_lot','commande','expedition','facture','bank_account','bank'] as $t) needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.$t))>0,'populated commercial fixture');
     needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'facture WHERE fk_statut<>0'))===0,'all invoices draft only');
+    needE(count(rowsE("SELECT rowid FROM ".MAIN_DB_PREFIX."bank_account WHERE iban_prefix='TEST-IBAN-COENABLED'"))===1,'populated fictional IBAN protected by baseline');
     // Every commercial fixture is now complete. Rebase original helper hashes ONCE
     // to this populated DB, before any acceptance/UI/intake action. No source edits.
     $contracts=[

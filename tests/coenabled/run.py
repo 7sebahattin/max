@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -13,10 +14,16 @@ def command(label,args):
     try:
         r=subprocess.run(args,capture_output=True,text=True,timeout=600)
         safe=[x for x in (r.stdout+'\n'+r.stderr).splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        for line in r.stderr.splitlines():
+            if line.startswith('COENABLED_NATIVE_ERROR '): row['native_error']=json.loads(line.split(' ',1)[1])
         row.update(exit_code=r.returncode,log=safe[-18:]); print(('PASS' if r.returncode==0 else 'FAIL')+' '+label,flush=True)
         if r.returncode: raise RuntimeError('Stage failed: '+label)
         row['passed']=True
-    finally: (OUT/'stages.json').write_text(json.dumps(STAGES,indent=2))
+    finally:
+        (OUT/'stages.json').write_text(json.dumps(STAGES,indent=2))
+        for name in ('mailintake-report.json','mailintake-protocol.json','mailintake-summary.json'):
+            file=Path('.local')/name
+            if file.is_file(): shutil.copyfile(file,OUT/name)
 def php(path,*args): command(path+' '+str(args[0] if args else ''),['docker','compose','exec','-T','--user','www-data','web','php','/checks/'+path,*args])
 def copy(source,target):
     command('private fixture transfer',['docker','compose','cp','web:/var/lib/dolibarr/documents/'+source,'.local/'+target]); Path('.local/'+target).chmod(0o600)
