@@ -1,0 +1,50 @@
+name: MAX co-enabled acceptance
+on:
+  pull_request:
+    paths: ['tests/coenabled/**', 'scripts/coenabled_*', 'docs/COENABLED_ACCEPTANCE.md', '.github/workflows/max-coenabled.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  single-populated-installation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      COMPOSE_PROJECT_NAME: max-coenabled-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Exact source, repository policy and safe assertion tests
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check.py
+          python3 scripts/max_source_audit.py --json
+          python3 -m compileall -q tests/coenabled
+          bash -n scripts/coenabled_test.sh
+          find tests/coenabled -name '*.php' -print0 | xargs -0 -n1 php -l
+          python3 -m unittest discover -s tests/coenabled -v
+      - name: Generated disposable credentials and browser
+        run: |
+          python3 - <<'PYENV'
+          from pathlib import Path
+          import secrets
+          env=Path('.env')
+          env.write_text('MARIADB_DATABASE=max_demo\nMARIADB_USER=max_demo\nMARIADB_PASSWORD='+secrets.token_hex(24)+'\nMARIADB_ROOT_PASSWORD='+secrets.token_hex(24)+'\n')
+          env.chmod(0o600)
+          PYENV
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium
+      - name: ONE native installation and shared DB for all five enabled modules
+        run: bash scripts/coenabled_test.sh
+      - name: Sanitized evidence including failures and cleanup
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: max-coenabled-evidence
+          path: .local/coenabled-evidence/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
