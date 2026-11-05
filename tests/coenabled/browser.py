@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 
 BASE='http://127.0.0.1:8080'
 PAGES=['societe/list.php','product/list.php','commande/list.php','expedition/list.php','compta/facture/list.php']
-OUT=Path('.local/coenabled-evidence'); measurements=[]; errors=[]
+OUT=Path('.local/coenabled-evidence'); measurements=[]; errors=[]; role_checks=[]
 def need(value,label):
     if not value: raise AssertionError(label)
 def save(): (OUT/'native-layout.json').write_text(json.dumps(measurements,indent=2))
@@ -17,7 +17,7 @@ def login(browser,account):
     context=browser.new_context(viewport={'width':390,'height':900})
     context.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort())
     page=context.new_page(); page.on('pageerror',lambda e:errors.append({'kind':'javascript','hash':hashlib.sha256(str(e).encode()).hexdigest()}))
-    page.on('console',lambda m:errors.append({'kind':'console','hash':hashlib.sha256(m.text.encode()).hexdigest()}) if m.type=='error' and not m.text.startswith('Failed to load resource: the server responded with a status of') else None)
+    page.on('console',lambda m:errors.append({'kind':'console','hash':hashlib.sha256(m.text.encode()).hexdigest()}) if m.type=='error' and not m.text.startswith('Failed to load resource: the server responded with a status of 403') else None)
     page.on('response',lambda r:errors.append({'kind':'asset','status':r.status}) if r.status>=400 and r.request.resource_type in ('image','font','stylesheet','script') else None)
     page.goto(BASE+'/'); page.locator('[name=username]').fill(account['login']); page.locator('[name=password]').fill(account['password']); page.locator('[type=submit]').first.click(); page.wait_for_load_state('networkidle')
     need(not page.locator('[name=password]').count(),'Native login'); return context,page
@@ -85,11 +85,15 @@ def main():
             for path in PAGES:
                 r=page.goto(BASE+'/'+path+'?lang=tr_TR')
                 if role=='reader':need(r.status==200 and page.locator('table.liste').count()>0,'Native read permission retained')
-                else:need(page.locator('table.liste').count()==0 and not page.locator('.maxmobile-table-scroll').count(),'Native denied user has no list content')
+                else:
+                    need(r.status in (200,403) and page.locator('table.liste').count()==0 and not page.locator('.maxmobile-table-scroll').count(),'Native denied user has no list content')
+                    denial=page.locator('div.error').first.inner_text(); need('Access denied' in denial or 'Erişim' in denial,'Native denial body oracle')
+                need('Fatal error' not in r.text() and 'Parse error' not in r.text(),'Native role page has no runtime error')
+                role_checks.append({'role':role,'surface':path,'status':r.status,'denial':role=='denied'})
             c.close()
         guest=browser.new_context();page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
         browser.close()
-    (OUT/'native-browser.json').write_text(json.dumps({'passed':not errors,'errors':errors,'strict_checks':15,'baseline_checks':15,'brand_changes':2,'hooks_same_page':True},indent=2));need(not errors,'No JavaScript or missing asset failures')
+    (OUT/'native-browser.json').write_text(json.dumps({'passed':not errors,'errors':errors,'strict_checks':15,'baseline_checks':15,'brand_changes':2,'hooks_same_page':True,'roles':role_checks},indent=2));need(not errors,'No JavaScript or missing asset failures')
     print('PASS shared native hooks two brands assets roles and 15 STRICT viewport cases')
 
 if __name__=='__main__':

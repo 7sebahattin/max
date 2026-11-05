@@ -56,6 +56,10 @@ if($mode==='bootstrap') {
     }
     file_put_contents($root.'/maxcore-accounts.json',json_encode($accounts)); chmod($root.'/maxcore-accounts.json',0600);
     foreach(['MAIN_INFO_SOCIETE_IDPROF1'=>'SYNTHETIC-TAX-COENABLED','MAIN_INFO_SOCIETE_ADDRESS'=>'Synthetic address only'] as $key=>$value) needE(dolibarr_set_const($db,$key,$value,'chaine',0,'',1)>0,'synthetic legal fixture');
+    require_once DOL_DOCUMENT_ROOT.'/product/stock/class/productlot.class.php';
+    $product=(int)rowsE("SELECT rowid FROM ".MAIN_DB_PREFIX."product WHERE ref='P2-LOT'")[0]['rowid'];
+    $lot=new Productlot($db);
+    if($lot->fetch(0,$product,'P2-BATCH')<=0) { $lot->fk_product=$product; $lot->batch='P2-BATCH'; $lot->eatby=dol_now()+365*86400; $lot->sellby=dol_now()+180*86400; needE($lot->create($user)>0,'native lot catalog fixture'); }
     require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
     $bank=new Account($db); needE($bank->fetch((int)rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'bank_account ORDER BY rowid LIMIT 1')[0]['rowid'])>0,'native synthetic bank fixture');
     $bank->iban='TEST-IBAN-COENABLED'; needE($bank->update_bban($user)>0,'native synthetic nonbank IBAN fixture');
@@ -67,7 +71,7 @@ if($mode==='bootstrap') {
 if($mode==='freeze') {
     needE(!is_file($root.'/coenabled-native-before'),'immutable baseline created once');
     activationE();
-    foreach(['societe','product','product_stock','product_lot','commande','expedition','facture','bank_account','bank'] as $t) needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.$t))>0,'populated commercial fixture');
+    foreach(['societe','product','product_stock','product_lot','commande','expedition','facture','bank_account','bank'] as $t) needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.$t))>0,'populated commercial fixture '.$t);
     needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'facture WHERE fk_statut<>0'))===0,'all invoices draft only');
     needE(count(rowsE("SELECT rowid FROM ".MAIN_DB_PREFIX."bank_account WHERE iban_prefix='TEST-IBAN-COENABLED'"))===1,'populated fictional IBAN protected by baseline');
     // Every commercial fixture is now complete. Rebase original helper hashes ONCE

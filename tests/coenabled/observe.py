@@ -19,7 +19,7 @@ def run(lane):
         def page_created(page):
             page.on('pageerror',lambda e:errors.append({'kind':'javascript','digest':hashlib.sha256(str(e).encode()).hexdigest()}))
             def console(message):
-                if message.type=='error' and not message.text.startswith('Failed to load resource: the server responded with a status of'):
+                if message.type=='error' and not re.match(r'^Failed to load resource: the server responded with a status of (403|404|405|409|503)\b',message.text):
                     errors.append({'kind':'console','digest':hashlib.sha256(message.text.encode()).hexdigest()})
             def response(r):
                 if r.status>=400 and r.request.resource_type in ('script','stylesheet','font','image'):
