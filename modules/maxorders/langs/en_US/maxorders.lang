@@ -168,3 +168,4 @@ OrdersValue_OrdersProposalOnly=Proposal only
 OrdersPdfOptIn=Opt in to the offline PDF text pilot (requires reviewed Poppler, Bubblewrap, prlimit and working unprivileged namespaces).
 OrdersPdfSandboxBlocked=BLOCKED if sandbox tools/capabilities are unavailable. No unsandboxed fallback.
 OrdersPdfUnreadable=PDF unreadable, encrypted, scanned or outside safe limits. Manual review required.
+OrdersSave=Save

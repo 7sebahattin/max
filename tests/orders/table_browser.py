@@ -74,6 +74,8 @@ with sync_playwright() as p:
     page.locator('[name=document_file]').set_input_files(inputs/'browser.xlsx')
     page.locator('[data-orders-upload] button').click();page.wait_for_load_state('networkidle')
     upload_id=int(page.url.split('id=')[1]);path=f'document.php?id={upload_id}'
+    # Native redirects do not persist a one-request lang query parameter.
+    page.goto(URL+path+'&lang=tr_TR')
     check(page.locator('[data-orders-source-lines] article').count()==3 and 'Synthetic!D10' in page.locator('body').inner_text(),'multipart upload persists exact source cells')
     check('Birden çok para birimi' in page.locator('body').inner_text(),'visible mixed-currency warning')
     deny(context.request.post(URL+'document.php',form=dict(token='invalid',action='associate',id=str(upload_id))),'table association CSRF denied')

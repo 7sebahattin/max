@@ -29,6 +29,7 @@ class MaxOrdersPdf {
    $info=self::command('pdfinfo',$path,['/input.pdf'],8192);
    if($info===null)return self::base('OrdersPdfSandboxBlocked');
    if(!preg_match('/^Pages:\s+([0-9]+)\s*$/m',$info,$pages) || (int)$pages[1]<1 || (int)$pages[1]>10 || !preg_match('/^Encrypted:\s+no\s*$/m',$info))return self::base('OrdersPdfUnreadable');
+   if(!preg_match('/^JavaScript:\s+no\s*$/m',$info) || !preg_match('/^Form:\s+none\s*$/m',$info) || !preg_match('/^Suspects:\s+no\s*$/m',$info))return self::base('OrdersPdfUnreadable');
    $text=self::command('pdftotext',$path,['-f','1','-l','10','-enc','UTF-8','-layout','/input.pdf','-'],65536);
    if($text===null || preg_match('//u',$text)!==1 || trim($text)==='')return self::base('OrdersPdfUnreadable');
    return self::text($text);
@@ -40,12 +41,12 @@ class MaxOrdersPdf {
    foreach(explode("\n",$content) as $line=>$raw) {
     $start=$offset;$offset+=strlen($raw)+1;$value=trim($raw);if($value==='')continue;
     if($first) { if($value!==self::MARKER)return $result;$first=false;continue; }
-    $colon=strpos($value,':');if($colon===false)return $result;
-    $key=trim(substr($value,0,$colon));$value=trim(substr($value,$colon+1));
+    $contentLine=ltrim($raw);$colon=strpos($contentLine,':');if($colon===false)return $result;
+    $key=trim(substr($contentLine,0,$colon));$rawValue=substr($contentLine,$colon+1);$value=trim($rawValue);
     if(!in_array($key,MaxOrdersExtraction::FIELDS,true))return $result;
-    $valid=MaxOrdersExtraction::valid($key,$value);$truncated=mb_strlen($value)>255;
-    $fields[]=['field'=>$key,'raw'=>mb_substr($value,0,255),'value'=>mb_substr($value,0,255),'truncated'=>$truncated,'state'=>$valid?'suggested':'uncertain','source'=>['page'=>$page+1,'line'=>$line+1,'offset'=>$start]];
-    $seen[$key]=($seen[$key]??0)+1;if(!$valid)$issues[]='OrdersUncertainField';
+    $valid=MaxOrdersExtraction::valid($key,$value);$truncated=mb_strlen($rawValue)>255;
+    $fields[]=['field'=>$key,'raw'=>mb_substr($rawValue,0,255),'value'=>mb_substr($value,0,255),'truncated'=>$truncated,'state'=>$valid&&!$truncated?'suggested':'uncertain','source'=>['page'=>$page+1,'line'=>$line+1,'offset'=>$start]];
+    $seen[$key]=($seen[$key]??0)+1;if(!$valid||$truncated)$issues[]='OrdersUncertainField';
    }
   }
   foreach($fields as &$field)if($seen[$field['field']]>1){$field['state']='ambiguous';$issues[]='OrdersAmbiguousField';}unset($field);

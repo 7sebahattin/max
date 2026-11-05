@@ -41,6 +41,10 @@ docker compose exec -T --user www-data web php /checks/orders/table_runtime.php 
 docker compose cp web:/var/lib/dolibarr/documents/orders-table-session.json .local/orders-table-session.json
 docker compose cp web:/var/lib/dolibarr/documents/orders-table-inputs .local/orders-table-inputs
 chmod 600 .local/orders-table-session.json
+# Preserve only named public partial reports if browser acceptance fails.
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-parser.json .local/orders-table-parser.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-native.json .local/orders-table-native.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-pdf-probe.json .local/orders-pdf-probe.json
 python3 tests/orders/table_browser.py
 docker compose exec -T --user www-data web php /checks/orders/table_runtime.php verify
 docker compose cp web:/var/lib/dolibarr/documents/orders-table-parser.json .local/orders-table-parser.json

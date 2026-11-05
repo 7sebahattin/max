@@ -168,3 +168,4 @@ OrdersValue_OrdersProposalOnly=Yalnız öneri
 OrdersPdfOptIn=Çevrimdışı PDF metin pilotunu aç (incelenmiş Poppler, Bubblewrap, prlimit ve ayrıcalıksız namespace gerektirir).
 OrdersPdfSandboxBlocked=Sandbox araçları/yetenekleri yoksa BLOCKED. Korumasız yedek yol yoktur.
 OrdersPdfUnreadable=PDF okunamıyor, şifreli, taranmış veya güvenli sınırları aşıyor. Manuel inceleme gerekli.
+OrdersSave=Kaydet
