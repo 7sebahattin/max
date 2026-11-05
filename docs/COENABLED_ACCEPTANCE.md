@@ -27,7 +27,7 @@ Both document and body scroll widths must fit the requested CSS viewport **witho
 
 Fresh-project guard refuses any pre-existing labeled container, network or volume before arming teardown; it also refuses previous local installer/ownership files. Runtime services have no Internet path/proxy, fake IMAP has no published port, gateway is loopback only, and no real provider/account/customer/SMTP/HKS is used. The unchanged P2 mail test is local capture-only, never SMTP. Private Mail/Customs storage stays separate and outside webroot. Cross-module native users are denied access to other modules and existing private evidence; isolated-run passes are not counted as shared-run proof.
 
-Only `tests/coenabled/**`, `scripts/coenabled_*`, this document and the new workflow are changed. Application modules, existing test files and upstream are unchanged. The exact branch HEAD is checked out explicitly. No skip/xfail/continue-on-error is permitted. Missing viewport sets, observer evidence, snapshot mismatch, test failure or cleanup failure prevents acceptance. Test exit and cleanup outcome are recorded separately, including on failure.
+Issue #20 added only `tests/coenabled/**`, `scripts/coenabled_*`, this document and its workflow. Application modules, previously merged test helpers and upstream remain unchanged. Issue #31 adjusts CI routing/source metadata inside that harness, as documented below. The exact branch HEAD is checked out explicitly. No skip/xfail/continue-on-error is permitted within native acceptance. Missing viewport sets, observer evidence, snapshot mismatch, test failure or cleanup failure prevents acceptance. Test exit and cleanup outcome are recorded separately, including on failure.
 
 Artifacts: numeric geometry/state/identity/phase summaries, fixed assertion locations, source SHA, and public or source-redacted synthetic screenshots. No raw HTML, credential/session/seed/config files, raw MIME/attachments, browser trace or Mail screenshots are published. Observers suppress exception arguments and retain safe labels/file locations; private values are not debugging artifacts.
 
@@ -40,7 +40,7 @@ python3 -m unittest discover -s tests/coenabled -v
 COMPOSE_PROJECT_NAME=max-coenabled-unique bash scripts/coenabled_test.sh
 ```
 
-Local full native execution is **BLOCKED** by this managed environment's 8 GB/vfs capacity; real isolated execution is performed in GitHub Actions, not substituted with mocks. Exact SHA/run links, failed assertions, root causes, per-surface counts and cleanup outcome are recorded in the draft PR as execution completes. Six local evidence/cleanup/real-Docker guard tests PASS. Recorded cross-module results are listed below; final exact-head proof is maintained in draft PR #29.
+During Issue #20, local full native execution was **BLOCKED** by the managed environment's 8 GB/vfs capacity; real isolated execution was performed in GitHub Actions, not substituted with mocks. Six local evidence/cleanup/real-Docker guard tests passed then. Recorded cross-module results are listed below; final exact-head proof is maintained in merged PR #29. Issue #31's prepublication cost gate and NOT RUN snapshot are preserved below, followed by its published exact-SHA evidence; historical results do not validate a later HEAD.
 
 Physical phones, real WSL2/Docker Desktop workstation, full accessibility audit, provider/TLS/OAuth, PDF extraction/unlocking/automatic release, HKS SOAP and commercial distribution remain manual/BLOCKED gates. This test-only task authorizes no staging/live deployment, validated invoice or merge. Rollback discards only the owned synthetic project; module/data rollback is outside this test-only PR.
 
@@ -66,4 +66,96 @@ Runtime: Docker 28.0.4, Compose 2.38.2, Dolibarr 24.0.1, PHP 8.3.36, MariaDB `11
 
 Native Dolibarr's legacy denied list pages return HTTP 200 with an access-denied body; tests record the actual code, require the denial message and absence of the protected table. MAX module/field/private-file denials require HTTP 403. No native core status behavior was patched or mislabeled.
 
-The final evidence follow-up records explicit native and Orders/Customs before/after hashes plus module versions and applies the same local-network guard to the unauthenticated login context. Its exact SHA/CI result is recorded in [draft PR #29](https://github.com/7sebahattin/max/pull/29). No unresolved application defect was found in this synthetic pilot; manual/BLOCKED gates above remain outside this acceptance.
+The final evidence follow-up records explicit native and Orders/Customs before/after hashes plus module versions and applies the same local-network guard to the unauthenticated login context. Its exact SHA/CI result is recorded in [merged PR #29](https://github.com/7sebahattin/max/pull/29): `697f5efac81d0347617e61cb2524eda83d09181d`, [native CI 41989908295](https://github.com/7sebahattin/max/actions/runs/41989908295), 63/63. No unresolved application defect was found in this synthetic pilot; manual/BLOCKED gates above remain outside this acceptance.
+
+## Issue #31: persistent selective regression
+
+Starting main was verified on GitHub on 2026-11-05 as `83df46d2646f8004c72ec2cbaf4ad4892159f9fd`, the merge commit of PR #29 (already merged; no merge requested or repeated). Open parallel work was only draft PR #23; neither that PR nor its branch is modified. The new local branch is `ci/max-selective-regression`. This section and [Issue #31](https://github.com/7sebahattin/max/issues/31) record the implementation and publication gate.
+
+### Selection and concurrency contract
+
+`regression_policy.py` is the single path policy. A five-minute lightweight job reads the **complete local Git diff** from the PR target/head merge base after a full-history exact-head checkout. It does not use GitHub's truncated 300-file path-filter list or call a changed-files API. Deletions and both sides of renames are included; NUL-separated paths and subprocess argument arrays preserve unusual filenames. Missing history, incorrect checkout SHA, dirty tracked sources or invalid input fail selection rather than emitting a valid skip. The only control outputs are a boolean and verified full SHA.
+
+| Changed paths | Native job selected? | Reason |
+|---|---|---|
+| `modules/maxcore/**`, `modules/maxmobile/**`, `modules/maxorders/**`, `modules/maxcustoms/**`, `modules/maxmail/**` | Yes | All five deployed module trees, including assets/locales/SQL |
+| `tests/coenabled/**`, `tests/maxcore/**`, `tests/mobile/**`, `tests/orders/**`, `tests/customs/**`, `tests/mailintake/**`, `tests/branding/**`, `tests/p2_*` | Yes | Shared native fixtures, browser/security helpers, fake IMAP overlay and related module suites |
+| `scripts/coenabled_*`, `scripts/maxcore_*`, `scripts/mobile_*`, `scripts/orders_*`, `scripts/customs_*`, `scripts/mailintake_*`, `scripts/branding_*` | Yes | Related orchestration/helper families |
+| `compose.yaml`, `.dockerignore`, `deployment/local/**`, `upstream.lock.json`, `scripts/p2_install.sh`, `scripts/prepare.py`, `scripts/check.py`, `scripts/max_source_audit.py` | Yes | Runtime/build context, pinned compatibility, native installer and policy dependencies |
+| `.github/workflows/max-coenabled.yml` | Yes | Changes to the acceptance gate itself |
+| Documentation only, including this file and `docs/COMPATIBILITY.md`; unrelated lanes such as `tests/mail/**` | No | Prose does not change executable compatibility; actual locks/build/Compose changes above do |
+| `workflow_dispatch` | Always | Explicit full native acceptance on the selected ref, even without a diff |
+
+PR events are only `opened`, `synchronize`, `reopened`; there is no push, schedule, automatic retry, matrix or extra-service dependency. Cumulative PR changes are used: adding a doc commit to a PR that already changes a module still requires exact-head native proof. An older SHA's success is never reused as current acceptance.
+
+Concurrency is keyed by source repository plus branch, shared with manual runs on that branch. Only one workflow in that group runs at once; GitHub replaces older pending runs with the newest pending run. `cancel-in-progress: false` deliberately preserves a running suite's owned-resource teardown. There is no second push-triggered copy. Manual cancellation/timeouts cannot be claimed as verified cleanup or native PASS; the ephemeral hosted VM disposal is a fallback, not acceptance evidence. A manual dispatch on a different branch is a different group.
+
+An irrelevant doc-only PR runs the lightweight selector and leaves `single-populated-installation` **NOT RUN**. The selector's PASS means routing/provenance passed, never 63-case native PASS. For selected runs the existing 40-minute native job still requires complete evidence, unchanged snapshots and successful teardown. Missing selector output/job failure cannot silently select a successful native skip.
+
+If enforcing required status checks, require the selector as well as the conditional native job: a skipped native job alone is not acceptance evidence when selection fails. Branch-protection settings are not changed by this task.
+
+### Preserved native guarantees and source metadata fix
+
+The original source guard hardcoded the Issue #20 creation base and permitted only added harness files. A future legitimate module modification would therefore abort before the native regression began. Source metadata now records the actual target/merge-base, changed paths and exact HEAD with a clean tracked tree; the native job receives the selector's verified target SHA and computes the same merge-base. Local reproduction defaults to the first parent, or accepts an explicit `COENABLED_BASE_SHA`. Moving main ahead of a PR is supported via merge-base, without testing a synthetic merge instead of the PR HEAD. This adjusts provenance, not the commercial fixture/snapshot boundary.
+
+The strict engine, runtime PHP, observers, role/CSRF/private-file checks, IMAP scenarios, native snapshots, run orchestration and cleanup script are unchanged. The same five Cartesian sets remain **15 native + 9 Core + 9 Orders + 18 Customs + 12 Mail = 63**, at exactly 360/390/768px with zero overflow tolerance, one installation/database and no SMTP/HKS/provider use. New offline negative tests cover missing/duplicate/one-pixel-overflow evidence in every surface and test/cleanup failures with a manifest present. Missing-manifest tests remain in place. These synthetic unit fixtures are not native execution evidence.
+
+### Historical prepublication snapshot: zero-cost gate and local evidence
+
+The following BLOCKED / NOT RUN statements and evidence table record the local-only state at `b7769ee8ea346b9f1b29cc67c13df3d224e7e1fa` **before publication**. They remain unchanged as history, not the current PR status. The later owner-confirmed spending block and completed automatic CI are recorded separately below.
+
+**BLOCKED: push, draft PR creation and any new remote native run.** The connected GitHub tools do not expose account-level remaining private-repository Actions allowance, artifact-storage allowance or hard spending limits. A standard `ubuntu-latest` runner is not proof of zero charges. No billing setting was changed or inferred from successful historical runs. No new runner, subscription, API key, external service, schedule or retry was created.
+
+Before publication the owner must verify sufficient included Actions execution/storage allowance and a hard stop preventing additional charges for this private repository. Existing foundation/integration workflows can also run on publication; this change does not alter their independent policies. Thus even pushing/opening a draft PR is held until that exposure is verified. This is a user-required cost gate, not a requirement for another architectural/P2 approval. Local commits are not published by an issue status comment.
+
+| Evidence for Issue #31 | Status |
+|---|---|
+| Main SHA, PR #29 merged, parallel PR/workflow inventory | PASS (read-only GitHub verification) |
+| New offline trigger/provenance/63-case contract/cleanup tests | PASS: 15 unit methods; no Docker/network/provider |
+| Existing strict evidence tests and missing-manifest cleanup test | PASS: 4 + 1 unit methods |
+| Python compilation, shell syntax, workflow YAML syntax/structure (preinstalled PyYAML), repository policy and whitespace check | PASS locally |
+| Staged source audit | PASS: 183 blobs scanned, zero findings |
+| Protected-source comparison against verified main | PASS: exactly the five intended CI/test/docs files changed; modules, strict engine, native helpers and cleanup unchanged |
+| Full Docker/DB/63-browser execution at this new HEAD | NOT RUN; no native PASS or runtime identity claimed |
+| New remote CI run, push and draft PR | NOT RUN / BLOCKED by unverifiable no-charge allowance |
+
+### Published PR #32 evidence: implementation HEAD verified 2026-11-05
+
+After the historical snapshot, the owner verified the account Billing display as **$0.00 / $0.00, Usage blocked** and authorized publication. The branch was published and [DRAFT PR #32](https://github.com/7sebahattin/max/pull/32) opened against main `83df46d2646f8004c72ec2cbaf4ad4892159f9fd`. Budget/spending controls were not changed; no paid runner/service/API, manual dispatch or rerun was used. This supersedes the earlier publication/native-execution block for the evidence below, without claiming independent API access to account billing settings.
+
+All four automatically PR-triggered workflows completed **PASS on attempt 1** at exact implementation HEAD `b7769ee8ea346b9f1b29cc67c13df3d224e7e1fa`:
+
+| Workflow | Result | Exact-SHA run |
+|---|---|---|
+| MAX co-enabled acceptance | PASS | [42027772689](https://github.com/7sebahattin/max/actions/runs/42027772689) |
+| MAX integration regression (P2 and MAX Core native pilots) | PASS | [42027772266](https://github.com/7sebahattin/max/actions/runs/42027772266) |
+| Foundation checks | PASS | [42027772511](https://github.com/7sebahattin/max/actions/runs/42027772511) |
+| MAX source audit (Linux/Windows) | PASS | [42027772543](https://github.com/7sebahattin/max/actions/runs/42027772543) |
+
+The completed native job log confirms the unchanged strict evidence engine passed **63/63** (15 native + 9 Core + 9 Orders + 18 Customs + 12 Mail), project identity checks passed before/installed/final, and `PASS single owned project cleanup and complete acceptance evidence` was recorded. These are actual native execution and cleanup results, not the earlier offline tests or artifact-upload success alone. CI also passed 21 harness unit tests including the real-Docker ownership guard; **20/20 local PASS** remains the offline subset recorded above. The [independent source review](https://github.com/7sebahattin/max/pull/32#pullrequestreview-5785167136) verified the native log and requested this documentation reconciliation; it is not owner merge authorization.
+
+The sanitized `max-coenabled-evidence` artifact (ID `13414698732`, SHA-256 `66b2e3f7d3f5395609694c6790ece53032fc30c993d73f37fa67001cc005f2d3`) is temporary, with recorded expiry **2026-11-12**. Its archive contents were not independently downloaded/inspected for this PR reconciliation; the native log and workflow outcomes were verified. Do not treat temporary artifact retention as permanent evidence availability.
+
+These run links prove only the implementation SHA above. This documentation follow-up creates a later HEAD; its automatic CI results must be verified separately and recorded with that exact SHA in PR #32, without attributing an older PASS to it or creating recursive documentation-only CI updates. The PR's cumulative executable changes still select native acceptance even though this follow-up modifies only this document.
+
+**Still manual / BLOCKED:** physical-device checks, a real WSL2/Docker Desktop workstation, real provider/TLS/OAuth, PDF extraction/unlocking/automatic release, HKS SOAP and full accessibility/commercial review. Synthetic CI does not satisfy those gates. Code review and explicit owner merge authorization remain separate requirements; selector code from the PR HEAD is not an independent tamper-proof policy. No module/test mechanism, PR #23, merge or staging/live deployment is changed or authorized by this documentation update.
+
+### Reproduction and rollback
+
+The commands below are reproduction guidance, not authorization to dispatch or rerun workflows during this documentation task. The earlier offline/native NOT RUN distinction remains part of the historical record; actual published native/cleanup PASS is recorded above.
+
+Lightweight reproduction (Python stdlib and Git; no Docker or API):
+
+```sh
+python3 -m unittest discover -s tests/coenabled -p test_ci_policy.py -v
+python3 -m unittest discover -s tests/coenabled -p test_evidence.py -v
+python3 -m unittest discover -s tests/coenabled -p test_cleanup.py -v
+python3 -m compileall -q tests/coenabled
+bash -n scripts/coenabled_test.sh
+python3 scripts/check.py
+python3 scripts/max_source_audit.py --json
+```
+
+The source audit reads the Git index; include the reviewed new files before auditing. A preinstalled YAML parser can validate workflow syntax without downloading tools. Full `unittest discover -s tests/coenabled` also includes the real-Docker ownership guard and is **not** part of this offline subset. After the no-charge gate is verified, use manual dispatch on the exact published branch HEAD or the existing native reproduction command in a fresh disposable checkout; record that SHA, actual runtime identity, all counts and independent test/cleanup exits. No historical run substitutes for it.
+
+Rollback: discard this local feature branch before publication, or later revert its isolated commit through a reviewed PR. That restores the former harness-only routing/source guard without changing modules or business data; it also removes automatic coverage of module edits, so record that loss of protection. Do not roll back application/database state for this CI-only change. No owned Docker project is created by the offline tests, so native cleanup is NOT RUN rather than a fabricated cleanup PASS. Physical devices, WSL2, provider/TLS/OAuth, PDF release, HKS and full accessibility/commercial review remain manual/BLOCKED.

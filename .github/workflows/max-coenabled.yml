@@ -1,15 +1,41 @@
 name: MAX co-enabled acceptance
 on:
   pull_request:
-    paths: ['tests/coenabled/**', 'scripts/coenabled_*', 'docs/COENABLED_ACCEPTANCE.md', '.github/workflows/max-coenabled.yml']
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 permissions:
   contents: read
+# Serialize by source branch, including manual runs; retain running cleanup.
+# GitHub keeps only the newest pending run in this group.
+concurrency:
+  group: max-coenabled-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: false
 jobs:
+  select-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      required: ${{ steps.selection.outputs.required }}
+      base: ${{ steps.selection.outputs.base }}
+      comparison_base: ${{ steps.selection.outputs.comparison_base }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Lightweight trigger/provenance tests (no Docker)
+        run: python3 -m unittest discover -s tests/coenabled -p test_ci_policy.py -v
+      - name: Select from complete Git diff (including deletions and renames)
+        id: selection
+        run: python3 tests/coenabled/regression_policy.py
   single-populated-installation:
+    needs: select-regression
+    if: needs.select-regression.outputs.required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
+      COENABLED_BASE_SHA: ${{ needs.select-regression.outputs.base }}
       COMPOSE_PROJECT_NAME: max-coenabled-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
