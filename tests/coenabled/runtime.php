@@ -34,7 +34,7 @@ function activationE(): array {
         foreach($r as $row) {needE(!in_array($row['id'],$rights,true),'cross module rights uniqueness'); $rights[]=$row['id'];}
         $m=rowsE("SELECT rowid,type,mainmenu,url FROM ".MAIN_DB_PREFIX."menu WHERE module='".$name."' ORDER BY rowid"); needE(count($m)===$menuCount,'exact native menu count');
         foreach($m as $row) { $key=$row['type'].'|'.$row['mainmenu'].'|'.$row['url']; needE(!in_array($key,$menus,true),'cross module menu uniqueness'); $menus[]=$key; }
-        $result[$name]=['module_id'=>$id,'rights'=>count($r),'menus'=>count($m),'hooks'=>$module->module_parts['hooks']??[]];
+        $result[$name]=['module_id'=>$id,'version'=>$module->version,'rights'=>count($r),'menus'=>count($m),'hooks'=>$module->module_parts['hooks']??[]];
     }
     needE(in_array('all',$result['maxcore']['hooks'],true) && in_array('all',$result['maxmobile']['hooks'],true),'both shared hooks registered');
     return $result;
@@ -130,5 +130,10 @@ if($mode==='mail-after' || $mode==='final') {
     needE(realpath($root.'/maxmail')!==realpath($root.'/maxcustoms'),'private storage separation');
 }
 $report=['modules'=>activationE(),'baseline_unchanged'=>true,'no_send'=>getDolGlobalString('MAIN_DISABLE_ALL_MAILS')==='1' && ini_get('sendmail_path')==='/bin/false']; needE($report['no_send'],'no SMTP send boundary');
-if($mode==='final') file_put_contents($root.'/coenabled-final.json',json_encode($report));
+if($mode==='final') {
+    $report['native_before']=file_get_contents($root.'/coenabled-native-before'); $report['native_after']=nativeE();
+    $report['mail_modules_before']=file_get_contents($root.'/coenabled-mail-before'); $report['mail_modules_after']=moduleStateE();
+    $report['installation_fingerprint']=hash('sha256',$conf->file->instance_unique_id);
+    file_put_contents($root.'/coenabled-final.json',json_encode($report));
+}
 echo 'PASS coexistence checkpoint '.$mode."\n";

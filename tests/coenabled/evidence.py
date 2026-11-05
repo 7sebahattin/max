@@ -31,6 +31,8 @@ def collect():
     for lane in ('core','orders','customs','mail'): assert json.loads((out/(lane+'-observer.json')).read_text())['passed'],'Failed browser observer'
     assert json.loads((out/'native-browser.json').read_text())['passed'],'Native hook failure'
     final=json.loads((out/'final.json').read_text());assert final['baseline_unchanged'] and final['no_send'] and len(final['modules'])==5
+    assert final['native_before']==final['native_after'] and final['mail_modules_before']==final['mail_modules_after']
+    assert final['installation_fingerprint']==json.loads((out/'identity.json').read_text())['installation_fingerprint']
     # Only public Core/Orders and source-redacted Customs screenshots; Mail is numeric only.
     patterns=['maxcore*-360.png','maxcore*-390.png','maxcore*-768.png','orders-*.png','customs-view-*.png']
     for pattern in patterns:

@@ -92,7 +92,7 @@ def main():
                 need('Fatal error' not in r.text() and 'Parse error' not in r.text(),'Native role page has no runtime error')
                 role_checks.append({'role':role,'surface':path,'status':r.status,'denial':role=='denied'})
             c.close()
-        guest=browser.new_context();opt_out(guest);page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
+        guest=browser.new_context();opt_out(guest);guest.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort());page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
         browser.close()
     (OUT/'native-browser.json').write_text(json.dumps({'passed':not errors,'errors':errors,'strict_checks':15,'baseline_checks':15,'brand_changes':2,'hooks_same_page':True,'roles':role_checks},indent=2));need(not errors,'No JavaScript or missing asset failures')
     print('PASS shared native hooks two brands assets roles and 15 STRICT viewport cases')
