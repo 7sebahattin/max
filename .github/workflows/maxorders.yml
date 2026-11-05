@@ -57,6 +57,11 @@ jobs:
             .local/orders-intake-native.json
             .local/orders-intake-http.json
             .local/orders-intake-mobile.json
+            .local/orders-table-parser.json
+            .local/orders-table-native.json
+            .local/orders-table-http.json
+            .local/orders-table-mobile.json
+            .local/orders-pdf-probe.json
             .local/orders-*.png
             .local/maxorders-module.zip
           include-hidden-files: true

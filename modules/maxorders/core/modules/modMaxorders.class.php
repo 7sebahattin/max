@@ -5,8 +5,8 @@ class modMaxorders extends DolibarrModules {
  public function __construct($db) {
   $this->db=$db; $this->numero=610140; $this->rights_class='maxorders'; $this->family='crm';
   $this->module_position='20'; $this->name='Maxorders'; $this->description='OrdersDescription';
-  $this->editor_name='MAX'; $this->version='0.2.0'; $this->const_name='MAIN_MODULE_MAXORDERS'; $this->picto='order';
-  $this->module_parts=['moduleforexternal'=>0]; $this->config_page_url=[]; $this->langfiles=['maxorders@maxorders'];
+  $this->editor_name='MAX'; $this->version='0.3.0'; $this->const_name='MAIN_MODULE_MAXORDERS'; $this->picto='order';
+  $this->module_parts=['moduleforexternal'=>0]; $this->config_page_url=['setup.php@maxorders']; $this->langfiles=['maxorders@maxorders'];
   $this->phpmin=[8,1]; $this->need_dolibarr_version=[24,0]; $this->dirs=[];
   $this->depends=['modSociete','modCommande']; $this->requiredby=[]; $this->conflictwith=[]; $this->const=[];
   $this->rights=[];

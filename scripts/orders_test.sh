@@ -34,6 +34,22 @@ python3 tests/orders/intake_browser.py
 docker compose exec -T --user www-data web php /checks/orders/intake_runtime.php verify
 docker compose cp web:/var/lib/dolibarr/documents/orders-intake-native.json .local/orders-intake-native.json
 docker compose cp web:/var/lib/dolibarr/documents/orders-intake-parser.json .local/orders-intake-parser.json
+# Orders 0.3 runs after both unchanged baseline suites in this same installed DB.
+docker compose exec -T --user www-data web php /checks/orders/table_unit.php /opt/dolibarr/htdocs /var/lib/dolibarr/documents/orders-table-parser.json
+docker compose exec -T --user www-data web php /checks/orders/pdf_probe.php /opt/dolibarr/htdocs /var/lib/dolibarr/documents/orders-pdf-probe.json
+docker compose exec -T --user www-data web php /checks/orders/table_runtime.php setup
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-session.json .local/orders-table-session.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-inputs .local/orders-table-inputs
+chmod 600 .local/orders-table-session.json
+# Preserve only named public partial reports if browser acceptance fails.
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-parser.json .local/orders-table-parser.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-native.json .local/orders-table-native.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-pdf-probe.json .local/orders-pdf-probe.json
+python3 tests/orders/table_browser.py
+docker compose exec -T --user www-data web php /checks/orders/table_runtime.php verify
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-parser.json .local/orders-table-parser.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-table-native.json .local/orders-table-native.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-pdf-probe.json .local/orders-pdf-probe.json
 docker compose down --volumes --remove-orphans
 for kind in container volume network; do
  case "$kind" in container) count="$(docker ps -aq --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME")";;

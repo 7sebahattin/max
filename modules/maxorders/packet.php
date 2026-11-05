@@ -1,5 +1,6 @@
 <?php
 require __DIR__.'/lib/bootstrap.php';
+require_once __DIR__.'/class/lines.class.php';
 $id=GETPOSTINT('id');
 try { $d=$packets->detail($user,$id); } catch(Throwable $e) { moError($e); exit; }
 moHeader($langs->trans('OrdersPacket').' '.$d['packet']->match_ref);
@@ -12,4 +13,11 @@ moTable($d['fact'],['fk_revision'=>'OrdersSource','field_name'=>'OrdersField','f
 moTable($d['lock'],['field_name'=>'OrdersField','field_value'=>'OrdersValue','is_locked'=>'OrdersLocked','fk_user_author'=>'OrdersActor'],'OrdersLocks');
 moTable($d['conflict'],['rowid'=>'OrdersID','field_name'=>'OrdersField','old_value'=>'OrdersOld','new_value'=>'OrdersNew','fk_revision'=>'OrdersSource','status'=>'OrdersStatus','decision'=>'OrdersDecision','fk_user_resolver'=>'OrdersActor'],'OrdersConflicts');
 moTable($d['audit'],['event'=>'OrdersEvent','field_name'=>'OrdersField','fk_revision'=>'OrdersSource','fk_user_author'=>'OrdersActor','datec'=>'OrdersDate'],'OrdersAudit');
+$sourceLines=new MaxOrdersLines($db);
+$history=$sourceLines->history($user,$id);
+moTable($history,['kind'=>'OrdersKind','document_ref'=>'OrdersDocument','revision_no'=>'OrdersRevision','status'=>'OrdersStatus','content_hash'=>'OrdersFileHash','fk_user_reviewer'=>'OrdersActor','date_reviewed'=>'OrdersDate'],'OrdersSourceHistory');
+foreach($history as $source) print '<p><a href="'.dol_buildpath('/maxorders/document.php',1).'?id='.(int)$source->fk_upload.'">'.moEsc($source->original_name).'</a></p>';
+$comparison=$sourceLines->comparisons($user,$id);
+if($comparison['limited']) print '<p role="note">'.moLabel('OrdersHistoryLimit').'</p>';
+moTable($comparison['rows'],['kind'=>'OrdersKind','revision_no'=>'OrdersRevision','status'=>'OrdersStatus','description'=>'OrdersExtract_description','quantity'=>'OrdersExtract_quantity','unit_price'=>'OrdersExtract_unit_price','currency'=>'OrdersExtract_currency','comparison'=>'OrdersComparison','source'=>'OrdersPosition'],'OrdersLineComparison');
 print '</section>'; moFooter();

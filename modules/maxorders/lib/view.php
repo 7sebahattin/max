@@ -18,6 +18,6 @@ function moTable($rows,$columns,$label) {
  print '<h2>'.moLabel($label).'</h2><div class="maxorders-scroll" tabindex="0" role="region" aria-label="'.moLabel($label).'"><table><thead><tr>';
  foreach($columns as $column=>$label) print '<th scope="col">'.moLabel($label).'</th>';
  print '</tr></thead><tbody>';
- foreach($rows as $row) { print '<tr>'; foreach($columns as $column=>$label) print '<td>'.(in_array($column,['field_name','status','decision','event'],true)?moValue($row->$column??''):moEsc($row->$column??'')).'</td>'; print '</tr>'; }
+ foreach($rows as $row) { print '<tr>'; foreach($columns as $column=>$label) print '<td>'.(in_array($column,['field_name','status','decision','event','comparison'],true)?moValue($row->$column??''):moEsc($row->$column??'')).'</td>'; print '</tr>'; }
  print '</tbody></table></div>';
 }

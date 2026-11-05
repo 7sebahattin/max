@@ -1,7 +1,8 @@
 <?php
 /** Private content ledger and explicit human association. GPL-3.0-or-later. */
 require_once __DIR__.'/packet.class.php';
-require_once __DIR__.'/extraction.class.php';
+require_once __DIR__.'/runner.class.php';
+require_once __DIR__.'/lines.class.php';
 class MaxOrdersDocument {
  private $db;
  private $entity;
@@ -34,7 +35,7 @@ class MaxOrdersDocument {
  }
  public function receive($actor,$name,$bytes) {
   $this->guard($actor,'intake');
-  $analysis=MaxOrdersExtraction::inspect($name,$bytes);
+  $analysis=MaxOrdersRunner::inspect($name,$bytes);
   $json=json_encode($analysis,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);
   if(strlen($json)>262144) throw new InvalidArgumentException('OrdersFileInvalid',400);
   $hash=hash('sha256',$bytes); $created=false; $path='';
@@ -52,6 +53,7 @@ class MaxOrdersDocument {
     try { if(!chmod($path,0600) || fwrite($handle,$bytes)!==strlen($bytes) || !fflush($handle)) throw new RuntimeException('OrdersStorageError',500); }
     finally { fclose($handle); }
    }
+   (new MaxOrdersLines($this->db))->capture($actor,(int)$record->rowid);
    if(!$this->db->commit()) throw new RuntimeException('OrdersStorageError',500);
    return ['id'=>(int)$record->rowid,'duplicate'=>!$created];
   } catch(Throwable $e) { $this->db->rollback(); if($created && is_file($path) && !unlink($path)) throw new RuntimeException('OrdersStorageError',500); throw $e; }
@@ -90,15 +92,21 @@ class MaxOrdersDocument {
    $record=$this->get($actor,$id,true);
    if($record->fk_packet) {
     if(!hash_equals((string)$record->link_hash,$hash)) throw new RuntimeException('OrdersDocumentLinked',409);
-    $this->db->commit(); return ['packet'=>(int)$record->fk_packet,'revision'=>(int)$record->fk_revision,'status'=>$record->link_status];
+    $this->db->commit(); return ['packet'=>(int)$record->fk_packet,'revision'=>$record->fk_revision===null?null:(int)$record->fk_revision,'status'=>$record->link_status];
    }
    $service=new MaxOrdersPacket($this->db); $packet=$service->packet($actor,$packetId,true);
    if((int)$packet->fk_soc!==(int)$customer || MaxOrdersPacket::normalized($packet->match_ref)!==MaxOrdersPacket::normalized($reference)) throw new InvalidArgumentException('OrdersOrderMismatch',400);
    // Supported native transaction nesting keeps packet+file association atomic.
    // The existing service preserves revision collisions, source quantities/locks.
-   $result=$service->ingest($actor,(int)$customer,$packet->match_ref,$kind,$document,$revision,json_encode((object)$values));
+   $analysis=json_decode($record->analysis_json,true,40,JSON_THROW_ON_ERROR);
+   if(($analysis['template']??'')==='table-v03') {
+    if($values) throw new InvalidArgumentException('OrdersNoLineAggregation',400);
+    $result=(new MaxOrdersLines($this->db))->associate($actor,$record,(int)$packetId,$kind,$document,$revision);
+   } else {
+    $result=$service->ingest($actor,(int)$customer,$packet->match_ref,$kind,$document,$revision,json_encode((object)$values));
+   }
    if($result['packet']!==(int)$packetId) throw new RuntimeException('OrdersStorageError',500);
-   $this->q('UPDATE '.$this->table().' SET fk_packet='.(int)$packetId.',fk_revision='.(int)$result['revision'].',link_status='.$this->s($result['status']).',link_hash='.$this->s($hash).',link_json='.$this->s($decision).',fk_user_reviewer='.(int)$actor->id.',date_linked='.$this->s($this->db->idate(dol_now())).' WHERE '.$this->scope().' AND rowid='.(int)$id);
+   $this->q('UPDATE '.$this->table().' SET fk_packet='.(int)$packetId.',fk_revision='.($result['revision']===null?'NULL':(int)$result['revision']).',link_status='.$this->s($result['status']).',link_hash='.$this->s($hash).',link_json='.$this->s($decision).',fk_user_reviewer='.(int)$actor->id.',date_linked='.$this->s($this->db->idate(dol_now())).' WHERE '.$this->scope().' AND rowid='.(int)$id);
    if(!$this->db->commit()) throw new RuntimeException('OrdersStorageError',500);
    return $result;
   } catch(Throwable $e) { $this->db->rollback(); throw $e; }

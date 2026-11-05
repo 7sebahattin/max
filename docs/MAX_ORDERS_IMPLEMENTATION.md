@@ -1,6 +1,6 @@
-# MAX Orders 0.2 — private document intake and document packets
+# MAX Orders 0.3 — traceable source line proposals
 
-Issue #21 established the optional manual 0.1 packet slice. Version 0.2 adds private PDF/XLSX intake, bounded XLSX proposals and explicit association with an existing packet. External GPL-3.0-or-later module for pinned Dolibarr 24.0.1; no core changes, shadow ERP records or mail importer. **General PDF text extraction is BLOCKED**, not implemented by a guessed/regex parser. The original manual workflow below remains available; the 0.2 extension and limits are documented separately at the end.
+Version 0.3 preserves the 0.1 manual packet and 0.2 A/B intake workflows and adds bounded multi-line XLSX proposals. The optional PDF text pilot is disabled by default and fails closed unless reviewed offline sandbox capabilities exist. See **Orders 0.3** below for current behavior and evidence. Earlier version-specific PDF BLOCKED statements describe the default pinned runtime, not a claim that the optional local pilot cannot work. External GPL-3.0-or-later module for Dolibarr 24.0.1; no upstream or native commercial mutations. Issue #21 established the original packet slice.
 
 ## Install and use
 
@@ -31,7 +31,7 @@ Every read/write service and HTTP boundary checks module state, native user righ
 | 360/390/768 pages, focusable table-local scrolling, accessible labels/buttons | Automated browser acceptance; no global native/mobile stylesheet changes |
 | Binary file uploads and private downloads | Implemented in 0.2 with explicit review; see limits below |
 | Bounded single-sheet XLSX cell proposals | Implemented in 0.2; not a general customer-layout importer |
-| Content PDF text extraction | **BLOCKED**; all PDFs stay needs_review with no inferred fields |
+| Content PDF text extraction | Default pinned runtime **BLOCKED**; optional explicit text-layout pilot in 0.3, described below |
 | Mail automation, shipment mutation, external sending, automatic order creation/approval, stock writes, issued commercial invoice, customer PKL | **NOT IMPLEMENTED** |
 | Field priority/effective quantity, approved extraction policy | Owner product decisions deferred |
 
@@ -121,3 +121,63 @@ The previously owner-confirmed **$0.00 / $0.00, Usage blocked** control is prese
 First CI attempt at `c832ce766343707919a3378b1103eee0524784f0`: [Orders 42043164847](https://github.com/7sebahattin/max/actions/runs/42043164847) **FAIL** in the new fixture helper: `getHashUniqueIdOfRegistration()` was called without its native `blockedlog.lib.php` include. The original 0.1 suite, 32 real-file parser checks and new service checks through lifecycle preservation passed; new HTTP/concurrency/final snapshot checks were **NOT RUN**. Docker teardown commands removed the owned containers/networks/volume, but the wrapper's final post-check was not reached. The fix explicitly loads that supported native library, as the existing shared fixture already does; it changes no application code or assertion. At that same SHA [co-enabled 42043160962](https://github.com/7sebahattin/max/actions/runs/42043160962), [integration 42043160498](https://github.com/7sebahattin/max/actions/runs/42043160498), [foundation 42043160811](https://github.com/7sebahattin/max/actions/runs/42043160811) and [source audit 42043160483](https://github.com/7sebahattin/max/actions/runs/42043160483) passed. These do not certify a later fix commit; exact-HEAD follow-up evidence is recorded in PR #33.
 
 Second attempt `677dc02fd166f6d89e5c7b095957201b02136066`: [Orders 42046152488](https://github.com/7sebahattin/max/actions/runs/42046152488) passed the original suite, 32 parser checks, installed 0.2 service/lifecycle, native HTTP/concurrency, nine new strict viewports, unchanged commercial/financial snapshots and owned teardown. [Co-enabled 42046152498](https://github.com/7sebahattin/max/actions/runs/42046152498), [integration 42046152827](https://github.com/7sebahattin/max/actions/runs/42046152827), [foundation 42046152556](https://github.com/7sebahattin/max/actions/runs/42046152556) and [audit 42046152918](https://github.com/7sebahattin/max/actions/runs/42046152918) also passed. **Artifact privacy audit FAILED:** the broad `orders-intake-*.json` pattern also selected the generated private session fixture. Artifact `13423974333` therefore contains expired synthetic credentials and must be removed; the disposable DB/accounts were already destroyed, no real provider/customer credential was involved, and values are not reproduced here. Connector tools cannot delete artifacts and a CLI DELETE was denied `Forbidden`; removal remains an explicit owner action unless later verified in PR #33. The fix replaces the glob with four exact report filenames and adds early negative-selection tests for session/account/credential/raw-input paths. Do not treat green runtime CI alone as a successful artifact-privacy audit. New exact-HEAD CI and archive inspection are required after this fix.
+
+
+## Orders 0.3: explicit source tables and human decisions
+
+Base: `1d473fe8bea6de3035fcdf02b5a27d0dcccf437c`. PR #32 and #33 were verified merged before branching. PR #33's old private artifact was deleted by the owner (comment 6662160913); that historical privacy gate is resolved. No changes to PR #23, other module sources, upstream, dependency pins, or the original 63 shared acceptance cases.
+
+### Supported layouts
+
+The existing `MAX_ORDERS_V02` A/B layout retains its original semantics. The new layout has exactly one visible sheet:
+
+| Cells | Meaning |
+|---|---|
+| A1 | `MAX_ORDERS_TABLE_V03` |
+| A2:B8 | Keys/values: document_kind, order_reference, document_reference, document_revision, customer_reference, customer_name, document_date |
+| Row 9 | Exact configured column headers |
+| Rows 10–59 | Up to 50 source rows; interior blank rows remain identifiable |
+
+Default columns, in order: Product → description, Variety → variety, Size → size, Quantity → quantity, Unit → unit, Price → unit_price, Currency → currency. Required fields: description, quantity, unit, unit_price, currency. Administrators with native Orders access can configure **MAX Orders → module setup** (`admin/setup.php`), using the entity-scoped `MAXORDERS_V03_COLUMNS` JSON map. Allowed optional fields include product_reference and packaging, at most nine columns A–I. Labels are unique, bounded strings, not code. Header mismatch yields needs_review; no fuzzy header or locale inference. A new configuration applies to new hashes only: replay always retains the original stored analysis.
+
+Raw cell literals and proposed values remain separate. Decimal normalization uses string operations only; commas, exponents, negative quantities and excessive precision remain uncertain. No formulas or cached formula results are evaluated. Mixed currencies produce a visible warning and no total. Blank, duplicate and contradictory rows are retained and marked. Product description is never treated as a native product code. Catalog suggestions require an **explicit product_reference**, the same entity, exact reference and native product-read permission. Suggestions do not write native associations.
+
+### Storage, association and history
+
+Two additive, MAX-owned `_init` tables extend the existing schema without altering the original tables: `maxorders_source_line` and `maxorders_document_source`. Re-enable the module through native administration after copying the upgrade. Disable/re-enable preserves all data. Existing module/right IDs and menus stay stable.
+
+Each immutable source row records upload SHA-256, declared kind/revision, sheet/row, cell raw/proposed values, uncertainty and pending review. The upload transaction locks the unique entity/hash ledger before inserting unique entity/upload/source-row records. Two simultaneous workers cannot create duplicate lines. Original files stay private and immutable.
+
+Both intake and review rights, native customer/order scope, CSRF and an explicit checkbox are required to link a source file to an existing packet. Customer and normalized order reference must match. For multi-line tables the facts object **must be `{}`**: flattening a table into scalar quantity/price is rejected. Human association records confirmed document kind/revision and actor/time; `linked` is not approval of every proposal. No effective quantity, source precedence, automatic product assignment or native ERP mutation is implemented.
+
+Document contexts retain PO/LL/PC independently. Lower late revisions are archived; conflicting same revisions are collisions. No source row, manual lock or earlier scalar fact is overwritten. Packet history shows original file links, all versions and separate source quantities/prices/currencies. Cross-source differences remain warnings with no selected winner. Comparisons fail closed above 500 rows; individual files remain accessible. Original 0.1/0.2 manual edits and conflict resolution remain available independently.
+
+### Resource and privacy boundaries
+
+Uploads are analyzed in a fixed PHP CLI worker with no DB/session/bootstrap or secret environment. Wall time 5 seconds; CPU 3 seconds; PHP heap 128 MiB; address space 384 MiB; 64 file descriptors; file output 3 MiB; reply 256 KiB. Missing CLI/POSIX limits or failed/over-budget workers yield needs_review with no accepted values. Private random workspaces are mode 0700, files 0600, and cleaned on normal success, rejection, timeout and PHP shutdown. A SIGKILL/host crash cannot run PHP cleanup: operators must handle orphaned private temporary directories before reuse. No shell commands or user paths are interpolated.
+
+XLSX retains 2 MiB input, 64 ZIP entries, 1 MiB/entry, 8 MiB expansion, ratio 50, 20,000 XML nodes, one sheet, 128 rows, 1,152 cells and columns A–I bounds. DTD/entities, external relationships, traversal, macros, merges and formulas are rejected before the bundled reader. Hidden sheets/rows/columns and hidden protection layouts are not accepted. XML uses NONET, no entity substitution; only fixed internal parts are allowed. No parser makes external HTTP requests or follows document links. Storage/download retain native authorization, entity, hash verification, GET-only attachments, no-store/nosniff/sandbox headers and mode 0600 outside webroot.
+
+### Optional offline PDF pilot and license review
+
+Dolibarr's bundled PDF creation/merge libraries are not used as an untrusted general text extractor. The existing environment supplies **Poppler pdftotext/pdfinfo 25.03.0**, Bubblewrap and util-linux prlimit. Poppler's installed notices cover GPL-2/GPL-3/GPL-2+ components; Bubblewrap is LGPL-2/LGPL-2.1+; prlimit is a util-linux system tool. These are external executables, not vendored or linked PHP libraries. Preserve distribution copyright/source obligations when packaging a runtime containing them. MAX remains GPL-3.0-or-later. No OCR, paid API, extra package installation, runtime image or dependency pin change is introduced here.
+
+The administrator may explicitly enable `MAXORDERS_PDF_SAFE_ENABLE`. Fixed `/usr/bin` tools must already be present and a real unprivileged user/network/PID/IPC/UTS namespace sandbox must work. Every invocation uses an argument array, cleared environment, no capabilities, read-only public binaries/libraries/fonts and one private input. App files, credentials and home are not mounted. Network is unshared, temp is a 4 MiB tmpfs, core dumps disabled, child memory 256 MiB, CPU 2 seconds, wall 2 seconds per command, output bounded. Ten pages and 64 KiB extracted UTF-8 text maximum. No rendering, OCR, URL fetch, embedded action or shell execution.
+
+Only text beginning `MAX_ORDERS_PDF_V03` followed by exact `field: value` lines for the existing allowlist is understood. Unknown layout/fields, invalid values, duplicate fields, scanned/encrypted/malformed/over-limit documents stay needs_review. Supported fields include page, line and byte-offset provenance; original bytes are unchanged. This is a deterministic **extracted text** parser, not a PDF-byte regex parser.
+
+The pinned native Docker runtime lacks these optional tools; safe sandbox support inside its container is not certified. Its default and CI PDF extraction are therefore **BLOCKED**, with no unconfined fallback. Do not add privileged mode, SYS_ADMIN, relaxed seccomp, paid OCR or an external provider to bypass this gate. Review/package licensed tools and validate unprivileged namespaces in a dedicated future deployment change before enabling on a customer installation.
+
+### Tests and reproduction
+
+`bash scripts/orders_test.sh` retains the entire original 0.1/0.2 suites, then runs the 0.3 real-file parser, optional capability probe, installed DB fixtures, authenticated browser checks and separate concurrent PHP workers in the same disposable native installation. Synthetic product creation precedes the immutable 17-table plus legal-issuer snapshot. Subsequent parser, branding-independent UI and intake operations may not change those native records. Existing shared 63 strict cases remain unchanged and run through the selective co-enabled workflow.
+
+Local PHP 8.3.36 + checksum-verified Dolibarr 24.0.1 reader results: **32/32** original file/security checks, **32/32** new table/resource checks, **14/14** real sandboxed PDF checks, repository checks, PHP lint, Python compilation, four Orders artifact/Docker refusal/locale tests and **21/21** shared lightweight tests PASS. Full local MariaDB/browser acceptance is **NOT RUN** in the constrained managed filesystem; new automatic PR CI is authoritative for native installation, source HEAD, shared cases, artifact inventory and teardown. Do not infer a native PDF PASS from the separate capable-host probe. Native CI results are recorded on the draft PR at exact HEAD, including failed attempts.
+
+New browser matrix: source table review, packet source history, administrator template settings × TR/EN × 360/390/768 = **18 strict document-overflow cases**, preserving the previous Orders and intake matrices. Tests cover pointer confirmation, keyboard-focusable table-local scrolling, native roles, server-side denial/content, template and association CSRF, source provenance, original bytes and missing assets/JS errors. Manual physical-device, WSL2, real-provider/TLS, general PDF/OCR, HKS, SMTP and full accessibility gates remain BLOCKED/NOT RUN; none is certified by desktop Chromium.
+
+Only explicitly named public JSON reports, synthetic screenshots and the source-only module ZIP enter the artifact. New allowed names: orders-table-parser/native/http/mobile.json and orders-pdf-probe.json. Credentials, sessions, source inputs, workspace files and unlisted future JSON files must never match upload patterns. Inspect the actual downloaded archive against this closed inventory and source HEAD before review; a failed/absent archive inspection is NOT RUN, not PASS. Owned Compose containers, networks and volumes must be absent after teardown; cleanup failure fails acceptance. Keep the existing $0 Actions hard stop unchanged; no manual dispatch/rerun.
+
+Reproduce the pure parser on a compatible PHP CLI with zip/DOM/mbstring/intl/POSIX: `php tests/orders/table_unit.php /path/to/dolibarr/htdocs`; optional sandbox capability: `php tests/orders/pdf_probe.php /path/to/dolibarr/htdocs`. These do not install tools or contact providers. For native acceptance use the existing unique `max-orders-*` Compose wrapper with synthetic `.env` and Playwright 1.56.0.
+
+Rollback: disable the optional PDF setting, then disable MAX Orders through native administration. Restore the approved source package and preserve all private files and MAX-owned tables; do not drop or migrate commercial data. Version 0.2 ignores additive 0.3 source tables, so source-line review requires 0.3 again. Back up/restore the installation's approved DB/documents together before any future customer deployment. No deployment or merge is authorized by this PR.
