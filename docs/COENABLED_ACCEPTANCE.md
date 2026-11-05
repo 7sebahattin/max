@@ -47,3 +47,5 @@ Physical phones, real WSL2/Docker Desktop workstation, full accessibility audit,
 ## Execution history
 
 Initial exact head `5ef348cbd8657050d00e46cd3575aed86b613c84` [41984618161](https://github.com/7sebahattin/max/actions/runs/41984618161) FAILED at the new bootstrap helper, after the unchanged native P2/commercial installation passed. Docker identities were captured; cleanup succeeded and no acceptance manifest was emitted. The first bounded log projection omitted a generic native exception, so argument-free exception type/file/line/stack diagnostics and partial NOT_RUN viewport evidence were added. This is not a cross-module PASS or yet a diagnosed application defect.
+
+Bootstrap root cause: the harness passed the HTML selector value `logo` directly to `maxCoreSave`, whose supported service contract accepts concrete bundled/uploaded asset tokens. The UI resolves `logo` before invoking that service. Bootstrap now supplies `max-icon.svg`; the real HTTP upload test still uses the UI `logo` option and validates normalized raster/favicon bytes. This is a new-test API misuse, not an application defect or a reason to modify Core.

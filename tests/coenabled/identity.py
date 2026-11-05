@@ -8,7 +8,7 @@ OUT=Path('.local/coenabled-evidence');OUT.mkdir(exist_ok=True)
 phase=sys.argv[1]; sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
 project=os.environ['COMPOSE_PROJECT_NAME']
 if phase=='before':
-    (OUT/'source.json').write_text(json.dumps({'sha':sha,'base':'a3344b18be64e99c8e08df83d5888699f4e3d89d','project':project},indent=2))
+    (OUT/'source.json').write_text(json.dumps({'sha':sha,'base':'a3344b18be64e99c8e08df83d5888699f4e3d89d','project':project,'docker_version':subprocess.check_output(['docker','version','--format','{{.Server.Version}}'],text=True).strip(),'compose_version':subprocess.check_output(['docker','compose','version','--short'],text=True).strip()},indent=2))
 else:
     containers={}
     for service in ('db','web','gateway','fakeimap'):

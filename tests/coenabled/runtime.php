@@ -60,7 +60,7 @@ if($mode==='bootstrap') {
     $bank=new Account($db); needE($bank->fetch((int)rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'bank_account ORDER BY rowid LIMIT 1')[0]['rowid'])>0,'native synthetic bank fixture');
     $bank->iban='TEST-IBAN-COENABLED'; needE($bank->update_bban($user)>0,'native synthetic nonbank IBAN fixture');
     require_once DOL_DOCUMENT_ROOT.'/custom/maxcore/lib/maxcore.lib.php';
-    maxCoreSave(['MAXCORE_DISPLAY_NAME'=>'Coenabled Initial','MAXCORE_LOGO'=>'max.svg','MAXCORE_FAVICON'=>'logo'],$user);
+    maxCoreSave(['MAXCORE_DISPLAY_NAME'=>'Coenabled Initial','MAXCORE_LOGO'=>'max.svg','MAXCORE_FAVICON'=>'max-icon.svg'],$user);
     $image=imagecreatetruecolor(32,32); imagefill($image,0,0,imagecolorallocate($image,30,90,130)); imagejpeg($image,$root.'/coenabled-logo.jpg',85); imagedestroy($image); chmod($root.'/coenabled-logo.jpg',0600);
     echo "PASS all five modules installed and Core roles prepared\n"; exit;
 }
@@ -84,6 +84,8 @@ if($mode==='freeze') {
     file_put_contents($root.'/coenabled-identity.json',json_encode($identity)); echo "PASS immutable populated single DB baseline frozen\n"; exit;
 }
 needE(nativeE()===file_get_contents($root.'/coenabled-native-before'),'immutable native legal bank stock order invoice finance snapshot');
+$identity=json_decode(file_get_contents($root.'/coenabled-identity.json'),true);
+needE(hash('sha256',$conf->file->instance_unique_id)===$identity['installation_fingerprint'] && rowsE('SELECT @@hostname AS host')[0]['host']===$identity['database_server']['host'],'same installed DB identity at every phase');
 if($mode==='chain') {
     require_once DOL_DOCUMENT_ROOT.'/custom/maxorders/class/packet.class.php';
     require_once DOL_DOCUMENT_ROOT.'/custom/maxcustoms/class/declaration.class.php';
