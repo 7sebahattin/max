@@ -1,14 +1,22 @@
 <?php
 /** Bounded proposals, never commercial truth. GPL-3.0-or-later. */
+require_once __DIR__.'/table.class.php';
 class MaxOrdersExtraction {
  const MAX_BYTES=2097152;
  const FIELDS=['document_kind','order_reference','document_reference','document_date','customer_reference','customer_name','product_reference','description','quantity','unit','unit_price','currency','packaging'];
 
- public static function inspect($name,$bytes) {
+ public static function validate($name,$bytes) {
   if(!is_string($name) || preg_match('//u',$name)!==1 || $name!==basename($name) || preg_match('/[\\\\\/\x00-\x1f\x7f:]/u',$name) || mb_strlen($name)>120 || !is_string($bytes) || strlen($bytes)<8 || strlen($bytes)>self::MAX_BYTES) throw new InvalidArgumentException('OrdersFileInvalid',400);
   $extension=strtolower(pathinfo($name,PATHINFO_EXTENSION));
   $mime=(new finfo(FILEINFO_MIME_TYPE))->buffer($bytes);
+  if($extension==='pdf' && $mime==='application/pdf' && preg_match('/^%PDF-(?:1\.[0-7]|2\.0)[\r\n]/D',$bytes)) return [$extension,$mime];
+  if($extension==='xlsx' && in_array($mime,['application/zip','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],true) && substr($bytes,0,4)==="PK\x03\x04") return [$extension,$mime];
+  throw new InvalidArgumentException('OrdersFileInvalid',400);
+ }
+ public static function inspect($name,$bytes,$options=[]) {
+  [$extension,$mime]=self::validate($name,$bytes);
   if($extension==='pdf' && $mime==='application/pdf' && preg_match('/^%PDF-(?:1\.[0-7]|2\.0)[\r\n]/D',$bytes)) {
+   if(!empty($options['pdf_sandbox'])) { require_once __DIR__.'/pdf.class.php'; return MaxOrdersPdf::inspect($bytes); }
    // No safe general text extractor is bundled. Never feed hostile PDF objects
    // to the upstream merge parser, render them, or guess from filename/bytes.
    return ['format'=>'pdf','mime'=>$mime,'status'=>'needs_review','fields'=>[],
@@ -35,6 +43,8 @@ class MaxOrdersExtraction {
    try {
     if($book->getSheetCount()!==1 || $raw['hidden']) { $result['issues']=['OrdersLayoutReview']; return $result; }
     $sheet=$book->getSheet(0);
+    if($sheet->getCell('A1')->getValue()===MaxOrdersTable::MARKER) return MaxOrdersTable::parse($sheet,$raw,$options);
+    foreach($sheet->getCoordinates() as $ref) if(!preg_match('/^[AB][0-9]+$/D',$ref) && $sheet->getCell($ref)->getValue()!==null && $sheet->getCell($ref)->getValue()!=='') { $result['issues']=['OrdersLayoutReview']; return $result; }
     if($sheet->getCell('A1')->getValue()!=='MAX_ORDERS_V02' || $sheet->getCell('A2')->getValue()!=='field' || $sheet->getCell('B2')->getValue()!=='value') { $result['issues']=['OrdersLayoutReview']; return $result; }
     $seen=[];
     for($row=3;$row<=128;$row++) {
@@ -64,7 +74,7 @@ class MaxOrdersExtraction {
   } finally { if(is_file($temp) && !unlink($temp)) throw new RuntimeException('OrdersStorageError',500); }
  }
 
- private static function valid($key,$value) {
+ public static function valid($key,$value) {
   if($value==='' || mb_strlen($value)>($key==='description'?255:80) || preg_match('/[\x00-\x1f\x7f<>]/u',$value)!==0) return false;
   if($key==='document_kind') return in_array($value,['PO','LL','PC'],true);
   if($key==='quantity') return (bool)preg_match('/^\d{1,9}(\.\d{1,3})?$/D',$value);
@@ -108,21 +118,22 @@ class MaxOrdersExtraction {
      if($node->hasAttribute('count') && (!ctype_digit($node->getAttribute('count')) || (int)$node->getAttribute('count')>20000)) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
      if($node->localName==='Relationship' && ($node->getAttribute('TargetMode')==='External' || preg_match('~(?:^[\\\\/]|\.\.|:|\\\\)~',$node->getAttribute('Target')))) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
      if($node->localName==='Override' && preg_match('/macro|vba|activex|oleObject/i',$node->getAttribute('ContentType'))) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
+     if($node->localName==='protection' && in_array($node->getAttribute('hidden'),['1','true'],true)) $hidden=true;
      if($node->localName==='sheet' && $node->getAttribute('state')!=='' && $node->getAttribute('state')!=='visible') $hidden=true;
     }
     if($name==='xl/worksheets/sheet1.xml') {
-     $cells=$dom->getElementsByTagNameNS('*','c'); if($cells->length>256) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
+     $cells=$dom->getElementsByTagNameNS('*','c'); if($cells->length>1152) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
      $cellNames=[];
      foreach($cells as $cell) {
       $ref=$cell->getAttribute('r');
-      if(!preg_match('/^[AB]([1-9][0-9]{0,2})$/D',$ref,$m) || (int)$m[1]>128 || isset($cellNames[$ref])) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
+      if(!preg_match('/^[A-I]([1-9][0-9]{0,2})$/D',$ref,$m) || (int)$m[1]>128 || isset($cellNames[$ref])) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
       $cellNames[$ref]=true;
       foreach($cell->getElementsByTagNameNS('*','v') as $v) $numbers[$ref]=$v->textContent;
       if($cell->getElementsByTagNameNS('*','f')->length) $formulas=true;
      }
-     foreach($dom->getElementsByTagNameNS('*','row') as $row) { if(!preg_match('/^[1-9][0-9]{0,2}$/D',$row->getAttribute('r')) || (int)$row->getAttribute('r')>128) throw new InvalidArgumentException('OrdersArchiveInvalid',400); if($row->getAttribute('hidden')==='1') $hidden=true; }
-     foreach($dom->getElementsByTagNameNS('*','dimension') as $dim) if(!preg_match('/^A1(?::[AB]([1-9][0-9]{0,2}))?$/D',$dim->getAttribute('ref'),$m) || (isset($m[1]) && (int)$m[1]>128)) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
-     foreach($dom->getElementsByTagNameNS('*','col') as $col) if(!in_array($col->getAttribute('min'),['1','2'],true) || !in_array($col->getAttribute('max'),['1','2'],true) || (int)$col->getAttribute('min')>(int)$col->getAttribute('max')) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
+     foreach($dom->getElementsByTagNameNS('*','row') as $row) { if(!preg_match('/^[1-9][0-9]{0,2}$/D',$row->getAttribute('r')) || (int)$row->getAttribute('r')>128) throw new InvalidArgumentException('OrdersArchiveInvalid',400); if(in_array($row->getAttribute('hidden'),['1','true'],true) || $row->getAttribute('ht')==='0') $hidden=true; }
+     foreach($dom->getElementsByTagNameNS('*','dimension') as $dim) if(!preg_match('/^A1(?::[A-I]([1-9][0-9]{0,2}))?$/D',$dim->getAttribute('ref'),$m) || (isset($m[1]) && (int)$m[1]>128)) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
+     foreach($dom->getElementsByTagNameNS('*','col') as $col) { if(!preg_match('/^[1-9]$/D',$col->getAttribute('min')) || !preg_match('/^[1-9]$/D',$col->getAttribute('max')) || (int)$col->getAttribute('min')>(int)$col->getAttribute('max')) throw new InvalidArgumentException('OrdersArchiveInvalid',400); if(in_array($col->getAttribute('hidden'),['1','true'],true) || $col->getAttribute('width')==='0') $hidden=true; }
     }
    }
    foreach(['[content_types].xml','_rels/.rels','xl/workbook.xml','xl/_rels/workbook.xml.rels','xl/worksheets/sheet1.xml'] as $required) if(!isset($seen[$required])) throw new InvalidArgumentException('OrdersArchiveInvalid',400);
