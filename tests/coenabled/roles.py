@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from privacy import opt_out
 BASE='http://127.0.0.1:8080'; OUT=Path('.local/coenabled-evidence')
 
 def main():
@@ -15,7 +16,7 @@ def main():
     with sync_playwright() as p:
         browser=p.chromium.launch()
         for role,(account,paths) in targets.items():
-            c=browser.new_context();c.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort());page=c.new_page();page.goto(BASE+'/');page.locator('[name=username]').fill(account['login']);page.locator('[name=password]').fill(account['password']);page.locator('[type=submit]').first.click();page.wait_for_load_state('networkidle');assert not page.locator('[name=password]').count(),'Native login failed'
+            c=browser.new_context();opt_out(c);c.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort());page=c.new_page();page.goto(BASE+'/');page.locator('[name=username]').fill(account['login']);page.locator('[name=password]').fill(account['password']);page.locator('[type=submit]').first.click();page.wait_for_load_state('networkidle');assert not page.locator('[name=password]').count(),'Native login failed'
             for path in paths:
                 r=c.request.get(BASE+path);assert r.status==403,'Cross module GET status'
                 assert all(x not in r.text() for x in ['data-maxorders=','data-maxcustoms=','PRIVATE_EVIDENCE_SENTINEL','CONTACT_RESTRICTED_SENTINEL','Synthetic intake 202','MAXCORE_DISPLAY_NAME']),'Cross module denial body'

@@ -10,13 +10,14 @@ import shutil
 import sys
 from urllib.parse import urlsplit
 from playwright.sync_api import Browser
+from privacy import opt_out
 
 ALLOWED={'core':'tests/maxcore/browser.py','orders':'tests/orders/browser.py','customs':'tests/customs/browser.py','mail':'tests/mailintake/browser.py'}
 
 def run(lane):
     path=Path(ALLOWED[lane]); errors=[]; navigation=[]; failed_requests=[]; contexts=[]; original=Browser.new_context
     def new_context(self,*args,**kwargs):
-        context=original(self,*args,**kwargs); ordinal=len(contexts); contexts.append(ordinal)
+        context=original(self,*args,**kwargs); ordinal=len(contexts); contexts.append(ordinal); opt_out(context)
         def page_created(page):
             page.on('pageerror',lambda e:errors.append({'kind':'javascript','digest':hashlib.sha256(str(e).encode()).hexdigest()}))
             def console(message):
@@ -35,7 +36,7 @@ def run(lane):
     sys.path.insert(0,str(path.parent.resolve()))
     try:
         with contextlib.redirect_stdout(output),contextlib.redirect_stderr(output): runpy.run_path(str(path),run_name='__main__')
-        if errors: raise AssertionError('JavaScript console or asset failure')
+        if errors or failed_requests: raise AssertionError('JavaScript asset or unexpected network request failure')
         result['passed']=True
     except BaseException as e:
         trace=e.__traceback__; locations=[]

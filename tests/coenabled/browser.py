@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 from playwright.sync_api import sync_playwright
+from privacy import opt_out
 
 BASE='http://127.0.0.1:8080'
 PAGES=['societe/list.php','product/list.php','commande/list.php','expedition/list.php','compta/facture/list.php']
@@ -14,7 +15,7 @@ def need(value,label):
 def save(): (OUT/'native-layout.json').write_text(json.dumps(measurements,indent=2))
 def cli(mode): subprocess.run(['docker','compose','exec','-T','--user','www-data','web','php','/checks/mobile/runtime.php',mode],check=True,stdout=subprocess.DEVNULL)
 def login(browser,account):
-    context=browser.new_context(viewport={'width':390,'height':900})
+    context=browser.new_context(viewport={'width':390,'height':900}); opt_out(context)
     context.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort())
     page=context.new_page(); page.on('pageerror',lambda e:errors.append({'kind':'javascript','hash':hashlib.sha256(str(e).encode()).hexdigest()}))
     page.on('console',lambda m:errors.append({'kind':'console','hash':hashlib.sha256(m.text.encode()).hexdigest()}) if m.type=='error' and not m.text.startswith('Failed to load resource: the server responded with a status of 403') else None)
@@ -91,7 +92,7 @@ def main():
                 need('Fatal error' not in r.text() and 'Parse error' not in r.text(),'Native role page has no runtime error')
                 role_checks.append({'role':role,'surface':path,'status':r.status,'denial':role=='denied'})
             c.close()
-        guest=browser.new_context();page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
+        guest=browser.new_context();opt_out(guest);page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
         browser.close()
     (OUT/'native-browser.json').write_text(json.dumps({'passed':not errors,'errors':errors,'strict_checks':15,'baseline_checks':15,'brand_changes':2,'hooks_same_page':True,'roles':role_checks},indent=2));need(not errors,'No JavaScript or missing asset failures')
     print('PASS shared native hooks two brands assets roles and 15 STRICT viewport cases')

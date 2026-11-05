@@ -41,7 +41,7 @@ def main():
     php('mailintake/native.php','setup')
     checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json'); copy('coenabled-core-roles.json','coenabled-evidence/core-roles.json')
     checkpoint('chain'); copy('coenabled-chain.json','coenabled-evidence/chain.json')
-    for source,target in [('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('orders-accounts.json','orders-accounts.json'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
+    for source,target in [('coenabled-privacy.json','coenabled-privacy.json'),('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('orders-accounts.json','orders-accounts.json'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
     for lane in ('core','orders','customs'):
         checkpoint('before-'+lane)
         python('tests/coenabled/observe.py',lane)

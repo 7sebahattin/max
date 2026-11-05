@@ -52,7 +52,12 @@ if($mode==='bootstrap') {
         if($role==='test') $p->admin=1;
         needE($p->create($user)>0,'native Core fixture user');
         if($role!=='test') { $p->clearrights(); if($right) needE($p->addrights($right)>0,'native Core fixture grant'); $accounts[$role]=['login'=>$p->login,'password'=>$pass]; }
-        else {file_put_contents($root.'/coenabled-core-admin',$pass); chmod($root.'/coenabled-core-admin',0600);}
+        else {
+            // Native admin flag is not a substitute for explicit module rights.
+            // This account was created AFTER activation, unlike installer maxadmin.
+            foreach(rowsE('SELECT id FROM '.MAIN_DB_PREFIX.'rights_def WHERE entity IN (0,1)') as $rightRow) needE($p->addrights((int)$rightRow['id'])>0,'explicit fixture owner rights');
+            file_put_contents($root.'/coenabled-core-admin',$pass); chmod($root.'/coenabled-core-admin',0600);
+        }
     }
     file_put_contents($root.'/maxcore-accounts.json',json_encode($accounts)); chmod($root.'/maxcore-accounts.json',0600);
     foreach(['MAIN_INFO_SOCIETE_IDPROF1'=>'SYNTHETIC-TAX-COENABLED','MAIN_INFO_SOCIETE_ADDRESS'=>'Synthetic address only'] as $key=>$value) needE(dolibarr_set_const($db,$key,$value,'chaine',0,'',1)>0,'synthetic legal fixture');
@@ -81,6 +86,10 @@ if($mode==='freeze') {
         $caps[$role]=['id'=>(int)$p->id,'admin'=>(int)$p->admin,'read'=>maxCoreCan($p,'read'),'configure'=>maxCoreCan($p,'configure'),'module_admin'=>maxCoreCan($p,'admin')];
     }
     file_put_contents($root.'/coenabled-core-roles.json',json_encode($caps));
+    needE($caps['test']['read'] && $caps['test']['configure'] && $caps['test']['module_admin'],'fixture owner capabilities verified before browser');
+    require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
+    $privacy=[['name'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256'),'value'=>'1','domain'=>'127.0.0.1','path'=>'/','sameSite'=>'Lax']];
+    file_put_contents($root.'/coenabled-privacy.json',json_encode($privacy)); chmod($root.'/coenabled-privacy.json',0600);
     // Every commercial fixture is now complete. Rebase original helper hashes ONCE
     // to this populated DB, before any acceptance/UI/intake action. No source edits.
     $contracts=[
