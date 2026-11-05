@@ -88,7 +88,7 @@ if($mode==='chain') {
     needE($replay['status']==='duplicate' && $orders->detail($user,$ll['packet'])==$before,'packet replay link has no duplicate side effect');
     $customs=new MaxCustomsDeclaration($db); $id=$customs->create($user,'COENABLED-CHAIN',['office'=>'Synthetic','mode'=>'road','origin'=>'Demo','destination'=>'Demo','goods_summary'=>'Synthetic chain']);
     $d=$customs->projection($user,$id); $customs->matchNative($user,$id,$d['version'],$f['customer'],$o->id,$f['shipments'],$f['reference'],true); $d=$customs->projection($user,$id);
-    needE((int)$orders->packet($user,$ll['packet'])->fk_order===$o->id && $d['order']===$o->id && $d['customer']===$f['customer'] && count($d['shipments'])===2 && $d['status']==='draft','customer order partial shipment packet customs chain');
+    needE((int)$orders->packet($user,$ll['packet'])->fk_order===(int)$o->id && $d['order_id']===(int)$o->id && $d['customer_id']===(int)$f['customer'] && count($d['shipments'])===2 && $d['status']==='draft','customer order partial shipment packet customs chain');
     file_put_contents($root.'/coenabled-chain.json',json_encode(['customer'=>$f['customer'],'order'=>$o->id,'shipments'=>$d['shipments'],'packet'=>$ll['packet'],'declaration'=>$id,'status'=>'draft']));
     needE(nativeE()===file_get_contents($root.'/coenabled-native-before'),'chain only writes MAX records'); echo "PASS native chain linked without ERP writes or duplicate packet\n"; exit;
 }
