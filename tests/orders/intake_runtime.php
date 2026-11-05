@@ -3,6 +3,7 @@
 if(PHP_SAPI!=='cli') exit(2);
 chdir('/opt/dolibarr/htdocs'); require 'master.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/custom/maxorders/class/document.class.php';
 require __DIR__.'/fixtures.php';
 $checks=[];
