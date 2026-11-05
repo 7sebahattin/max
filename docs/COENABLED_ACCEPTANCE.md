@@ -40,7 +40,7 @@ python3 -m unittest discover -s tests/coenabled -v
 COMPOSE_PROJECT_NAME=max-coenabled-unique bash scripts/coenabled_test.sh
 ```
 
-During Issue #20, local full native execution was **BLOCKED** by the managed environment's 8 GB/vfs capacity; real isolated execution was performed in GitHub Actions, not substituted with mocks. Six local evidence/cleanup/real-Docker guard tests passed then. Recorded cross-module results are listed below; final exact-head proof is maintained in merged PR #29. Issue #31 has a separate cost gate and NOT RUN status below; historical results do not validate its new HEAD.
+During Issue #20, local full native execution was **BLOCKED** by the managed environment's 8 GB/vfs capacity; real isolated execution was performed in GitHub Actions, not substituted with mocks. Six local evidence/cleanup/real-Docker guard tests passed then. Recorded cross-module results are listed below; final exact-head proof is maintained in merged PR #29. Issue #31's prepublication cost gate and NOT RUN snapshot are preserved below, followed by its published exact-SHA evidence; historical results do not validate a later HEAD.
 
 Physical phones, real WSL2/Docker Desktop workstation, full accessibility audit, provider/TLS/OAuth, PDF extraction/unlocking/automatic release, HKS SOAP and commercial distribution remain manual/BLOCKED gates. This test-only task authorizes no staging/live deployment, validated invoice or merge. Rollback discards only the owned synthetic project; module/data rollback is outside this test-only PR.
 
@@ -100,7 +100,9 @@ The original source guard hardcoded the Issue #20 creation base and permitted on
 
 The strict engine, runtime PHP, observers, role/CSRF/private-file checks, IMAP scenarios, native snapshots, run orchestration and cleanup script are unchanged. The same five Cartesian sets remain **15 native + 9 Core + 9 Orders + 18 Customs + 12 Mail = 63**, at exactly 360/390/768px with zero overflow tolerance, one installation/database and no SMTP/HKS/provider use. New offline negative tests cover missing/duplicate/one-pixel-overflow evidence in every surface and test/cleanup failures with a manifest present. Missing-manifest tests remain in place. These synthetic unit fixtures are not native execution evidence.
 
-### Zero-cost publication gate and current evidence
+### Historical prepublication snapshot: zero-cost gate and local evidence
+
+The following BLOCKED / NOT RUN statements and evidence table record the local-only state at `b7769ee8ea346b9f1b29cc67c13df3d224e7e1fa` **before publication**. They remain unchanged as history, not the current PR status. The later owner-confirmed spending block and completed automatic CI are recorded separately below.
 
 **BLOCKED: push, draft PR creation and any new remote native run.** The connected GitHub tools do not expose account-level remaining private-repository Actions allowance, artifact-storage allowance or hard spending limits. A standard `ubuntu-latest` runner is not proof of zero charges. No billing setting was changed or inferred from successful historical runs. No new runner, subscription, API key, external service, schedule or retry was created.
 
@@ -116,6 +118,31 @@ Before publication the owner must verify sufficient included Actions execution/s
 | Protected-source comparison against verified main | PASS: exactly the five intended CI/test/docs files changed; modules, strict engine, native helpers and cleanup unchanged |
 | Full Docker/DB/63-browser execution at this new HEAD | NOT RUN; no native PASS or runtime identity claimed |
 | New remote CI run, push and draft PR | NOT RUN / BLOCKED by unverifiable no-charge allowance |
+
+### Published PR #32 evidence: implementation HEAD verified 2026-11-05
+
+After the historical snapshot, the owner verified the account Billing display as **$0.00 / $0.00, Usage blocked** and authorized publication. The branch was published and [DRAFT PR #32](https://github.com/7sebahattin/max/pull/32) opened against main `83df46d2646f8004c72ec2cbaf4ad4892159f9fd`. Budget/spending controls were not changed; no paid runner/service/API, manual dispatch or rerun was used. This supersedes the earlier publication/native-execution block for the evidence below, without claiming independent API access to account billing settings.
+
+All four automatically PR-triggered workflows completed **PASS on attempt 1** at exact implementation HEAD `b7769ee8ea346b9f1b29cc67c13df3d224e7e1fa`:
+
+| Workflow | Result | Exact-SHA run |
+|---|---|---|
+| MAX co-enabled acceptance | PASS | [42027772689](https://github.com/7sebahattin/max/actions/runs/42027772689) |
+| MAX integration regression (P2 and MAX Core native pilots) | PASS | [42027772266](https://github.com/7sebahattin/max/actions/runs/42027772266) |
+| Foundation checks | PASS | [42027772511](https://github.com/7sebahattin/max/actions/runs/42027772511) |
+| MAX source audit (Linux/Windows) | PASS | [42027772543](https://github.com/7sebahattin/max/actions/runs/42027772543) |
+
+The completed native job log confirms the unchanged strict evidence engine passed **63/63** (15 native + 9 Core + 9 Orders + 18 Customs + 12 Mail), project identity checks passed before/installed/final, and `PASS single owned project cleanup and complete acceptance evidence` was recorded. These are actual native execution and cleanup results, not the earlier offline tests or artifact-upload success alone. CI also passed 21 harness unit tests including the real-Docker ownership guard; **20/20 local PASS** remains the offline subset recorded above. The [independent source review](https://github.com/7sebahattin/max/pull/32#pullrequestreview-5785167136) verified the native log and requested this documentation reconciliation; it is not owner merge authorization.
+
+The sanitized `max-coenabled-evidence` artifact (ID `13414698732`, SHA-256 `66b2e3f7d3f5395609694c6790ece53032fc30c993d73f37fa67001cc005f2d3`) is temporary, with recorded expiry **2026-11-12**. Its archive contents were not independently downloaded/inspected for this PR reconciliation; the native log and workflow outcomes were verified. Do not treat temporary artifact retention as permanent evidence availability.
+
+These run links prove only the implementation SHA above. This documentation follow-up creates a later HEAD; its automatic CI results must be verified separately and recorded with that exact SHA in PR #32, without attributing an older PASS to it or creating recursive documentation-only CI updates. The PR's cumulative executable changes still select native acceptance even though this follow-up modifies only this document.
+
+**Still manual / BLOCKED:** physical-device checks, a real WSL2/Docker Desktop workstation, real provider/TLS/OAuth, PDF extraction/unlocking/automatic release, HKS SOAP and full accessibility/commercial review. Synthetic CI does not satisfy those gates. Code review and explicit owner merge authorization remain separate requirements; selector code from the PR HEAD is not an independent tamper-proof policy. No module/test mechanism, PR #23, merge or staging/live deployment is changed or authorized by this documentation update.
+
+### Reproduction and rollback
+
+The commands below are reproduction guidance, not authorization to dispatch or rerun workflows during this documentation task. The earlier offline/native NOT RUN distinction remains part of the historical record; actual published native/cleanup PASS is recorded above.
 
 Lightweight reproduction (Python stdlib and Git; no Docker or API):
 
