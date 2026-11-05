@@ -65,5 +65,19 @@ CREATE TABLE IF NOT EXISTS llx_maxorders_audit (
  fk_user_author integer NOT NULL, datec datetime NOT NULL
 ) ENGINE=innodb
 SQL
+),
+str_replace('llx_', MAIN_DB_PREFIX, <<<'SQL'
+CREATE TABLE IF NOT EXISTS llx_maxorders_upload (
+ rowid integer AUTO_INCREMENT PRIMARY KEY, entity integer NOT NULL,
+ content_hash char(64) NOT NULL, original_name varchar(120) NOT NULL,
+ format varchar(8) NOT NULL, byte_size integer NOT NULL,
+ analysis_status varchar(20) NOT NULL, analysis_json mediumtext NOT NULL,
+ link_status varchar(20) NOT NULL, fk_packet integer NULL, fk_revision integer NULL,
+ link_hash char(64) NULL, link_json text NULL,
+ fk_user_author integer NOT NULL, datec datetime NOT NULL,
+ fk_user_reviewer integer NULL, date_linked datetime NULL,
+ UNIQUE KEY uk_maxorders_upload (entity,content_hash)
+) ENGINE=innodb
+SQL
 )
 ];

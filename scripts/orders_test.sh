@@ -23,6 +23,17 @@ docker compose cp web:/var/lib/dolibarr/documents/orders-accounts.json .local/or
 chmod 600 .local/orders-accounts.json
 python3 tests/orders/browser.py
 docker compose exec -T web php /checks/orders/runtime.php verify
+# Orders 0.2 uses the same installed synthetic DB and preserves the original suite.
+docker compose exec -T web chown -R www-data:www-data /var/lib/dolibarr/documents
+docker compose exec -T --user www-data web php /checks/orders/extraction_unit.php /opt/dolibarr/htdocs /var/lib/dolibarr/documents/orders-intake-parser.json
+docker compose exec -T --user www-data web php /checks/orders/intake_runtime.php setup
+docker compose cp web:/var/lib/dolibarr/documents/orders-intake-session.json .local/orders-intake-session.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-intake-inputs .local/orders-intake-inputs
+chmod 600 .local/orders-intake-session.json
+python3 tests/orders/intake_browser.py
+docker compose exec -T --user www-data web php /checks/orders/intake_runtime.php verify
+docker compose cp web:/var/lib/dolibarr/documents/orders-intake-native.json .local/orders-intake-native.json
+docker compose cp web:/var/lib/dolibarr/documents/orders-intake-parser.json .local/orders-intake-parser.json
 docker compose down --volumes --remove-orphans
 for kind in container volume network; do
  case "$kind" in container) count="$(docker ps -aq --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME")";;
