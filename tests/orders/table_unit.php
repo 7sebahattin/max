@@ -22,6 +22,8 @@ $row=ordersTableRows()[0];$a=tableInspect([$row,$row]);
 tableCheck(array_column($a['lines'],'state')===['duplicate','duplicate'],'both exact duplicate rows marked');
 $changed=$row;$changed[3]='999';$a=tableInspect([$row,$changed]);
 tableCheck(array_column($a['lines'],'state')===['conflict','conflict'] && $a['lines'][0]['values']['quantity']==='1000','contradictory row proposals not merged');
+$invalidA=$row;$invalidB=$row;$invalidA[3]='1,000';$invalidB[3]='1.000,00';$a=tableInspect([$invalidA,$invalidB]);
+tableCheck(array_column($a['lines'],'state')===['conflict','conflict'],'different uncertain raw values are conflicts, not duplicates');
 foreach(['1,000','1.000,00','1e3','-1','NaN','1.2345'] as $number){$r=$row;$r[3]=$number;$a=tableInspect([$r]);tableCheck(!isset($a['lines'][0]['values']['quantity']) && $a['lines'][0]['cells']['quantity']['raw']===$number,'ambiguous quantity rejected '.$number);}
 $r=$row;$r[3]=['number','001.230'];$a=tableInspect([$r]);tableCheck($a['lines'][0]['values']['quantity']==='1.23' && $a['lines'][0]['cells']['quantity']['raw']==='001.230','numeric XML precision retained without floats');
 $r=$row;$r[3]=['formula','WEBSERVICE("https://example.invalid/no-network")'];$a=tableInspect([$r]);

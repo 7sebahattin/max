@@ -18,6 +18,6 @@ if(($_SERVER['REQUEST_METHOD']??'')==='POST') {
 moHeader($langs->trans('OrdersTemplateSettings'));
 print '<section data-maxorders="template"><p>'.moLabel('OrdersTemplateHelp').'</p>';
 moForm('template');
-print '<label>'.moLabel('OrdersTemplateColumns').'<textarea name="columns" rows="12" maxlength="2048" required>'.moEsc(getDolGlobalString('MAXORDERS_V03_COLUMNS',json_encode(MaxOrdersTable::DEFAULT_COLUMNS,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE))).'</textarea></label>';
+print '<label>'.moLabel('OrdersTemplateColumns').'<textarea name="columns" rows="12" maxlength="2048" required>'.dol_escape_htmltag(getDolGlobalString('MAXORDERS_V03_COLUMNS')?:json_encode(MaxOrdersTable::DEFAULT_COLUMNS,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE),0,1).'</textarea></label>';
 print '<label class="maxorders-check"><input type="checkbox" name="safe_pdf" value="yes"'.(getDolGlobalInt('MAXORDERS_PDF_SAFE_ENABLE')===1?' checked':'').'> '.moLabel('OrdersPdfOptIn').'</label><p>'.moLabel('OrdersPdfSandboxBlocked').'</p>';
 moButton('OrdersSave'); print '</section>'; moFooter();

@@ -18,12 +18,17 @@ function tSnapshot(){
 tCheck(DOL_VERSION==='24.0.1' && $dolibarr_main_db_host==='db' && $dolibarr_main_db_name==='max_demo' && is_file(DOL_DATA_ROOT.'/install.lock'),'isolated pinned native table environment');
 $user->fetch('','maxadmin');$user->getrights('',1);
 $documents=new MaxOrdersDocument($db);$lines=new MaxOrdersLines($db);$packets=new MaxOrdersPacket($db);$mode=$argv[1]??'setup';
-if($mode==='concurrent'){$documents->receive($user,'table-concurrent.xlsx',file_get_contents(DOL_DATA_ROOT.'/orders-table-inputs/concurrent.xlsx'));exit;}
+if($mode==='concurrent'){
+ $f=json_decode(file_get_contents(DOL_DATA_ROOT.'/orders-table-session.json'),true);
+ $upload=$documents->receive($user,'table-concurrent.xlsx',file_get_contents(DOL_DATA_ROOT.'/orders-table-inputs/concurrent.xlsx'))['id'];
+ // Replay one explicit synthetic human decision through two independent DB sessions.
+ $documents->associate($user,$upload,$f['table_concurrent_packet'],$f['customer'],'TABLE-CONCURRENT','PO','TABLE-DEMO',2,'{}',true);exit;
+}
 if($mode==='verify'){
  tCheck(tSnapshot()===file_get_contents(DOL_DATA_ROOT.'/orders-table-before'),'native commercial financial legal snapshot unchanged after table HTTP');
  $sha=hash_file('sha256',DOL_DATA_ROOT.'/orders-table-inputs/concurrent.xlsx');
  $records=tRows("SELECT rowid FROM ".MAIN_DB_PREFIX."maxorders_upload WHERE entity=1 AND content_hash='".$sha."'");
- tCheck(count($records)===1 && count($lines->forUpload($user,$records[0]->rowid))===3,'concurrent workers create one upload and exactly three source rows');
+ tCheck(count($records)===1 && count($lines->forUpload($user,$records[0]->rowid))===3 && count(tRows('SELECT rowid FROM '.MAIN_DB_PREFIX.'maxorders_document_source WHERE entity=1 AND fk_upload='.(int)$records[0]->rowid))===1,'concurrent workers create one upload, one context and three source rows');
  tCheck(!glob(sys_get_temp_dir().'/maxorders-worker-*'),'no leftover analysis workspace');
  $report=json_decode(file_get_contents(DOL_DATA_ROOT.'/orders-table-native.json'),true);$report['checks']=array_merge($report['checks'],$checks);$report['native_after']=tSnapshot();$report['final_verified']=true;
  file_put_contents(DOL_DATA_ROOT.'/orders-table-native.json',json_encode($report,JSON_PRETTY_PRINT));exit;
@@ -62,7 +67,7 @@ $detail=$packets->detail($reviewer,$packet);
 tCheck(json_encode($detail['current'])===json_encode($original['current']) && json_encode($detail['lock'])===json_encode($original['lock']) && count($detail['revision'])===count($original['revision']),'line intake leaves manual locks and scalar revisions unchanged');
 $comparison=$lines->comparisons($reviewer,$packet);
 tCheck(!$comparison['limited'] && count($comparison['rows'])===18 && count(array_filter($comparison['rows'],fn($r)=>$r->comparison==='OrdersSourceDifference'))===6,'PO LL PC conflicting quantities retained without selecting a winner');
-tCheck($lines->catalog($reviewer,json_decode($record->analysis_json,true))===[],'descriptions do not become catalog code matches');
+tCheck($lines->catalog($user,json_decode($record->analysis_json,true))===[],'descriptions do not become catalog code matches');
 foreach(['denied','no-native','reader','intake','reviewer'] as $role){$actor=new User($db);$actor->fetch('','orders-'.$role);$actor->getrights('',1);tDeny(fn()=>$documents->associate($actor,$id,$packet,$fixture['customer'],'TABLE-300','PO','TABLE-DEMO',2,'{}',true),403,'native table association role '.$role);}
 $mapping=['product_reference'=>'Code']+MaxOrdersTable::DEFAULT_COLUMNS;
 $catalogAnalysis=MaxOrdersExtraction::inspect('catalog.xlsx',ordersTableFixture([array_merge(['SYNTH-V03'],ordersTableRows()[0])],[],$mapping),['columns_json'=>json_encode($mapping)]);
@@ -72,6 +77,7 @@ try{tCheck((new MaxOrdersLines($db))->forUpload($user,$id)===[],'source lines en
 $download=$documents->download($reviewer,$id);tCheck(hash_file('sha256',$download['path'])===hash('sha256',$bytes),'private original unchanged after association');
 $dir=DOL_DATA_ROOT.'/orders-table-inputs';if(!is_dir($dir))mkdir($dir,0700);
 foreach(['browser.xlsx'=>ordersTableFixture(null,array_replace($meta,['document_reference'=>'BROWSER-TABLE','document_revision'=>'4'])),'concurrent.xlsx'=>ordersTableFixture(null,['order_reference'=>'TABLE-CONCURRENT'])] as $name=>$content){file_put_contents($dir.'/'.$name,$content);chmod($dir.'/'.$name,0600);}
+$fixture['table_concurrent_packet']=$packets->ingest($reviewer,$fixture['customer'],'TABLE-CONCURRENT','UNKNOWN','CONCURRENT',1,'{}')['packet'];
 $fixture['table_packet']=$packet;$fixture['table_upload']=$id;$fixture['table_hash']=hash('sha256',$bytes);
 file_put_contents(DOL_DATA_ROOT.'/orders-table-session.json',json_encode($fixture));chmod(DOL_DATA_ROOT.'/orders-table-session.json',0600);
 tCheck(tSnapshot()===$before,'table intake preserves all native commercial financial and legal records');

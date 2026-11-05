@@ -125,7 +125,9 @@ with sync_playwright() as p:
                 body=page.locator('body').inner_text()
                 check('OrdersSourceLines' not in body and 'OrdersTemplateSettings' not in body and 'OrdersSourceDifference' not in body,'localized source labels')
                 page.screenshot(path=f'.local/orders-table-{surface}-{language}-{width}.png',full_page=True)
-    check(len(metrics)==18 and not errors and not assets,'18 strict bilingual cases; no JS errors or missing assets')
+    required={(language,width,surface) for language in ['tr_TR','en_US'] for width in [360,390,768] for surface in ['table-review','source-history','table-settings']}
+    observed={(row['language'],row['width'],row['surface']) for row in metrics}
+    check(len(metrics)==18 and observed==required and not errors and not assets,'18 exact strict bilingual cases; no JS errors or missing assets')
     context.close();browser.close()
 
 def concurrent_receive(_):

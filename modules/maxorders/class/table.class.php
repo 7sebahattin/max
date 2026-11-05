@@ -55,7 +55,8 @@ class MaxOrdersTable {
    $result['lines'][]=['row'=>$row,'sheet'=>$sheet->getTitle(),'key'=>$key,'state'=>$state,'review_status'=>'pending','cells'=>$cells,'values'=>$values,'issues'=>array_values(array_unique($issues))];
    if($hasData){$groups[$key][]=count($result['lines'])-1;if(isset($values['currency']))$currencies[$values['currency']]=true;}
   }
-  foreach($groups as $indexes){if(count($indexes)<2)continue;$first=$result['lines'][$indexes[0]]['values'];$identical=true;foreach($indexes as $i)if($result['lines'][$i]['values']!==$first)$identical=false;
+  $signature=fn($line)=>array_map(fn($cell)=>[$cell['state'],$cell['state']==='suggested'?$cell['value']:$cell['raw']],$line['cells']);
+  foreach($groups as $indexes){if(count($indexes)<2)continue;$first=$signature($result['lines'][$indexes[0]]);$identical=true;foreach($indexes as $i)if($signature($result['lines'][$i])!==$first)$identical=false;
    foreach($indexes as $i){$result['lines'][$i]['state']=$identical?'duplicate':'conflict';$result['lines'][$i]['issues'][]=$identical?'OrdersDuplicateSourceRow':'OrdersConflictingSourceRows';}
   }
   foreach($result['lines'] as $line)foreach($line['issues'] as $issue)$result['issues'][]=$issue;
