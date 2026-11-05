@@ -1,0 +1,24 @@
+services:
+  fakeimap:
+    image: python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb064f8ee1fd42d02ebcd9d337
+    command: [python, /fixtures/fake_imap.py, --state, /state/state.json, --port, '1143']
+    volumes:
+      - ./tests/mail:/fixtures:ro
+      - ./.local/mail-state:/state
+    networks: [sandbox]
+    environment:
+      HTTP_PROXY: ''
+      HTTPS_PROXY: ''
+      ALL_PROXY: ''
+      http_proxy: ''
+      https_proxy: ''
+      all_proxy: ''
+    healthcheck:
+      test: [CMD, python, -c, "import socket; s=socket.create_connection(('127.0.0.1',1143),2); assert s.recv(100).startswith(b'* OK'); s.close()"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    security_opt: [no-new-privileges:true]
+  web:
+    volumes:
+      - ./.local/mail-state:/mail-state:ro

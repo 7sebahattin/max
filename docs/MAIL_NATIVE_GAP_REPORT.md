@@ -1,0 +1,90 @@
+# MAX Mail native protocol pilot — Issue #22
+
+Dolibarr **24.0.1**, upstream commit `b7958385f00a92219f76a4dfea67dae93df97a25`, pinned by `upstream.lock.json`. No core changes. No MAX Mail module or replacement transport is introduced.
+
+## Run
+
+Create a disposable `.env` using `.env.example` (random database passwords), install Playwright 1.56.0 and Chromium, then run:
+
+```sh
+python3 -m unittest discover -s tests/mail -v
+COMPOSE_PROJECT_NAME=max-mail-unique bash scripts/mail_test.sh
+# Strict product acceptance currently fails for the two proven native gaps:
+python3 tests/mail/product_contracts.py
+```
+
+Use a new checkout/project each run. The wrapper refuses pre-existing containers, volumes **and networks before arming cleanup**; only its fresh project is removed, including its database volume. A real Docker negative test preserves an intentionally existing network. The fake server has no published port, lives on Compose's internal sandbox, and has no proxy environment. PHP sends remain disabled; the unchanged P2 local capture uses a local process only. Never use real credentials/providers.
+
+`tests/mail/compose.yaml` extends the existing Compose file without editing it. Its official Python image is digest-pinned. The fake server is an explicitly limited RFC3501 fixture, not a production IMAP implementation or TLS certificate test. It supports LOGIN, exact Orders mailbox selection, UID SEARCH/FETCH/STORE, literals, flags, epochs, reconnect, authentication/fetch failure. Unsupported commands fail closed. Commands are logged as names and account aliases only.
+
+## Native source findings and executable coverage
+
+References are in the verified upstream archive under `htdocs/`:
+
+| Capability | Native surface / evidence | Status and product implication |
+|---|---|---|
+| Collector configuration, filters/actions, active scheduled polling | `emailcollector/class/emailcollector.class.php`: `create`, `doCollect`, `doCollectOneCollector(0)` | Actual native configuration, real mode-0 polling and cron invoked in CI; no inactive-config-only claim |
+| IMAP backend | `MAIN_IMAP_USE_PHPIMAP=1`, bundled `includes/webklex/php-imap/vendor/autoload.php` | Supported pure-PHP backend avoids absent PHP IMAP extension; baseline default backend requires that extension. No new Composer dependency |
+| Two accounts and mailbox selection | Actual collectors A/B against isolated fake server, Orders folder | A folder is not a document type; only agenda `recordevent` enabled, no ticket/project/order creation |
+| Duplicate semantics | `recordevent` calls `ActionComm::fetch` by Message-ID | Entity-wide Message-ID dedupe suppresses a distinct message with the same Message-ID in another account. **GAP**, not account+UIDVALIDITY+UID identity |
+| Restart, replay, changed epoch, retry | `tests/mail/pilot.py` changes server state between actual polls | Unique Message-ID after epoch change creates one agenda action; old Message-ID remains suppressed; failed authentication followed by retry does not duplicate actions |
+| Attachments | Native Webklex attachment objects | Name, size, content hash and detected MIME asserted. Bad PDF is opaque synthetic bytes; no PDF interpretation or guessed PO/LL/PC |
+| Private attachment intake/quarantine | Generic agenda `recordevent` does not provide a Mail Center quarantine repository | **NOT IMPLEMENTED**. Native ticket/project/recordjoinpiece actions can write attachments but are deliberately not configured. No false role-checked download claim |
+| Sender attribution | Native `email_from`, From/Reply-To synthetic lookalike fixture | Header attribution is recorded, not authenticated trust. No provider/DKIM verification or permission based on sender. Future exact sender policy requires review |
+| Native administration ACL | `admin/emailcollector_list.php` and `emailcollector_card.php` admin guards | Browser checks native login, denied response status and protected-body absence for unprivileged reader; admin sees configuration. Native denial may be HTTP 200 and must include actual denial content |
+| No financial effects | Full native partner/order/line/shipment/invoice/stock/bank/payment and legal-constant snapshot | Unchanged across polling/browser checks; only agenda/collector bookkeeping changes |
+| TLS/provider interoperability | Fake internal plaintext only | **NOT TESTED**; do not use plaintext fixture configuration in production. Native extension connect string includes `novalidate-cert`; pure backend config validates certificates. Production certificates/provider auth require separate verification |
+
+## MAX Mail functional requirements (proposal, not implementation)
+
+Persist a bounded, private incoming ledger keyed by installation/account/UIDVALIDITY/UID with content digest and source metadata. Message-ID is supplementary evidence, never a global mailbox identity. UIDVALIDITY reset must reconcile hashes/references without silently resurrecting deleted business documents. Two accounts require distinct authorization and identity scope. Failed intake needs explicit retry state and bounded backoff; parsing failures need review status, not guessed classification. Preserve immutable message/document provenance and exact From/Reply-To distinctions without treating either as trusted authorization.
+
+Provide role-checked attachment retrieval outside webroot, size/MIME/content validation, untrusted-name handling, quarantine for malformed/unknown documents, explicit customer/order matching and human review before any Orders intake. The present native agenda collector alone does not satisfy those requirements. No automatic precedence, order approval, stock decrement or invoice creation is proposed here.
+
+### No-send and uncertain-outcome proposal
+
+Future outgoing flow: draft → human approval → durable outbox → sending → sent, with a separate **unknown_outcome** state if a fake SMTP server accepts DATA but the final 250 response is lost. Reconcile using durable outbox identity, Message-ID and transport evidence before any explicit retry; never blind-resend an uncertain accepted message. A future fake SMTP test should simulate this boundary. **No SMTP sender, translation API, outgoing queue or provider integration is implemented in this PR.**
+
+## Evidence and acceptance
+
+Local: four real socket IMAP unittest cases plus the real Docker ownership/refusal test passed. Full native runtime local execution is **BLOCKED** by the managed runner's 8 GB/vfs Docker storage; it is executed on disposable GitHub Actions instead. CI results and exact tested commits are appended below, including failed attempts. Safe artifacts are numeric/hash reports and command-name transcripts only; no state/password/raw mail/native debug output or installer HTML. New evidence does not imply production certification.
+
+Rollback: disable/delete the disposable native collectors or discard the isolated project. No core/database migration or live deployment exists.
+
+CI attempt `a98dba1559e3fa9df096988403afc0dcf74f1140`: [41692920377](https://github.com/7sebahattin/max/actions/runs/41692920377) failed at active collector creation because the fixture omitted native EmailCollectorAction/Filter includes. The baseline native installer/P2 passed; project cleanup ran. Fixture includes corrected without core changes.
+
+CI attempts `5c1b7dc`, `bfc7cf9`, `1965055` and `64b9970` failed at the fixture collector lookup before polling. Native `CommonObject::createCommon()` sanitizes references with `dol_string_nospecial` (spaces become underscores); the fixture incorrectly queried the unsanitized display reference. Corrected to stable `FIXTURE-A/B` references and native `EmailCollector::fetch(0, ref)`, with separate labels. Sanitized precondition/stack-location diagnostics are retained; raw native mail/debug/credentials stay suppressed.
+
+CI `2cb89a4d9e4f7e35d41f667f9b108220f2d2aab4`: [41696452070](https://github.com/7sebahattin/max/actions/runs/41696452070) reached wire polling and parsed attachment metadata, then failed at native `emailcollector.class.php:2254`, which calls `dol_stringtotime`. The direct CLI fixture lacked `core/lib/date.lib.php`, loaded by the official `cron/class/cronjob.class.php` scheduler. Added this native bootstrap dependency, without polyfills/core edits or calling unrelated cron jobs. This was a harness defect, not a claimed product gap.
+
+## Native-only MAX acceptance is BLOCKED (not waived)
+
+Actual run `d19993e9940eebbd4d5db2df7646e3dcb28c4aea`, [41697160525](https://github.com/7sebahattin/max/actions/runs/41697160525), proved active A/B polling, metadata and bytes, replay, restart, changed epoch, and authentication failure/retry. The next assertion failed because a real tagged `FETCH NO` produced native return **1** with no new action. This is distinct from the earlier fixture defects. Bundled Webklex `Connection/Protocols/ImapProtocol::fetch()` collects available untagged FETCH results but does not turn the final tagged NO into an exception for array fetches; an empty result can reach the collector as successful polling. Core and bundled library remain unchanged.
+
+The pilot now characterizes that exact behavior, proves the injected server fault in a separate sanitized fault transcript, then continues retry, cron, roles, no-send, native snapshot and teardown checks. **In a separate mandatory CI step after native characterization/teardown, two strict product contract tests remain failing:** four distinct messages across accounts must produce four intake identities (native agenda produces three), and real FETCH NO must return a negative collector status (native returns 1). No skip, xfail, `continue-on-error`, success masking or custom transport workaround is used. A red native acceptance job is the explicit BLOCKED evidence requested by Issue #22; it must not be advertised as a production-ready Mail Center.
+
+The native default bundled backend uses **message sequence numbers** for its observed SEARCH/FETCH commands. The fake server and socket tests implement real UID commands/UIDVALIDITY; the native instance is subjected to controlled epoch changes and reused UIDs, but it does **not** thereby gain a durable account+UIDVALIDITY+UID ledger. No unsupported client-option override is injected to pretend otherwise. Concurrent polling atomicity and deleted-event resurrection are **NOT TESTED**; the native fetch-then-create path has no mailbox-scoped unique ledger, and cannot be certified from sequential replay tests alone.
+
+Private incoming attachment quarantine/intake remains **BLOCKED / NOT IMPLEMENTED** on the tested generic recordevent path. Native ticket/project/recordjoinpiece attachment APIs exist but their separate business-object permission/download behavior is **NOT TESTED** here; do not generalize this finding to claim Dolibarr has no private object attachments. Evaluate those APIs against future account-level intake requirements before choosing additional storage.
+
+The four-source identity contract tests whether native agenda alone is an adequate incoming ledger, not whether a future MAX design should duplicate ERP actions. A future account-scoped ledger can preserve all four incoming identities while linking several sources to one idempotent native business action. No policy authorizing duplicate order/finance actions is implied. The CI keeps native wire characterization and strict native-only MAX acceptance as distinct steps so their outcomes are reviewable.
+
+A malformed-message fixture omits the RFC Message-ID header (separate from the malformed PDF attachment). Socket tests verify the fake server preserves the missing identity on the wire. Native polling/replay is exercised after the regular cases; no synthetic replacement identity or guessed document type is injected. This does not implement quarantine/review storage.
+
+Every poll compares both fixture Message-ID counts and **all newly created native agenda actions** against a pre-poll baseline, including missing-Message-ID replay. This catches hidden actions with empty/generated identities rather than filtering them out of duplicate checks.
+
+## Exact-SHA CI evidence
+
+| Tested commit | Run | Actual outcome |
+|---|---|---|
+| `a98dba1559e3fa9df096988403afc0dcf74f1140` | [41692920377](https://github.com/7sebahattin/max/actions/runs/41692920377) | FAIL: missing native action/filter includes in fixture; corrected |
+| `2cb89a4d9e4f7e35d41f667f9b108220f2d2aab4` | [41696452070](https://github.com/7sebahattin/max/actions/runs/41696452070) | FAIL: direct CLI bootstrap lacked native scheduler date library; corrected |
+| `d19993e9940eebbd4d5db2df7646e3dcb28c4aea` | [41697160525](https://github.com/7sebahattin/max/actions/runs/41697160525) | FAIL: real FETCH NO was incorrectly reported as native success; preserved as product gap |
+| `1e2808e633f2b43e4398a1963b28d4ec3e48da65` | [41699695697](https://github.com/7sebahattin/max/actions/runs/41699695697) | Native installation/P2, five protocol/safety tests, wire characterization, malformed-message replay, cron, HTTP ACL, native snapshots, no-send and teardown **PASS**; separate strict native-only MAX contracts **FAIL (2), BLOCKED** |
+| `1e2808e633f2b43e4398a1963b28d4ec3e48da65` | [Foundation 41699695690](https://github.com/7sebahattin/max/actions/runs/41699695690), [Windows/Linux audit 41699695523](https://github.com/7sebahattin/max/actions/runs/41699695523) | PASS |
+
+Downloaded and inspected artifact `mail-native-evidence` (ID `13261394606`, SHA-256 `db1802c5a7f2c0b6344dc615f6fd921f04c0b4eb5a962559a86d161b5cbb595c`): only numeric/hash mail reports and sanitized command/fault metadata. Every poll's full new-agenda count equals the fixture-scoped count. Missing-Message-ID polling/replay creates no additional agenda action; that is **not** a quarantine/review intake record. The raw source stays in the fake mailbox. The bundled backend's observed tagged-NO failure is backend-specific; the PHP IMAP-extension backend is **NOT TESTED**, not declared broken. The cross-account agenda Message-ID identity limitation is in the collector's common recordevent action.
+
+Local: five real socket/Docker safety tests, 40 existing doctor/source-audit tests, four MAX Core assertion regressions, policy/index audit, Python compilation and shell syntax passed. Full native local runtime remains BLOCKED by managed Docker storage. Actual native evidence above comes from GitHub Actions. The PR conversation records the final documentation commit's exact-head results separately; no self-referential SHA claim.
+
+Review requested in draft PR #23: optional native collector usefulness, blocked mailbox-scoped identity/private intake requirements, retry/error propagation and the no-send boundary. Owner action is architectural review of a later MAX Mail intake design; no production provider configuration, real credentials, translation or SMTP authorization is requested or assumed in this pilot. No other PR, core file, merge or live deployment changed.
