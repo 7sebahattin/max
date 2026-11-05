@@ -43,7 +43,7 @@ def hooks(page,name):
 
 def measure(page,width,path,phase):
     page.evaluate('document.fonts.ready')
-    row=page.evaluate('({width:innerWidth,document:document.documentElement.scrollWidth,body:document.body.scrollWidth})');row.update(surface=path,phase=phase)
+    row=page.evaluate("({width:innerWidth,document:document.documentElement.scrollWidth,body:document.body.scrollWidth,regions:[...document.querySelectorAll('.maxmobile-table-scroll')].map(n=>({scroll:n.scrollWidth,client:n.clientWidth,tab:n.tabIndex,role:n.getAttribute('role')}))})");row.update(surface=path,phase=phase)
     measurements.append(row); save()
     page.screenshot(path=str(OUT/('native-'+phase+'-'+str(width)+'-'+path.replace('/','-')+'.png')),full_page=True)
     if phase=='after': need(row['width']==width and max(row['body'],row['document'])<=width,'STRICT native document overflow')

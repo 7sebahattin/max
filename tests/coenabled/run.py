@@ -39,7 +39,7 @@ def main():
     command('private IMAP seed transfer',['docker','compose','cp','.local/mailintake-state/seed.json','web:/var/lib/dolibarr/documents/mailintake-input.json'])
     command('private seed ownership',['docker','compose','exec','-T','web','chown','www-data:www-data','/var/lib/dolibarr/documents/mailintake-input.json'])
     php('mailintake/native.php','setup')
-    checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json')
+    checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json'); copy('coenabled-core-roles.json','coenabled-evidence/core-roles.json')
     checkpoint('chain'); copy('coenabled-chain.json','coenabled-evidence/chain.json')
     for source,target in [('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('orders-accounts.json','orders-accounts.json'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
     for lane in ('core','orders','customs'):

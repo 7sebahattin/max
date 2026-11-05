@@ -74,6 +74,13 @@ if($mode==='freeze') {
     foreach(['societe','product','product_stock','product_lot','commande','expedition','facture','bank_account','bank'] as $t) needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.$t))>0,'populated commercial fixture '.$t);
     needE(count(rowsE('SELECT rowid FROM '.MAIN_DB_PREFIX.'facture WHERE fk_statut<>0'))===0,'all invoices draft only');
     needE(count(rowsE("SELECT rowid FROM ".MAIN_DB_PREFIX."bank_account WHERE iban_prefix='TEST-IBAN-COENABLED'"))===1,'populated fictional IBAN protected by baseline');
+    require_once DOL_DOCUMENT_ROOT.'/custom/maxcore/lib/maxcore.lib.php';
+    $caps=[];
+    foreach(['test','denied','reader','editor','manager'] as $role) {
+        $p=new User($db); needE($p->fetch('','maxcore-'.$role)>0,'Core role exists'); $p->getrights('',1);
+        $caps[$role]=['id'=>(int)$p->id,'admin'=>(int)$p->admin,'read'=>maxCoreCan($p,'read'),'configure'=>maxCoreCan($p,'configure'),'module_admin'=>maxCoreCan($p,'admin')];
+    }
+    file_put_contents($root.'/coenabled-core-roles.json',json_encode($caps));
     // Every commercial fixture is now complete. Rebase original helper hashes ONCE
     // to this populated DB, before any acceptance/UI/intake action. No source edits.
     $contracts=[
