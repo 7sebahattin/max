@@ -8,4 +8,4 @@ require_once __DIR__.'/view.php';
 $langs->load('maxorders@maxorders');
 $packets=new MaxOrdersPacket($db);
 if(!isModEnabled('maxorders') || !MaxOrdersPacket::can($user,'read')) { http_response_code(403); accessforbidden('',0,0,1); }
-if(!empty($_FILES)) { http_response_code(400); exit('OrdersInvalid'); }
+if(!empty($_FILES) && !defined('MAXORDERS_DOCUMENT_UPLOAD')) { http_response_code(400); exit('OrdersInvalid'); }

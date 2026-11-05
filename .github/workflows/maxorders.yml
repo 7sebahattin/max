@@ -53,6 +53,7 @@ jobs:
           name: orders-module-evidence
           path: |
             .local/orders-mobile.json
+            .local/orders-intake-*.json
             .local/orders-*.png
             .local/maxorders-module.zip
           include-hidden-files: true
