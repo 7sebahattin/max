@@ -84,8 +84,13 @@ def main():
                     for method,bad_token in (('GET',None),('GET','InvalidToken'),('POST',None),('POST','InvalidToken')):
                         bad=dict(params,step='5')
                         if bad_token is not None:bad['token']=bad_token
-                        response=admin.request.get(BASE+'/imports/import.php',params=bad) if method=='GET' else admin.request.post(BASE+'/imports/import.php',form=bad)
+                        response=admin.request.get(BASE+'/imports/import.php',params=bad) if method=='GET' else admin.request.post(BASE+'/imports/import.php?'+urlencode(dict(step=5,datatoimport=dataset,format=fmt,filetoimport=params['filetoimport'])),form=bad)
                         check(response.status==403 and read(ref)==before,'orders CSRF '+method+' '+str(bad_token)+' '+label)
+                    # Native invalid-token handling may clear POST before hooks.
+                    # Without a query step this can render the default page (200),
+                    # but it must never persist a header or line.
+                    response=admin.request.post(BASE+'/imports/import.php',form=dict(params,step='5',token='InvalidToken'))
+                    check(response.status in (200,403) and read(ref)==before,'orders body-only invalid token cannot write '+label)
                     page.goto(BASE+'/imports/import.php?'+urlencode(params));simulate(label,True)
                     with page.expect_request(lambda req:req.is_navigation_request() and urlparse(req.url).path=='/imports/import.php') as navigation:
                         page.locator('a.butAction[href*="step=5"]').click()

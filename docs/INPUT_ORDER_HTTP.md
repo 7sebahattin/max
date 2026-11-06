@@ -11,7 +11,7 @@ Başlangıç yerel commit'i `4d3cf82d61a068962ac89bd5b05218e7a750b2b2`. Mail ve 
 ## Kabul kapsamı
 
 - Gerçek upload ve saklanan exact kaynak baytları; eşleme ve simülasyon formları.
-- Simülasyonun parent/line kaydını değiştirmemesi; token'sız/yanlış token GET/POST'un 403 ile yazmadan reddi.
+- Simülasyonun parent/line kaydını değiştirmemesi; URL'de step=5 bulunan token'sız/yanlış token GET/POST'un 403 ile yazmadan reddi. Yalnız body'de step bulunan yanlış-token POST'ta native güvenlik POST'u temizleyip varsayılan sayfayı 200 döndürebilir; bu varyantta da kayıtların değişmediği ayrıca sınanır.
 - Native commit linkinin token'ı URL'ye koymadan POST yapması; public/private not, açıklama, Türkçe/NFC/Unicode genişlemesi; teknik referans/URI ve miktar/fiyat/toplam korunması.
 - Sipariş referans çakışmasında batch rollback, önceki pending siparişin kalmaması ve mevcut kaydın birleştirilmemesi.
 - Her iki header notunda ve line açıklamasında `ﬃ × 21846 → FFI × 21846` ile 65535 sınırının aşılması: simülasyon ve doğrudan commit reddi. Ham hücre 21846 karakterdir; XLSX'in 32767 hücre karakter sınırı içinde kalır, ancak dönüşüm sonrası 65538 karakter oluşur. Line batch'teki önceki geçerli pending satırın da rollback olması. Line açıklaması unique sayılmaz; yapay duplicate kuralı konmaz.
@@ -31,3 +31,5 @@ Bu yöntem pozitif persistence kanıtını, sabit ticari fixture'lardan ayırır
 Bu aşama final clean HEAD üzerinde PASS olduğunda dar CSV/XLSX insert/strict_line HTTP kapsamı **3/7 → 5/7 (%71,4)** olur. Fatura başlık/satır **2/7 (%28,6) HTTP NOT RUN** kalır. Update-key/fast_bulk, tüm native web/API, rich editor, ORM/cron/third-party ve Docker ortak 63 kapsamı bu teste dahil değildir. Bu ilerleme eski 25 hedefteki %28 kanıtlı / %72 açık-kısmi oranını değiştirmez; uppercase kalite kapısı ayrı izlenir.
 
 Yeniden üretim komutu `INPUT_NATIVE_WINDOWS.md` içindekiyle aynıdır. Rollback: yerel commit'i geri almak yalnız ek test/runner/dokümanları kaldırır; upstream/schema veya üretim verisi değişikliği yoktur. Yayın/merge/push yapılmaz.
+
+Hızlı geliştirme için aynı komuta `--http-suite orders` eklenebilir. Bu koşu da installer/fixture ve son importer/lifecycle/snapshot kontrollerini çalıştırır; diğer üç HTTP aşaması açıkça NOT RUN kalır. `http_suite: orders` sonucu tam regresyon kabulü sayılmaz. Final teslim için varsayılan `--http-suite all` ve tüm aşamaların PASS olması gerekir.

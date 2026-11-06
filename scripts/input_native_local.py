@@ -103,6 +103,7 @@ def main():
     parser.add_argument('--php-ini', required=True, type=Path)
     parser.add_argument('--dolibarr', required=True, type=Path)
     parser.add_argument('--mariadb', required=True, type=Path, help='Portable bin directory')
+    parser.add_argument('--http-suite', choices=('all','orders'), default='all', help='Targeted development run; unselected HTTP stages stay NOT RUN')
     parser.add_argument('--recover-run', type=Path, help='Only clean a stopped manifest-owned interrupted run, then exit')
     args = parser.parse_args()
     if os.name != 'nt':
@@ -155,7 +156,7 @@ def main():
            '-d', 'display_errors=0', '-d', 'log_errors=1', '-d', 'error_log='+(run/'php.log').as_posix()]
     processes, handles, installed = [], [], []
     report = dict(**identity,
-                  scope='portable_windows_installed_native', run_id=run.name,
+                  scope='portable_windows_installed_native', http_suite=args.http_suite, run_id=run.name,
                   upstream_sha256=lock['sha256'], preflight='PASS',
                   checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_wizard_http','native_people_http','native_order_http','native_import_lifecycle_snapshot')},
                   original_shared_63='NOT RUN (Docker identity/network contract unavailable)',
@@ -231,12 +232,13 @@ def main():
         http_passed=True
         try: command('native_order_http', [sys.executable,str(ROOT/'tests/input/order_http.py')],timeout=600)
         except RuntimeError: http_passed=False
-        try: command('native_http', [sys.executable,str(ROOT/'tests/input/installed_http.py')])
-        except RuntimeError: http_passed=False
-        try: command('native_wizard_http', [sys.executable,str(ROOT/'tests/input/wizard_http.py')])
-        except RuntimeError: http_passed=False
-        try: command('native_people_http', [sys.executable,str(ROOT/'tests/input/people_http.py')],timeout=600)
-        except RuntimeError: http_passed=False
+        if args.http_suite=='all':
+            try: command('native_http', [sys.executable,str(ROOT/'tests/input/installed_http.py')])
+            except RuntimeError: http_passed=False
+            try: command('native_wizard_http', [sys.executable,str(ROOT/'tests/input/wizard_http.py')])
+            except RuntimeError: http_passed=False
+            try: command('native_people_http', [sys.executable,str(ROOT/'tests/input/people_http.py')],timeout=600)
+            except RuntimeError: http_passed=False
         command('native_import_lifecycle_snapshot',php+[str(ROOT/'tests/input/installed.php'),'verify'])
         report['result']='PASS' if http_passed else 'FAIL'
     except Exception as exc:
