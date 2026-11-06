@@ -55,7 +55,7 @@ def main():
             page.goto(BASE+path+'?'+urlencode(query))
             form=page.locator('form:has(input[name=action][value=update])')
             check(form.count()==1,'CRM native edit form '+resource)
-            return path,form.locator('input[name=token]').input_value()
+            return path,form.locator('input[name=token]').first.input_value()
         def webdata(resource,data,identity):
             data=dict(data,action='update')
             if resource=='thirdparties':data.update(socid=identity,customer_code=data.pop('code_client'),status='1')
