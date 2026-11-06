@@ -52,8 +52,8 @@ def main():
             fields=HEADER if dataset=='commande_1' else LINE
             content=source_bytes(fmt,rows,headers=fields)
             response=page.goto(BASE+'/imports/import.php?'+urlencode(dict(step=2,datatoimport=dataset,format=fmt)))
-            check(response.status==200 and page.locator('[name=userfile]').count()==1,'orders upload form '+name)
-            page.locator('[name=userfile]').set_input_files(dict(name=name,mimeType='text/csv' if fmt=='csv' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer=content))
+            check(response.status==200 and page.locator('input[name=userfile]').count()==1,'orders upload form '+name)
+            page.locator('input[name=userfile]').set_input_files(dict(name=name,mimeType='text/csv' if fmt=='csv' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer=content))
             page.locator('[name=sendit]').click();page.wait_for_load_state('networkidle')
             links=page.locator('a[href*="step=3"]').evaluate_all('(nodes)=>nodes.map(n=>n.href)')
             found=[url for url in links if parse_qs(urlparse(url).query).get('filetoimport',[''])[0].endswith('-'+name)]
