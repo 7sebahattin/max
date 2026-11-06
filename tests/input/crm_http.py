@@ -85,7 +85,11 @@ def main():
             for resource,identity,original in [('thirdparties',cid,company('Crm-ApiCase')),('contacts',pid,contact(cid))]:
                 saved=read(resource,identity)
                 if resource=='thirdparties':
-                    check(saved['name']==UPPER and saved['name_alias']=='ŞİŞLİ' and saved['code_client']=='Crm-ApiCase' and saved['url']==original['url'],'CRM company API business and technical persistence')
+                    check(saved['name']==UPPER and saved['name_alias']=='ŞİŞLİ','CRM company API business name alias persistence')
+                    check(saved['code_client']=='Crm-ApiCase','CRM company API code case exact')
+                    # Societe::update uses native clean_url(), which lowercases
+                    # the DNS hostname. Path/query case must remain exact.
+                    check(saved['url']=='https://example.invalid/Case?Key=aB','CRM native URL host canonicalization and exact path query')
                 else:
                     check(saved['firstname']=='ÇİÇEK' and saved['lastname']=='IŞIK STRASSE' and saved['poste']=='ŞUBE YÖNETİCİSİ' and int(saved['socid'])==cid,'CRM contact API names role parent persistence')
                 check(saved['address']=='ÇİÇEK SOKAK' and saved['town']=='İZMİR' and saved['email']==original['email'],'CRM address town email integrity '+resource)
