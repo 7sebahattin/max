@@ -23,6 +23,12 @@ try{
  nativeInputCheck($data['label']==='ÇİÇEK'&&$data['ref']==='CaseRef'&&$data['email']==='User@Example.com','pinned native JSON decoder sees uppercase and exact technical identifiers');
  $raw=stream_get_contents($restler->getRequestStream());nativeInputCheck(str_contains($raw,'"options":{}'),'empty JSON object type preserved in transport');
  $source=file_get_contents(DOL_DOCUMENT_ROOT.'/api/index.php');
+ $contactSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_socpeople.sql');$contactBounds=true;
+ foreach(['firstname','lastname'] as $field){
+  $contactBounds=$contactBounds&&(bool)preg_match('/\b'.$field.'\s+varchar\(50\)/i',$contactSchema);
+  $contactBounds=$contactBounds&&MaxInput::registry()['web']['contact/card.php'][$field][1]===50&&MaxInput::registry()['api']['contacts'][$field][1]===50&&MaxInput::registry()['imports']['societe_2']['s.'.$field][1]===50;
+ }
+ nativeInputCheck($contactBounds,'contact web API and import length rules match actual pinned SQL varchar columns');
  nativeInputCheck(strpos($source,"executeHooks('beforeApiCall'")<strpos($source,'$api->r->handle()'),'supported hook precedes native request parsing');
  $import=file_get_contents(DOL_DOCUMENT_ROOT.'/imports/import.php');
  nativeInputCheck(str_contains($import,"'obj'                          => &\$obj")&&str_contains($import,"'nbok'                         => &\$nbok")&&str_contains($import,'if (empty($reshook))'),'native import hook retains object/counter references and replacement contract');

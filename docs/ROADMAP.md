@@ -1,6 +1,6 @@
 # MAX Roadmap — approved development sequence
 
-Status: planned. Only PR-01 repository scaffolding is authorized at this time.
+Historical baseline roadmap. Current owner-approved work is recorded in AGENTS.md; the current evidence-based development status and open acceptance percentage are in [PROJECT_STATUS.md](PROJECT_STATUS.md). The original PR-01-only state below is historical, not the current authorization boundary.
 
 | Milestone | Goal | Evidence required | Gate |
 | --- | --- | --- | --- |

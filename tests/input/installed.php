@@ -18,6 +18,7 @@ function installedSnapshot($ids){
  $out=[];
  foreach(['product_stock','product_batch','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture'] as $table)$out[$table]=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.$table.' ORDER BY rowid');
  foreach(['product','societe'] as $table)$out[$table]=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.$table.' WHERE rowid='.(int)$ids[$table]);
+ $out['protected_contact']=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.'socpeople WHERE rowid='.(int)$ids['socpeople']);
  $out['other_entity_product']=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.'product WHERE rowid='.(int)$ids['other_product']);
  $out['legal']=installedRows("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity");
  return ['sha256'=>hash('sha256',json_encode($out)),'counts'=>array_map('count',$out)];
@@ -31,6 +32,8 @@ if(($argv[1]??'')==='fixture'){
  $denied=new User($db);$denied->login='input-denied';$denied->lastname='Synthetic';$denied->pass=bin2hex(random_bytes(24));$deniedPass=$denied->pass;installedResult($denied->create($user),'native denied user');$denied->clearrights();$denied->fetch($denied->id);$denied->api_key=bin2hex(random_bytes(24));installedResult($denied->update($user,1),'native denied API credential');
  foreach(['societe/class/societe.class.php','product/class/product.class.php','product/stock/class/entrepot.class.php','product/stock/class/mouvementstock.class.php','commande/class/commande.class.php','compta/facture/class/facture.class.php','compta/bank/class/account.class.php'] as $file)require_once DOL_DOCUMENT_ROOT.'/'.$file;
  $soc=new Societe($db);$soc->name='Protected Synthetic Customer';$soc->client=1;$soc->code_client='Fixture-Case';$soc->country_id=1;installedResult($soc->create($user),'commercial customer fixture');
+ require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+ $contact=new Contact($db);$contact->socid=$soc->id;$contact->lastname='PROTECTED CONTACT';$contact->firstname='FIXTURE';$contact->email='Fixture.Case@Example.invalid';installedResult($contact->create($user),'protected native contact fixture');
  $product=new Product($db);$product->ref='Fixture-SkuCase';$product->label='PROTECTED GOODS';$product->type=0;$product->status=1;$product->status_buy=1;installedResult($product->create($user),'commercial product fixture');
  $warehouse=new Entrepot($db);$warehouse->ref='Fixture-Warehouse';$warehouse->label='PROTECTED WAREHOUSE';$warehouse->statut=1;installedResult($warehouse->create($user),'commercial warehouse fixture');
  $stock=new MouvementStock($db);installedResult($stock->reception($user,$product->id,$warehouse->id,20,5,'Synthetic stock receipt'),'commercial stock fixture');
@@ -39,9 +42,9 @@ if(($argv[1]??'')==='fixture'){
  $bank=new Account($db);$bank->ref='Input-Bank';$bank->label='SYNTHETIC NONBANK';$bank->country_id=1;$bank->currency_code='EUR';$bank->type=1;$bank->date_solde=dol_now();installedResult($bank->create($user),'fictional bank fixture');$bank->iban='TEST-IBAN-CaseOnly';installedResult($bank->update_bban($user),'fictional IBAN fixture');installedResult($bank->addline(dol_now(),'VIR','SYNTHETIC RECEIPT',40,'',0,$user),'fictional receipt fixture');
  $conf->entity=2;$other=new Product($db);$other->ref='Other-EntityCase';$other->label='OTHER ENTITY';$other->type=0;installedResult($other->create($user),'entity two native fixture');$conf->entity=1;
  require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
- $accounts=['admin'=>['login'=>'maxadmin','password'=>getenv('MAX_INPUT_ADMIN_PASS'),'key'=>$user->api_key],'denied'=>['login'=>'input-denied','password'=>$deniedPass,'key'=>$denied->api_key],'other_product'=>$other->id,'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
+ $accounts=['admin'=>['login'=>'maxadmin','password'=>getenv('MAX_INPUT_ADMIN_PASS'),'key'=>$user->api_key],'denied'=>['login'=>'input-denied','password'=>$deniedPass,'key'=>$denied->api_key],'fixture_customer'=>$soc->id,'other_product'=>$other->id,'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
  file_put_contents($run.'/accounts.json',json_encode($accounts));
- $ids=['product'=>$product->id,'societe'=>$soc->id,'other_product'=>$other->id];file_put_contents($run.'/protected-ids.json',json_encode($ids));
+ $ids=['product'=>$product->id,'societe'=>$soc->id,'socpeople'=>$contact->id,'other_product'=>$other->id];file_put_contents($run.'/protected-ids.json',json_encode($ids));
  $snapshot=installedSnapshot($ids);installedCheck($snapshot['counts']['bank']>0&&$snapshot['counts']['facturedet']>0&&$snapshot['counts']['stock_mouvement']>0,'populated immutable boundary after commercial fixtures');
  installedCheck(!is_file($run.'/before.json'),'baseline written once');file_put_contents($run.'/before.json',json_encode($snapshot,JSON_PRETTY_PRINT));
  file_put_contents($run.'/fixture-checks.json',json_encode($checks,JSON_PRETTY_PRINT));exit;

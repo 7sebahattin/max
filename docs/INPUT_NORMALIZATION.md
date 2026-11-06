@@ -55,6 +55,8 @@ Bu tablo desteklenmeyen işlemin çalıştığı izlenimini vermez. Bilinmeyen b
 
 ## Yerel doğrulama ve üretilebilirlik
 
+Cari/kişi devamı: [INPUT_PEOPLE_IMPORT.md](INPUT_PEOPLE_IMPORT.md). Kişi ad/soyad web/API/import sınırı native SQL'deki 50 karaktere eşitlenir; kişi private/public notları merkezi rich-text sınıfına eklenir. `societe_1` ve `societe_2` CSV/XLSX HTTP kabulü ile korunan kişi snapshot'ı eklenir. Genel ilerleme ve açık kabul payı [PROJECT_STATUS.md](PROJECT_STATUS.md) içinde ayrı hesaplanır.
+
 HTTP wizard devamı: [INPUT_IMPORT_WIZARD.md](INPUT_IMPORT_WIZARD.md), `produit_1` CSV/XLSX için gerçek yükleme/eşleme/simülasyon/commit, rol/CSRF, batch rollback ve kaynak hash kabulünü tanımlar. Step-5 token koruması native hook sınırlarında eklenir; native Run Import linki token'lı POST'a çevrilir. Profil adı merkezi MaxInput ile dönüştürülür. Diğer profiller ve genel ürün kabulü ayrı kapılardır; exact SHA kanıtı yerel rapordadır.
 
 ### Windows native devam çalışması (2026-11-06)

@@ -50,11 +50,11 @@
     "contact/card.php": {
       "firstname": [
         "text",
-        100
+        50
       ],
       "lastname": [
         "text",
-        100
+        50
       ],
       "address": [
         "text",
@@ -470,11 +470,11 @@
     "contacts": {
       "firstname": [
         "text",
-        100
+        50
       ],
       "lastname": [
         "text",
-        100
+        50
       ],
       "address": [
         "text",
@@ -622,11 +622,11 @@
     "societe_2": {
       "s.firstname": [
         "text",
-        100
+        50
       ],
       "s.lastname": [
         "text",
-        100
+        50
       ],
       "s.address": [
         "text",
@@ -639,6 +639,14 @@
       "s.poste": [
         "text",
         255
+      ],
+      "s.note_public": [
+        "html",
+        65535
+      ],
+      "s.note_private": [
+        "html",
+        65535
       ]
     },
     "produit_1": {

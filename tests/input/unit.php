@@ -84,6 +84,12 @@ $p=['datatoimport'=>'societe_1','obj'=>$driver,'arrayrecord'=>$row,'array_match_
 checkInput(MaxInputHooks::import($p)===1&&$count===1&&$driver->calls===1&&$driver->row===$mapped,'supported import hook delegates exactly once and preserves native success counter');
 $driver->warnings=['synthetic native warning'];try{MaxInputHooks::import($p);throw new RuntimeException('FAIL import warning accepted');}catch(RuntimeException $e){checkInput($driver->db->rollbacks===1&&$driver->db->commits===1,'import warnings roll back the wrapper row transaction');}
 checkInput(MaxInputHooks::import(['datatoimport'=>'unknown'])===0,'unclassified import is not claimed supported');
+checkInput(MaxInput::api('contacts',['firstname'=>str_repeat('ß',25)])['firstname']===str_repeat('SS',25),'contact API accepts exact native 50 character expansion boundary');
+rejectsInput(fn()=>MaxInput::api('contacts',['firstname'=>str_repeat('ß',26)]),'contact API rejects expansion beyond native 50 character column');
+rejectsInput(fn()=>MaxInput::web('contact/card.php',['lastname'=>str_repeat('ß',26)]),'contact web rejects expansion beyond native lastname column');
+$contactSource=[['val'=>'Name.Case@Example.invalid','type'=>1],['val'=>'özel çiçek','type'=>1],['val'=>'gizli şişli','type'=>1]];
+$contactNormalized=MaxInput::importRow('societe_2',$contactSource,[1=>'s.email',2=>'s.note_public',3=>'s.note_private']);
+checkInput($contactNormalized[0]===$contactSource[0]&&$contactNormalized[1]['val']==='ÖZEL ÇİÇEK'&&$contactNormalized[2]['val']==='GİZLİ ŞİŞLİ'&&$contactSource[1]['val']==='özel çiçek','contact import notes normalize without altering email or raw evidence');
 $unitNativeToken='CaseToken';$unitNativeRequest=['token'=>'wrong'];$protectedDriver=new DriverFixture();$forged=$p;$forged['obj']=$protectedDriver;$forged['step']=5;
 try{MaxInputHooks::import($forged);throw new LogicException('missing row token guard');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403&&$protectedDriver->calls===0,'authoritative row hook rejects CSRF before native importer call');}
 try{MaxInputHooks::import(['datatoimport'=>'unknown','step'=>5]);throw new LogicException('missing unknown row guard');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403,'unclassified wizard dataset cannot bypass CSRF through fallback');}

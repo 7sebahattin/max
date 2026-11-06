@@ -73,9 +73,11 @@ class OwnedCleanup(unittest.TestCase):
 
     def test_wizard_requires_separate_complete_evidence(self):
         (self.run/'http-checks.json').write_text('[{"check":"native browser no external requests","status":"PASS"}]')
-        with self.assertRaises(FileNotFoundError):runner.verify_stage_report(self.run,'native_wizard_http')
-        (self.run/'wizard-checks.json').write_text('[{"check":"wizard native login admin","status":"PASS"}]')
-        with self.assertRaises(RuntimeError):runner.verify_stage_report(self.run,'native_wizard_http')
+        for label,name in [('native_wizard_http','wizard-checks.json'),('native_people_http','people-checks.json')]:
+            with self.subTest(stage=label):
+                with self.assertRaises(FileNotFoundError):runner.verify_stage_report(self.run,label)
+                (self.run/name).write_text('[{"check":"native login only","status":"PASS"}]')
+                with self.assertRaises(RuntimeError):runner.verify_stage_report(self.run,label)
 
 
 if __name__=='__main__':unittest.main()
