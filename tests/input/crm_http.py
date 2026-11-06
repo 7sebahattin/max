@@ -74,7 +74,7 @@ def main():
                     # lack this entity boundary. Observe; never claim isolation or
                     # issue an admin write against the protected foreign row.
                     check(other_response.status==200 and int(other_response.json()['entity'])==2,'CRM native contact entity limitation reproduced; isolation BLOCKED')
-                    (RUN/'crm-limitations.json').write_text(json.dumps([dict(surface='contacts entity boundary for full-permission internal user without MultiCompany',status='BLOCKED',observed_native_status=200,write_attempted=False,delivery_boundary='separate installation and database per customer; two-install acceptance NOT RUN')],indent=2),encoding='utf-8')
+                    (RUN/'crm-limitations.json').write_text(json.dumps([dict(surface='contacts entity boundary for full-permission internal user without MultiCompany',status='BLOCKED',observed_native_status=200,full_permission_write_attempted=False,delivery_boundary='separate installation and database per customer; two-install acceptance NOT RUN')],indent=2),encoding='utf-8')
                     check(api('PUT',resource+'/'+other,{'lastname':'izinsiz'},role='denied').status==403,'CRM denied role cannot modify protected foreign contact')
                     continue
                 check(other_response.status in (403,404),'CRM cross entity API read denied '+resource)
