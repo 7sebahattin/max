@@ -110,6 +110,31 @@ rejectsInput(fn()=>(new MaxCustomsDeclaration($db))->create($allowed,'Case',['go
 rejectsInput(fn()=>(new MaxMailIntake($db))->createAccount($allowed,['label'=>str_repeat('ß',41)]),'Mail direct service enforces label normalization before persistence');
 MaxInputHooks::importFailure(4);checkInput(!MaxInputHooks::importBatchRejected(),'simulation failure does not claim a committed batch rollback');
 MaxInputHooks::importFailure(5);checkInput(MaxInputHooks::importBatchRejected(),'failed real import exposes batch rejection state for native footer');
+// Guard regressions for the request-bound native ORM email adapter. This fake
+// tests no DB behavior; actual native transactions run in crm_http.py.
+function dol_strtolower($value){return mb_strtolower($value,'UTF-8');}
+class UnitNativeEmail {
+ public $id=9,$entity=1,$table_element='socpeople',$email='case.user@example.invalid',$writes=0,$fail=false;
+ public function setValueFrom(...$args){$this->writes++;if($this->fail)return -1;$this->email=$args[1];return 1;}
+}
+$conf->entity=1;$actor=(object)['id'=>10];
+$emailObject=new UnitNativeEmail();MaxInputEmail::remember('contacts','update',9,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===0&&$emailObject->email==='Case.User@Example.invalid'&&$emailObject->writes===1,'email case restored only through native ORM');
+$emailObject=new UnitNativeEmail();MaxInputEmail::remember('contacts','update',8,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===-1&&$emailObject->writes===0,'email request cannot target a different native ID');
+$emailObject=new UnitNativeEmail();$emailObject->entity=2;MaxInputEmail::remember('contacts','update',9,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===-1&&$emailObject->writes===0,'email adapter cannot write another entity');
+$emailObject=new UnitNativeEmail();MaxInputEmail::remember('contacts','update',9,'Different@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===-1&&$emailObject->writes===0,'email adapter never overrides native validation or different content');
+$emailObject=new UnitNativeEmail();$emailObject->fail=true;MaxInputEmail::remember('contacts','update',9,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===-1&&$emailObject->email==='case.user@example.invalid','native ORM failure propagates to outer transaction');
+$emailObject=new UnitNativeEmail();MaxInputEmail::remember('contacts','update',9,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('COMPANY_MODIFY',$emailObject,$actor)===0&&$emailObject->writes===0,'email adapter ignores unrelated native event');
+MaxInputEmail::remember('ignored','update',9,'Case.User@Example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===0&&$emailObject->writes===0,'email adapter without supported request cannot write');
+MaxInputEmail::remember('contacts','update',9,'case.user@example.invalid');
+checkInput(MaxInputEmail::apply('CONTACT_MODIFY',$emailObject,$actor)===0&&$emailObject->writes===0,'identical opaque email needs no extra write');
+rejectsInput(fn()=>MaxInputEmail::api('contacts','PUT','/api/index.php/contacts/9',['email'=>'Body@Example.invalid'],['email'=>'Query@Example.invalid']),'ambiguous email query body is rejected before any native write');
 $report=['passed'=>true,'scope'=>'pure_normalizer_and_adapter_unit','checks'=>$checks,'installed_native'=>'NOT RUN'];
 if(isset($argv[1]))file_put_contents($argv[1],json_encode($report,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
 echo 'PASS '.count($checks)." normalization and adapter unit checks\n";

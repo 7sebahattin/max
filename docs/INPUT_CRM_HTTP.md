@@ -26,6 +26,8 @@ Sadece bu koşunun oluşturduğu ID'ler temizlenir; önce contact, sonra company
 
 ## Kanıt ve sınırlar
 
+Core 0.3.1 `module_parts.triggers` kaydını ekler; mevcut kurulumun ilerideki yetkili upgrade'inde native modül metadata refresh'i gerekir. Bu iş canlı kurulum upgrade'i yapmaz. Unit guard'lar eşleşmeyen ID/entity/event, farklı native içerik, ambiguous query/body, boş request context ve native ORM hata sinyalini sınar; bunlar gerçek DB rollback kanıtı gibi sayılmaz. Installed HTTP kabulü gerçek native create/update/trigger/ORM/persistence ve ticari snapshot ile ayrıca doğrulanır.
+
 Runner yeni `native_crm_http` aşamasını `crm-checks.json` ve terminal assertion ile doğrular. Hedefli geliştirme için standart Windows native komutuna `--http-suite crm` eklenebilir; diğer HTTP aşamaları NOT RUN kalır. Final teslim aynı clean HEAD'de varsayılan `--http-suite all`, yerel kontroller ve owned cleanup gerektirir. Exact SHA ve sonuç `.local/input-native-summary.json`, güvenli assertion/hash paketi `.local/input-evidence-manifest.json` içindedir; raw/log/config/credential/session paylaşılmaz.
 
 Önceki yedi import profilinin CSV/XLSX insert/strict_line kabulü yeni town sınırıyla yeniden çalışır. Eski 25 ürün hedefinin %28 kanıtlı / %72 açık-kısmi oranı değişmez. Bu test tüm native web/API coverage iddiası değildir: CKEditor etkileşimleri, bütün CRM özel aksiyonları, external-user/owner-scope çeşitleri, warehouse/order/invoice/shipment write yüzeyleri, update/bulk import, ORM/cron/third-party, Core kapalı yollar ve Docker ortak 63 ayrı açık/BLOCKED kapsamdır.
