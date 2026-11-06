@@ -105,7 +105,9 @@ def main():
                         response=admin.request.post(BASE+'/imports/import.php',form=dict(bad,step='5',token=token(page)))
                         check('data-max-input-import="rejected"' in response.text() and read(pending) is None and read(ref)==saved,'orders duplicate batch rollback without merge '+fmt)
                     for column in (('description',) if is_line else ('public','private')):
-                        overflow='ß'*32768
+                        # 21846 source characters fit XLSX's 32767-character cell
+                        # limit, then expand to 65538 business characters (FFI).
+                        overflow='ﬃ'*21846
                         pending='OrderHttp-Overflow-'+fmt
                         rows=[line(ref,'geçici'),line(ref,overflow)] if is_line else [header(pending,overflow if column=='public' else TEXT,overflow if column=='private' else 'şişli')]
                         bad=upload(dataset,fmt,'overflow-'+column+'-'+label+'.'+fmt,rows);simulate('overflow-'+column+'-'+label,False)

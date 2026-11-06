@@ -14,7 +14,7 @@ Başlangıç yerel commit'i `4d3cf82d61a068962ac89bd5b05218e7a750b2b2`. Mail ve 
 - Simülasyonun parent/line kaydını değiştirmemesi; token'sız/yanlış token GET/POST'un 403 ile yazmadan reddi.
 - Native commit linkinin token'ı URL'ye koymadan POST yapması; public/private not, açıklama, Türkçe/NFC/Unicode genişlemesi; teknik referans/URI ve miktar/fiyat/toplam korunması.
 - Sipariş referans çakışmasında batch rollback, önceki pending siparişin kalmaması ve mevcut kaydın birleştirilmemesi.
-- Her iki header notunda ve line açıklamasında `ß × 32768 → SS × 32768` ile 65535 sınırının aşılması: simülasyon ve doğrudan commit reddi. Line batch'teki önceki geçerli pending satırın da rollback olması. Line açıklaması unique sayılmaz; yapay duplicate kuralı konmaz.
+- Her iki header notunda ve line açıklamasında `ﬃ × 21846 → FFI × 21846` ile 65535 sınırının aşılması: simülasyon ve doğrudan commit reddi. Ham hücre 21846 karakterdir; XLSX'in 32767 hücre karakter sınırı içinde kalır, ancak dönüşüm sonrası 65538 karakter oluşur. Line batch'teki önceki geçerli pending satırın da rollback olması. Line açıklaması unique sayılmaz; yapay duplicate kuralı konmaz.
 - Import yetkisiz kullanıcının geçerli token ile upload/import reddi; yanlış upload CSRF'sinin dosya bırakmaması.
 - Son raw dosya hash kontrolü, browser JavaScript hatası ve dış browser isteği olmaması.
 
