@@ -2,6 +2,18 @@
 /** Supported native hook adapters; no authentication replacement or DB statements. */
 require_once dirname(__DIR__).'/class/input.class.php';
 class MaxInputHooks {
+ private static $importBatchRejected=false;
+ public static function importFailure($step) {if($step==5)self::$importBatchRejected=true;}
+ public static function importBatchRejected() {return self::$importBatchRejected;}
+ /** Opaque native session tokens; no casing, decoding or token replacement. */
+ public static function requireImportToken($step,$provided,$expected) {
+  // Match the native wizard's numeric step comparison, including e.g. "5.0".
+  if($step!=5)return;
+  if(!is_string($provided)||!is_string($expected)||$provided===''||$expected===''||!hash_equals($expected,$provided))throw new InvalidArgumentException('MAXInputCsrf',403);
+ }
+ private static function importRequestToken($step) {
+  self::requireImportToken($step,GETPOST('token','alpha'),currentToken());
+ }
  public static function path($file,$root) {
   $root=rtrim(str_replace('\\','/',$root),'/').'/';$file=str_replace('\\','/',$file);
   return str_starts_with($file,$root)?substr($file,strlen($root)):'';
@@ -9,6 +21,7 @@ class MaxInputHooks {
  public static function web() {
   if(!in_array($_SERVER['REQUEST_METHOD']??'',['GET','POST'],true))return;
   $path=self::path($_SERVER['SCRIPT_FILENAME']??'',DOL_DOCUMENT_ROOT);
+  if($path==='imports/import.php')self::importRequestToken(GETPOST('step','alphanohtml'));
   // Native security handling may deliberately unset POST after rejecting CSRF.
   if(isset($_POST))$_POST=MaxInput::web($path,$_POST);
   // Native GETPOST defaults to query-before-body, so normalize both sources.
@@ -25,6 +38,9 @@ class MaxInputHooks {
  }
  /** Known native datasets delegate exactly once to the native importer. */
  public static function import($parameters) {
+  // The early session hook is not the authoritative write guard (first-login
+  // requests can follow a different native login branch). Guard the row hook too.
+  if(isset($parameters['step']))self::importRequestToken($parameters['step']);
   $dataset=$parameters['datatoimport']??'';
   if(!isset(MaxInput::registry()['imports'][$dataset]))return 0;
   foreach(['obj','arrayrecord','array_match_file_to_database','objimport','fieldssource','importid','updatekeys','nbok'] as $key)if(!array_key_exists($key,$parameters))throw new InvalidArgumentException('MAXInputInvalid',400);
@@ -47,7 +63,7 @@ class MaxInputHooks {
   $fields=MaxInput::registry()['web'][$path]??[];
   // MAX form services enforce their own authoritative fields as well.
   if($path==='custom/maxorders/index.php'||$path==='custom/maxorders/review.php')$fields=[];
-  $config=json_encode(['locale'=>'tr-TR','fields'=>$fields,'formLayout'=>in_array($path,['societe/card.php','product/card.php'],true),'facts'=>in_array($path,['custom/maxorders/index.php','custom/maxorders/review.php','custom/maxorders/document.php'],true)],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE);
+  $config=json_encode(['locale'=>'tr-TR','fields'=>$fields,'importWizard'=>$path==='imports/import.php','formLayout'=>in_array($path,['societe/card.php','product/card.php'],true),'facts'=>in_array($path,['custom/maxorders/index.php','custom/maxorders/review.php','custom/maxorders/document.php'],true)],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE);
   return '<link rel="stylesheet" href="'.dol_buildpath('/maxcore/css/input.css',1).'"><script id="max-input-config" type="application/json">'.$config.'</script><script defer src="'.dol_buildpath('/maxcore/js/input.js',1).'"></script>';
  }
 }

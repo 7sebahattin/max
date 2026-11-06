@@ -2,6 +2,9 @@
   "version": 1,
   "locale": "tr_TR",
   "web": {
+    "imports/import.php": {
+      "import_name": ["text", 50]
+    },
     "societe/card.php": {
       "nom": [
         "text",

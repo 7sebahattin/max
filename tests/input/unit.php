@@ -9,10 +9,22 @@ require __DIR__.'/../../modules/maxcustoms/class/declaration.class.php';
 require __DIR__.'/../../modules/maxmail/class/intake.class.php';
 function isModEnabled($name){return true;}
 function getDolGlobalString($name,$default=''){return $default;}
+// Pure row-hook guard fixtures. Actual native implementations run in the
+// separately installed suite and native_adapter_unit.php processes.
+function GETPOST($name,...$args){return $GLOBALS['unitNativeRequest'][$name]??'';}
+function currentToken(){return $GLOBALS['unitNativeToken']??'';}
 define('MAIN_DB_PREFIX','unit_');$dolibarr_main_db_name='synthetic_unit';
 $conf=(object)['entity'=>1];$checks=[];
 function checkInput($ok,$label){global $checks;if(!$ok)throw new RuntimeException('FAIL '.$label);$checks[]=['check'=>$label,'status'=>'PASS'];echo 'PASS '.$label."\n";}
 function rejectsInput($callback,$label){try{$callback();}catch(InvalidArgumentException $e){checkInput($e->getCode()===400,$label);return;}throw new RuntimeException('FAIL missing rejection '.$label);}
+foreach(['5','5.0',5] as $wizardStep){
+ MaxInputHooks::requireImportToken($wizardStep,'CaseToken','CaseToken');
+ try{MaxInputHooks::requireImportToken($wizardStep,'wrong','CaseToken');throw new LogicException('missing token rejection');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403,'wizard step variant requires exact opaque native token '.(string)$wizardStep);}
+}
+foreach([null,[],123,''] as $badToken){try{MaxInputHooks::requireImportToken(5,$badToken,'CaseToken');throw new LogicException('missing malformed token rejection');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403,'wizard malformed or missing token rejected '.gettype($badToken));}}
+MaxInputHooks::requireImportToken(4,null,null);
+checkInput(MaxInput::web('imports/import.php',['import_name'=>'şişli profil','token'=>'CaseToken','filetoimport'=>'Case/File.csv'])===['import_name'=>'ŞİŞLİ PROFİL','token'=>'CaseToken','filetoimport'=>'Case/File.csv'],'import profile business name uppercase while token and source path remain exact');
+rejectsInput(fn()=>MaxInput::web('imports/import.php',['import_name'=>str_repeat('ß',26)]),'import profile length validated after expansion');
 checkInput(MaxInput::text('istanbul ıslak İ I i ı çğöşü')==='İSTANBUL ISLAK İ I İ I ÇĞÖŞÜ','Turkish dotted/dotless I and alphabet');
 checkInput(MaxInput::text("c\u{0327}ic\u{0327}ek")==='ÇİÇEK','decomposed Unicode normalized to NFC');
 checkInput(MaxInput::text(str_repeat('a',65535),65535)===str_repeat('A',65535),'long non-address text does not cause unbounded protected-span backtracking');
@@ -72,6 +84,9 @@ $p=['datatoimport'=>'societe_1','obj'=>$driver,'arrayrecord'=>$row,'array_match_
 checkInput(MaxInputHooks::import($p)===1&&$count===1&&$driver->calls===1&&$driver->row===$mapped,'supported import hook delegates exactly once and preserves native success counter');
 $driver->warnings=['synthetic native warning'];try{MaxInputHooks::import($p);throw new RuntimeException('FAIL import warning accepted');}catch(RuntimeException $e){checkInput($driver->db->rollbacks===1&&$driver->db->commits===1,'import warnings roll back the wrapper row transaction');}
 checkInput(MaxInputHooks::import(['datatoimport'=>'unknown'])===0,'unclassified import is not claimed supported');
+$unitNativeToken='CaseToken';$unitNativeRequest=['token'=>'wrong'];$protectedDriver=new DriverFixture();$forged=$p;$forged['obj']=$protectedDriver;$forged['step']=5;
+try{MaxInputHooks::import($forged);throw new LogicException('missing row token guard');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403&&$protectedDriver->calls===0,'authoritative row hook rejects CSRF before native importer call');}
+try{MaxInputHooks::import(['datatoimport'=>'unknown','step'=>5]);throw new LogicException('missing unknown row guard');}catch(InvalidArgumentException $e){checkInput($e->getCode()===403,'unclassified wizard dataset cannot bypass CSRF through fallback');}
 $facts=MaxOrdersPacket::facts('{"variant":"çiçek","packaging":"kutu","sku":"CaseSKU","quantity":"1.250","currency":"eur"}');
 checkInput($facts['variant']==='ÇİÇEK'&&$facts['packaging']==='KUTU'&&$facts['sku']==='CaseSKU'&&$facts['currency']==='EUR'&&$facts['quantity']==='1.25','Orders direct service and bridges normalize business values, not SKU/numbers');
 rejectsInput(fn()=>MaxOrdersPacket::facts(json_encode(['variant'=>str_repeat('ß',41)])),'Orders validates canonical length');
@@ -87,6 +102,8 @@ class AllowedActor {public $id=10;public $socid=0;public function hasRight(...$a
 $allowed=new AllowedActor();
 rejectsInput(fn()=>(new MaxCustomsDeclaration($db))->create($allowed,'Case',['goods_summary'=>str_repeat('ß',1001)]),'Customs direct service enforces uppercase length before persistence');
 rejectsInput(fn()=>(new MaxMailIntake($db))->createAccount($allowed,['label'=>str_repeat('ß',41)]),'Mail direct service enforces label normalization before persistence');
+MaxInputHooks::importFailure(4);checkInput(!MaxInputHooks::importBatchRejected(),'simulation failure does not claim a committed batch rollback');
+MaxInputHooks::importFailure(5);checkInput(MaxInputHooks::importBatchRejected(),'failed real import exposes batch rejection state for native footer');
 $report=['passed'=>true,'scope'=>'pure_normalizer_and_adapter_unit','checks'=>$checks,'installed_native'=>'NOT RUN'];
 if(isset($argv[1]))file_put_contents($argv[1],json_encode($report,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
 echo 'PASS '.count($checks)." normalization and adapter unit checks\n";

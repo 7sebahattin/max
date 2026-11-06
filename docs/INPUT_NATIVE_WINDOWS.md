@@ -28,7 +28,7 @@ Mevcut normalizer, extraction, policy ve sentetik browser testleri yeniden yazı
 | Products API | Gerçek POST/PUT/GET, Türkçe/NFC/ß, rich text/link, SKU, duplicate key, uzunluk, auth/rol/entity | Diğer resource/line endpoint'leri NOT RUN |
 | Product web | Oturumlu doğrudan POST, query önceliği, geçerli token ile GET yazımı, geçersiz CSRF, yetkisiz kullanıcı, taşma reddi | Bütün update/clone/note varyantları NOT RUN |
 | Product/cari/Core form değerleri | Gerçek native ekranlarda actual input ve 360/390/768 px, sıfır taşma | Cari HTTP kayıt/clone, legal şirket ekranı ve gerçek CKEditor/caret NOT RUN |
-| `produit_1` import | Gerçek CSV/XLSX reader → native HookManager → native importer → DB; ham hash, SKU, duplicate rollback, uzunluk ve sayaç | HTTP import wizard/CSRF/rol akışı ve diğer 6 profil NOT RUN |
+| `produit_1` import | Gerçek CSV/XLSX reader → native HookManager → native importer → DB; ham hash, SKU, duplicate rollback, uzunluk ve sayaç; HTTP wizard devamı [ayrı kayıt](INPUT_IMPORT_WIZARD.md) | Diğer 6 profil ve update/fast_bulk NOT RUN |
 | Core marka | Doğrudan native DB servisi, Türkçe değer, entity 1/2 ayırımı ve legal snapshot | Marka HTTP save/upload/CSRF kabulü NOT RUN |
 | Modül lifecycle | Beş MAX modülü native aktivasyon, yazan modüllerde Core dependency, native Core off/on ve kapalıyken servis reddi | Tüm dependent cascade/kurulum UI kombinasyonları NOT RUN; Core kapalı native girişler BLOCKED |
 | Ticari değişmezlik | Aşağıdaki sabit before/after sözleşmesi | Dolu native invoice-payment/lot/shipment kapsamı NOT RUN |
@@ -87,4 +87,4 @@ Runner yalnız kendi PID'lerini durdurur ve kendi run dizininin çözümlenmiş 
 
 Mevcut `tests/coenabled/test_ci_policy.py` Windows koşusunda 14 PASS + 1 ERROR verdi: satır sonu içeren gerçek Git filename fixture'ı NTFS'de oluşturulamıyor (`WinError 123`). Test değiştirilmedi, skip veya tolerans eklenmedi; suite PASS ilan edilmez. Diğer yerel kanıt/cleanup testleri ayrı raporlanır. Compose validation/smoke ve ortak 63 NOT RUN; GitHub Actions/push/PR/billing/merge/deployment askısı aynen geçerlidir.
 
-Sonraki somut iş: sınıflandırma ve merkezi MaxInput sözleşmesini koruyarak gerçek HTTP import wizard'ının CSV/XLSX başarı/rol/CSRF/rollback akışlarını eklemek; ardından ücretsiz Docker-capable yerel ortamda değişmemiş ortak 63'ü ve kalan native girişleri doğrulamak.
+HTTP import wizard devamı ve yeni CSRF/profil/batch hata bildirimi [INPUT_IMPORT_WIZARD.md](INPUT_IMPORT_WIZARD.md) içinde kayıtlıdır. Sonraki somut iş, aynı zorunlu sınıflandırma/MaxInput kuralıyla diğer native import profillerini doğrulamaktır; ortak 63 ücretsiz Docker-capable yerel ortam gerektirir.

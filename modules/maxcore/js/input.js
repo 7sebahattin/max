@@ -5,6 +5,29 @@
  const configNode = document.getElementById('max-input-config');
  if (!configNode) return;
  const config = JSON.parse(configNode.textContent);
+ if (config.importWizard) {
+  const notice = document.querySelector('[data-max-input-import="rejected"]');
+  const result = document.querySelector('#id-right .info');
+  if (notice && result) result.before(notice);
+ }
+ // Native step-5 links commit an import. Submit their opaque parameters by POST
+ // with the current native token, preserving the native wizard and role checks.
+ if (config.importWizard) document.addEventListener('click', event => {
+  const link = event.target.closest && event.target.closest('a[href]');
+  if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  const url = new URL(link.href, location.href);
+  if (url.origin !== location.origin || url.pathname !== location.pathname || url.searchParams.get('step') !== '5') return;
+  event.preventDefault();
+  const token = document.querySelector('meta[name="anti-csrf-newtoken"]');
+  if (!token || !token.content) return; // Server also fails closed without a token.
+  const form = document.createElement('form');form.method = 'POST';form.action = url.pathname;
+  for (const [name,value] of url.searchParams) {
+   if (name === 'token') continue;
+   const field = document.createElement('input');field.type = 'hidden';field.name = name;field.value = value;form.append(field);
+  }
+  const field = document.createElement('input');field.type = 'hidden';field.name = 'token';field.value = token.content;form.append(field);
+  document.body.append(form);HTMLFormElement.prototype.submit.call(form);
+ });
  // Reflow the two native card forms verified by installed acceptance. This does
  // not change field values, table data, focus order or native submission names.
  if (config.formLayout) {

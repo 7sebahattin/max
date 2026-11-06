@@ -16,7 +16,7 @@ Ham PDF/XLSX/mail kanıtı ve hash'i aynıdır. İçe alınan iş önerisi ayrı
 
 ## Yerleştirilen mekanizmalar
 
-- [Alan kayıt defteri](../modules/maxcore/input-fields.json): açık route/alan/rol/uzunluk listesi. Şu anda 19 web route ailesi, 7 native API kaynağı ve 7 native import profili vardır. Listede olmayan alanlar kendiliğinden iş metni sayılmaz; kabul kapsamında sınıflandırılmamış olarak BLOCKED kalır.
+- [Alan kayıt defteri](../modules/maxcore/input-fields.json): açık route/alan/rol/uzunluk listesi. Şu anda 20 web route ailesi, 7 native API kaynağı ve 7 native import profili vardır. Import wizard profil adı business text olarak 50 karakterle sınıflandırılmıştır. Listede olmayan alanlar kendiliğinden iş metni sayılmaz; kabul kapsamında sınıflandırılmamış olarak BLOCKED kalır.
 - MAX Core `updateSession` native hook'u, kayıt kodundan önce tanımlı GET/POST/REQUEST alanlarını dönüştürür. Dolibarr `GETPOST` varsayılan olarak query'yi gövdeden önce okuyabildiğinden ikisi de normalize edilir. Kimlik/CSRF/action alanları değiştirilmez.
 - Native `beforeApiCall`, Restler'ın **public** `getRequestStream()` arayüzünü `handle()` öncesinde kullanır; Reflection/private property/core patch yoktur. Hook anında requestMethod henüz null olabileceğinden native public method resolver kullanılır. Tanımlı yazma kaynakları JSON gerektirir, sorgu fallback'i de normalize edilir, gövde/çıktı 256 KiB ile sınırlıdır. JSON taşımasında yalnız sınıflandırılmış string token'ları değiştirilir; finansal sayı literalleri (ondalık hassasiyet ve büyük tamsayılar dahil), opaque string kaçışları, anahtarlar ve kalan baytlar aynen korunur. Yinelenen JSON anahtarları belirsiz yorumlamayı önlemek için reddedilir. `lines` alt alanları yalnız orders/invoices/shipments kaynaklarında sınıflandırılmıştır. Başarısız dönüşümde istek generic 400/413/415/503 ile sonlanır; native auth ve object izinleri yerine geçmez.
 - Native `ImportInsert`, bilinen kolonları raw satır kopyasında dönüştürür ve native `import_insert` yöntemini tam bir kez çağırır. Native satır işlemi dış transaction ile çevrelenir; hata/uyarıda rollback ve manuel inceleme, başarıda native sayaç güncellemesi vardır. Native finans/stok SQL'i yazılmaz; importer'ın kendi yetki, tip, unique ve transaction davranışı tam kurulumda ayrıca doğrulanmalıdır.
@@ -54,6 +54,8 @@ Bu tablo desteklenmeyen işlemin çalıştığı izlenimini vermez. Bilinmeyen b
 5. Yeni native/third-party yüzeyi doğrulanmadıysa BLOCKED; unit'i native kurulum testi diye göstermeyin. `AGENTS.md` bu kapıyı zorunlu kılar. Yerel policy testi kayıt defteri rol/sınırlarını, Core bağımlılıklarını ve CI dosyalarının değişmediğini denetler.
 
 ## Yerel doğrulama ve üretilebilirlik
+
+HTTP wizard devamı: [INPUT_IMPORT_WIZARD.md](INPUT_IMPORT_WIZARD.md), `produit_1` CSV/XLSX için gerçek yükleme/eşleme/simülasyon/commit, rol/CSRF, batch rollback ve kaynak hash kabulünü tanımlar. Step-5 token koruması native hook sınırlarında eklenir; native Run Import linki token'lı POST'a çevrilir. Profil adı merkezi MaxInput ile dönüştürülür. Diğer profiller ve genel ürün kabulü ayrı kapılardır; exact SHA kanıtı yerel rapordadır.
 
 ### Windows native devam çalışması (2026-11-06)
 

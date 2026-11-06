@@ -41,3 +41,4 @@ MAXInputTooLong=Text is too long after uppercase conversion.
 MAXInputUnavailable=Text normalization is unavailable.
 MAXInputJsonRequired=This entry point requires JSON.
 MAXInputImportReview=Review the import row.
+MAXInputImportBatchRejected=The import failed. No records from this batch were saved. Check the file and try again.

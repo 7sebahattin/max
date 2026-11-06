@@ -54,6 +54,7 @@ def verify_stage_report(run,label):
     required={
         'native_fixture':('fixture-checks.json','baseline written once'),
         'native_http':('http-checks.json','native browser no external requests'),
+        'native_wizard_http':('wizard-checks.json','wizard final source integrity and network checks'),
         'native_import_lifecycle_snapshot':('verify-checks.json','commercial bank IBAN stock order invoice payment and legal snapshot unchanged'),
     }
     if label not in required:return
@@ -154,7 +155,7 @@ def main():
     report = dict(**identity,
                   scope='portable_windows_installed_native', run_id=run.name,
                   upstream_sha256=lock['sha256'], preflight='PASS',
-                  checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_import_lifecycle_snapshot')},
+                  checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_wizard_http','native_import_lifecycle_snapshot')},
                   original_shared_63='NOT RUN (Docker identity/network contract unavailable)',
                   github_ci='NOT RUN (owner hold)', cleanup='NOT RUN')
 
@@ -227,6 +228,8 @@ def main():
         ready(web,httpport)
         http_passed=True
         try: command('native_http', [sys.executable,str(ROOT/'tests/input/installed_http.py')])
+        except RuntimeError: http_passed=False
+        try: command('native_wizard_http', [sys.executable,str(ROOT/'tests/input/wizard_http.py')])
         except RuntimeError: http_passed=False
         command('native_import_lifecycle_snapshot',php+[str(ROOT/'tests/input/installed.php'),'verify'])
         report['result']='PASS' if http_passed else 'FAIL'
