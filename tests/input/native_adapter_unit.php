@@ -29,6 +29,8 @@ try{
   $contactBounds=$contactBounds&&MaxInput::registry()['web']['contact/card.php'][$field][1]===50&&MaxInput::registry()['api']['contacts'][$field][1]===50&&MaxInput::registry()['imports']['societe_2']['s.'.$field][1]===50;
  }
  nativeInputCheck($contactBounds,'contact web API and import length rules match actual pinned SQL varchar columns');
+ $companySchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_societe.sql');
+ nativeInputCheck((bool)preg_match('/\btown\s+varchar\(50\)/i',$companySchema)&&MaxInput::registry()['web']['societe/card.php']['town'][1]===50&&MaxInput::registry()['api']['thirdparties']['town'][1]===50&&MaxInput::registry()['imports']['societe_1']['s.town'][1]===50,'company town web API import bounds match pinned SQL');
  $invoiceLineSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_facturedet.sql');
  nativeInputCheck((bool)preg_match('/\blabel\s+varchar\(255\)/i',$invoiceLineSchema)&&MaxInput::registry()['imports']['facture_3']['fd.label']===['text',255],'invoice import line label length matches pinned native SQL');
  nativeInputCheck(strpos($source,"executeHooks('beforeApiCall'")<strpos($source,'$api->r->handle()'),'supported hook precedes native request parsing');

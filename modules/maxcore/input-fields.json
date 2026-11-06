@@ -3,7 +3,10 @@
   "locale": "tr_TR",
   "web": {
     "imports/import.php": {
-      "import_name": ["text", 50]
+      "import_name": [
+        "text",
+        50
+      ]
     },
     "societe/card.php": {
       "nom": [
@@ -20,7 +23,7 @@
       ],
       "town": [
         "text",
-        64
+        50
       ],
       "firstname": [
         "text",
@@ -67,6 +70,14 @@
       "poste": [
         "text",
         255
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
       ]
     },
     "product/card.php": {
@@ -444,7 +455,7 @@
       ],
       "town": [
         "text",
-        64
+        50
       ],
       "firstname": [
         "text",
@@ -487,6 +498,14 @@
       "poste": [
         "text",
         255
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
       ]
     },
     "products": {
@@ -608,7 +627,7 @@
       ],
       "s.town": [
         "text",
-        64
+        50
       ],
       "s.note_public": [
         "html",
