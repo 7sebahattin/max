@@ -45,6 +45,7 @@ if(($argv[1]??'')==='fixture'){
  $conf->entity=2;$other=new Product($db);$other->ref='Other-EntityCase';$other->label='OTHER ENTITY';$other->type=0;installedResult($other->create($user),'entity two native fixture');
  $otherSoc=new Societe($db);$otherSoc->name='OTHER ENTITY CUSTOMER';$otherSoc->client=1;$otherSoc->code_client='Other-Customer';installedResult($otherSoc->create($user),'entity two customer fixture');
  $otherContact=new Contact($db);$otherContact->entity=2;$otherContact->socid=$otherSoc->id;$otherContact->lastname='OTHER ENTITY CONTACT';installedResult($otherContact->create($user),'entity two contact fixture');$conf->entity=1;
+ installedCheck((int)installedRows('SELECT entity FROM '.MAIN_DB_PREFIX.'socpeople WHERE rowid='.(int)$otherContact->id)[0]['entity']===2,'foreign contact fixture really belongs to entity two');
  require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
  $accounts=['admin'=>['login'=>'maxadmin','password'=>getenv('MAX_INPUT_ADMIN_PASS'),'key'=>$user->api_key],'denied'=>['login'=>'input-denied','password'=>$deniedPass,'key'=>$denied->api_key],'fixture_customer'=>$soc->id,'other_product'=>$other->id,'other_societe'=>$otherSoc->id,'other_contact'=>$otherContact->id,'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
  file_put_contents($run.'/accounts.json',json_encode($accounts));
