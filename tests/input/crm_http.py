@@ -35,10 +35,12 @@ def main():
             check(page.locator('[name=password]').count()==0,'CRM native login '+role)
             return ctx,page
         admin,page=login('admin');denied,denied_page=login('denied')
+        anonymous=browser.new_context(base_url=BASE)
         def api(method,path,data=None,role='admin',raw=None,params=None):
             headers={'Content-Type':'application/json'}
             if role:headers['DOLAPIKEY']=ACCOUNTS[role]['key']
-            return admin.request.fetch(BASE+'/api/index.php/'+path,method=method,data=raw if raw is not None else (json.dumps(data,ensure_ascii=False) if data is not None else None),headers=headers,params=params)
+            request=anonymous.request if role is None else (denied.request if role=='denied' else admin.request)
+            return request.fetch(BASE+'/api/index.php/'+path,method=method,data=raw if raw is not None else (json.dumps(data,ensure_ascii=False) if data is not None else None),headers=headers,params=params)
         def read(resource,identity):
             response=api('GET',resource+'/'+str(identity));check(response.status==200,'CRM independent API read '+resource)
             return response.json()
