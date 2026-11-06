@@ -1,6 +1,8 @@
 <?php
 // Included only by the owned CLI fixture. No committed commercial changes.
 if(PHP_SAPI!=='cli'||!isset($run,$db,$hookmanager))exit(2);
+// Keep row/mapping/driver locals separate from the caller's product regression.
+function installedOrderImportChecks($run,$db,$user,$hookmanager){
 // Resolve every registered profile through the actual enabled native descriptors.
 foreach(MaxInput::registry()['imports'] as $code=>$fields){
  $descriptor=new Import($db);$descriptor->load_arrays($user,$code);
@@ -31,3 +33,5 @@ foreach(['csv','xlsx'] as $format){
   installedCheck(count(installedRows('SELECT rowid FROM '.MAIN_DB_PREFIX.($isLine?'commandedet':'commande')." WHERE import_key='OrderInputCase'"))===0,$code.' '.$format.' rollback removes all proposals');
  }
 }
+}
+installedOrderImportChecks($run,$db,$user,$hookmanager);
