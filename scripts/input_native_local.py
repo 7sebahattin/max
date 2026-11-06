@@ -236,7 +236,7 @@ def main():
             try:
                 command('native_crm_http', [sys.executable,str(ROOT/'tests/input/crm_http.py')],timeout=600)
                 report['blocked_surfaces']=json.loads((run/'crm-limitations.json').read_text(encoding='utf-8'))
-                report['acceptance_scope']='PARTIAL: executable checks passed; known native isolation boundary is BLOCKED'
+                report['acceptance_scope']='PARTIAL: executable checks passed; native entity/email integrity surfaces remain BLOCKED'
             except RuntimeError: http_passed=False
         if args.http_suite in ('all','invoices'):
             try: command('native_invoice_http', [sys.executable,str(ROOT/'tests/input/invoice_http.py')],timeout=600)
