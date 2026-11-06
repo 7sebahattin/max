@@ -31,7 +31,12 @@ class ActionsMaxcore {
   }return 0;
  }
  public function ImportInsert($parameters,&$object,&$action,$hookmanager) {
-  try{return MaxInputHooks::import($parameters);}catch(Throwable $e){$this->error='MAXInputImportReview';return -1;}
+  try{return MaxInputHooks::import($parameters);}catch(Throwable $e){
+   // Diagnose adapter/native integration failures without source values, SQL,
+   // credentials or exception arguments in the log or user-facing response.
+   error_log('MAXInputImportReview '.get_class($e).' '.basename($e->getFile()).':'.$e->getLine());
+   $this->error='MAXInputImportReview';return -1;
+  }
  }
  public function printTopRightMenu($parameters,&$object,&$action,$hookmanager) {
   $this->resprints=isModEnabled('maxcore')?maxCoreBrandMarkup():'';

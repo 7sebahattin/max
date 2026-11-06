@@ -53,6 +53,18 @@ $dupe=new StreamFixture('{"label":"one","label":"two"}');rejectsInput(fn()=>MaxI
 checkInput(!MaxInput::restler($rest,'products','GET','text/plain'),'read requests never rewritten');
 $row=['istanbul','Case-ID','Name@Example.com'];$mapped=MaxInput::importRow('societe_1',$row,[0=>'s.nom',1=>'s.code_client',2=>'s.email']);
 checkInput($mapped===['İSTANBUL','Case-ID','Name@Example.com']&&$row[0]==='istanbul','import row copy changes only mapped business columns');
+$nativeRow=[['val'=>'Case-Sku','type'=>1],['val'=>'çiçek straße','type'=>1],['val'=>'','type'=>-1],['val'=>null,'type'=>0],['val'=>'12.34000','type'=>1]];
+$nativeMapped=MaxInput::importRow('produit_1',$nativeRow,[1=>'p.ref',2=>'p.label',3=>'p.description',4=>'p.note_public',5=>'p.price']);
+$expectedNative=$nativeRow;$expectedNative[1]['val']='ÇİÇEK STRASSE';
+checkInput($nativeMapped===$expectedNative&&$nativeRow[1]['val']==='çiçek straße','native one-based mapping normalizes zero-based typed cells without changing raw metadata or numbers');
+$xlsxRow=array_combine(range(1,count($nativeRow)),$nativeRow);$xlsxExpected=$xlsxRow;$xlsxExpected[2]['val']='ÇİÇEK STRASSE';
+checkInput(MaxInput::importRow('produit_1',$xlsxRow,[1=>'p.ref',2=>'p.label',3=>'p.description',4=>'p.note_public',5=>'p.price'])===$xlsxExpected,'native XLSX one-based cell keys preserve correct field alignment');
+rejectsInput(fn()=>MaxInput::importRow('produit_1',[2=>['val'=>'çiçek','type'=>1]],[1=>'p.label']),'native sparse typed row cannot shift business classification');
+rejectsInput(fn()=>MaxInput::importRow('produit_1',[['val'=>str_repeat('ß',128),'type'=>1]],[1=>'p.label']),'native typed import expansion overflow');
+rejectsInput(fn()=>MaxInput::importRow('produit_1',[['val'=>'lowercase','type'=>-1]],[1=>'p.label']),'native typed import inconsistent null marker rejected');
+define('DOL_DOCUMENT_ROOT',__DIR__.'/native-uninstalled');
+$_SERVER['REQUEST_METHOD']='POST';$_SERVER['SCRIPT_FILENAME']=DOL_DOCUMENT_ROOT.'/product/card.php';unset($_POST);MaxInputHooks::web();
+checkInput(!isset($_POST),'native CSRF removal of POST stays removed without adapter error');
 class TransactionFixture {public $begins=0;public $commits=0;public $rollbacks=0;public function begin(){$this->begins++;return true;}public function commit(){$this->commits++;return true;}public function rollback(){$this->rollbacks++;return true;}}
 class DriverFixture {public $db;public function __construct(){$this->db=new TransactionFixture();}public $errors=[];public $warnings=[];public $calls=0;public $row;public function import_insert($row,...$args){$this->calls++;$this->row=$row;return 1;}}
 $driver=new DriverFixture();$count=0;

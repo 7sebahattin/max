@@ -40,13 +40,15 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--php',required=True,type=Path,help='Existing compatible PHP CLI, no installation performed')
     parser.add_argument('--dolibarr',required=True,type=Path,help='Existing checksum-verified pinned htdocs, read only')
+    parser.add_argument('--php-ini',type=Path,help='Optional existing local PHP configuration; system configuration stays unchanged')
     parser.add_argument('--browser',action='store_true',help='Use already installed Playwright and sandboxed /usr/bin/chromium')
     args=parser.parse_args()
-    php=str(args.php.resolve());native=str(args.dolibarr.resolve());out=ROOT/'.local';out.mkdir(exist_ok=True)
-    commands=[('normalizer',[php,'tests/input/unit.php',str(out/'input-unit.json')]),
-              ('native_library',[php,'tests/input/native_adapter_unit.php',native,str(out/'input-native-library.json')]),
-              ('source_preservation',[php,'tests/input/source_unit.php',native,str(out/'input-source.json')]),
-              ('original_extraction',[php,'tests/orders/extraction_unit.php',native,str(out/'input-orders-baseline.json')]),
+    php=[str(args.php.resolve())];native=str(args.dolibarr.resolve());out=ROOT/'.local';out.mkdir(exist_ok=True)
+    if args.php_ini:php+=['-c',str(args.php_ini.resolve())]
+    commands=[('normalizer',php+['tests/input/unit.php',str(out/'input-unit.json')]),
+              ('native_library',php+['tests/input/native_adapter_unit.php',native,str(out/'input-native-library.json')]),
+              ('source_preservation',php+['tests/input/source_unit.php',native,str(out/'input-source.json')]),
+              ('original_extraction',php+['tests/orders/extraction_unit.php',native,str(out/'input-orders-baseline.json')]),
               ('policy',[sys.executable,'-m','unittest','discover','-s','tests/input','-v'])]
     if args.browser:commands.append(('synthetic_browser',[sys.executable,'tests/input/browser.py']))
     report={'source_sha':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),

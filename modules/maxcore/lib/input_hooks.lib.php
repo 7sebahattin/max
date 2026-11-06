@@ -9,10 +9,11 @@ class MaxInputHooks {
  public static function web() {
   if(!in_array($_SERVER['REQUEST_METHOD']??'',['GET','POST'],true))return;
   $path=self::path($_SERVER['SCRIPT_FILENAME']??'',DOL_DOCUMENT_ROOT);
-  $_POST=MaxInput::web($path,$_POST);
+  // Native security handling may deliberately unset POST after rejecting CSRF.
+  if(isset($_POST))$_POST=MaxInput::web($path,$_POST);
   // Native GETPOST defaults to query-before-body, so normalize both sources.
-  $_GET=MaxInput::web($path,$_GET);
-  $_REQUEST=MaxInput::web($path,$_REQUEST);
+  if(isset($_GET))$_GET=MaxInput::web($path,$_GET);
+  if(isset($_REQUEST))$_REQUEST=MaxInput::web($path,$_REQUEST);
  }
  public static function api($parameters,$api,$method) {
   $resource=$parameters['moduleobject']??'';
@@ -46,7 +47,7 @@ class MaxInputHooks {
   $fields=MaxInput::registry()['web'][$path]??[];
   // MAX form services enforce their own authoritative fields as well.
   if($path==='custom/maxorders/index.php'||$path==='custom/maxorders/review.php')$fields=[];
-  $config=json_encode(['locale'=>'tr-TR','fields'=>$fields,'facts'=>in_array($path,['custom/maxorders/index.php','custom/maxorders/review.php','custom/maxorders/document.php'],true)],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE);
-  return '<script id="max-input-config" type="application/json">'.$config.'</script><script defer src="'.dol_buildpath('/maxcore/js/input.js',1).'"></script>';
+  $config=json_encode(['locale'=>'tr-TR','fields'=>$fields,'formLayout'=>in_array($path,['societe/card.php','product/card.php'],true),'facts'=>in_array($path,['custom/maxorders/index.php','custom/maxorders/review.php','custom/maxorders/document.php'],true)],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE);
+  return '<link rel="stylesheet" href="'.dol_buildpath('/maxcore/css/input.css',1).'"><script id="max-input-config" type="application/json">'.$config.'</script><script defer src="'.dol_buildpath('/maxcore/js/input.js',1).'"></script>';
  }
 }

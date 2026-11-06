@@ -55,6 +55,14 @@ Bu tablo desteklenmeyen işlemin çalıştığı izlenimini vermez. Bilinmeyen b
 
 ## Yerel doğrulama ve üretilebilirlik
 
+### Windows native devam çalışması (2026-11-06)
+
+Bundle Windows'a geri yüklendi. [Native Windows kayıt ve yeniden üretim](INPUT_NATIVE_WINDOWS.md), gerçek kurulumun kapsamını, yeni adaptör düzeltmelerini, sabit ticari snapshot sınırını ve kalan NOT RUN/BLOCKED kapılarını tanımlar. Yeni [yerel native runner](../scripts/input_native_local.py) resmi yükleyici, taşınabilir MariaDB, gerçek HTTP oturumu/API ve native CSV/XLSX reader/importer kullanır; eski sentetik test gruplarını veya Docker kimlikli ortak 63'ü temsil etmez. Exact final commit kanıtı ignored `.local/input-native-summary.json` içinde tutulur.
+
+Native import hücreleri `{val,type}` taşır: CSV sıfır, XLSX bir tabanlı; mapping bir tabanlıdır. Merkezi adaptör artık doğru business hücrenin yalnız `val` değerini dönüştürür; typed null/blank, metadata, teknik kolon ve ham kaynak korunur. Native CSRF tarafından kaldırılmış POST yeniden oluşturulmaz. Gerçek ürün/cari card taşmaları Core'a ait sınırlı form reflow ile düzeltilir; sıfır overflow koşulu gevşetilmez. Yeni unit regresyonları bu native farkları kapsar.
+
+Aşağıdaki 245 kontrol tablosu **aktarılmış ilk Linux kaydının tarihçesidir**; yeni Windows/native çalışmanın sayıları veya exact SHA kanıtı değildir. İlk kayıttaki geniş NOT RUN kapıları yalnız yeni native envanterde açıkça belirtilen altküme için daralır. Bütün 19/7/7 yüzey, HTTP import wizard, gerçek CKEditor ve ortak 63 hâlâ tamamlanmış sayılmaz.
+
 Mevcut uyumlu PHP CLI ve checksum-doğrulanmış Dolibarr 24.0.1 htdocs ile:
 
 ```sh

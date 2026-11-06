@@ -1,5 +1,6 @@
 """Real sandboxed Chromium, synthetic forms only. Not installed Dolibarr acceptance."""
 import json
+import os
 from pathlib import Path
 import sys
 from playwright.sync_api import sync_playwright
@@ -18,7 +19,7 @@ def check(value,label):
 
 def run():
     with sync_playwright() as p:
-        browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,chromium_sandbox=True)
+        browser=p.chromium.launch(executable_path=os.environ.get('MAX_INPUT_BROWSER_EXECUTABLE','/usr/bin/chromium'),headless=True,chromium_sandbox=True)
         context=browser.new_context()
         requests=[];errors=[]
         context.route('**/*',lambda route:(requests.append(route.request.resource_type),route.abort())[1])

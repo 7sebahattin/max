@@ -92,7 +92,25 @@ class MaxInput {
  /** Native import row copy; original raw source bytes/array are not changed. */
  public static function importRow($dataset,array $row,array $mapping){
   $rules=self::registry()['imports'][$dataset]??[];
-  foreach($mapping as $position=>$target)if(isset($rules[$target])&&array_key_exists($position,$row))$row[$position]=self::value($row[$position],$rules[$target]);
+  // CSV cells start at zero, XLSX cells at one; native mapping is one-based.
+  // Preserve the driver's keys, metadata, null/blank semantics and opaque columns.
+  $native=(bool)array_filter($row,'is_array');
+  $positions=array_keys($row);
+  if($native&&($positions!==range(0,count($row)-1)&&$positions!==range(1,count($row))))throw new InvalidArgumentException('MAXInputInvalid',400);
+  foreach($mapping as $position=>$target){
+   if(!isset($rules[$target]))continue;
+   if($native){
+    if(!is_int($position)||$position<1)throw new InvalidArgumentException('MAXInputInvalid',400);
+    if(!isset($positions[$position-1]))continue;
+    $position=$positions[$position-1];
+   }
+   if(!array_key_exists($position,$row))continue;
+   if(!$native){$row[$position]=self::value($row[$position],$rules[$target]);continue;}
+   $cell=$row[$position];
+   if(!is_array($cell)||!array_key_exists('val',$cell)||!isset($cell['type'])||!in_array($cell['type'],[-1,0,1],true))throw new InvalidArgumentException('MAXInputInvalid',400);
+   if($cell['type']===1)$row[$position]['val']=self::value($cell['val'],$rules[$target]);
+   elseif($cell['val']!==''&&$cell['val']!==null)throw new InvalidArgumentException('MAXInputInvalid',400);
+  }
   return $row;
  }
  /** Supported native pre-dispatch stream API, before Restler::handle parses the body. */

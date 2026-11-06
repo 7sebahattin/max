@@ -5,6 +5,14 @@
  const configNode = document.getElementById('max-input-config');
  if (!configNode) return;
  const config = JSON.parse(configNode.textContent);
+ // Reflow the two native card forms verified by installed acceptance. This does
+ // not change field values, table data, focus order or native submission names.
+ if (config.formLayout) {
+  document.body.classList.add('max-input-layout');
+  for (const node of document.querySelectorAll('input[name],textarea[name]')) {
+   if (config.fields[node.name] && node.form) node.form.classList.add('max-input-form');
+  }
+ }
  const composing = new WeakSet();
  const protectedSpan = /((?:(?<![a-z0-9+.-])(?:[a-z][a-z0-9+.-]{0,31}:\/\/|mailto:|www\.)[^\s<>"']+)|(?:(?<![\p{L}\p{N}.!#$%&*+/=?^_`{|}~-])[\p{L}\p{N}.!#$%&*+/=?^_`{|}~-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,})|(?:[a-z]:[\\/][^\s<>"']+)|(?:(?<!\S)\/[^\s<>"']+))/giu;
  function text(value) {
