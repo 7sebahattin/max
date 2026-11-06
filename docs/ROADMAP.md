@@ -2,7 +2,7 @@
 
 ## Current execution order — owner update, 6 November 2026
 
-1. **Mandatory input integrity:** finish native Orders header/line and invoice import acceptance, then remaining web/API surfaces. Current increment corrects the native order-line profile/alias and validates registry descriptors plus transaction-bound CSV/XLSX proposals. Full HTTP acceptance remains separately tracked.
+1. **Mandatory input integrity:** finish native Orders header/line and invoice import acceptance, then remaining web/API surfaces. Order-line profile/alias and all seven registry descriptors were corrected/verified. The current increment adds real Orders header/line HTTP acceptance, including native API persistence and owned draft cleanup; invoice header/line HTTP acceptance follows. See [INPUT_ORDER_HTTP.md](INPUT_ORDER_HTTP.md).
 2. **Orders and native commercial flow:** agree effective quantity/source-priority rules; verify manual document/revision/conflict handling and the 4+6 partial-shipment scenario. Reconcile PR #34 separately, without copying unmerged code. Keep manual intake usable without Mail.
 3. **Customs and optional HKS:** strengthen manual/native order-shipment links and document validation; implement HKS draft/validator/mock idempotency and ambiguous-result handling if included in the target delivery. No live submission.
 4. **Eligible operational outputs:** inventory reports from screens outside legacy Reports, record their provenance and exact acceptance fields, assess native filtered lists/exports first, implement only proven gaps. Do not reproduce the faulty legacy Reports page.

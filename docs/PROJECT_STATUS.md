@@ -38,9 +38,9 @@ Sahibinin 6 Kasım talimatıyla **Mail sayfası, çeviri ve bütün Mail gelişt
 
 Bu erteleme 25 kabul hedefini silmez: **%28 kanıtlı altkapsam / %72 açık-kısmi** aynı kalır. Mail'e bağlı INT-01/03 son fazda; ORD-05'in bağımsız belge dedup kısmı çalışmaya devam eder. RPT-01/02'nin hangi eski ekrana dayandığı henüz doğrulanmadığından hepsi otomatik ertelenmiş veya aktif sayılmaz. İlerlemenin değişmesi için testle kabul kapanması gerekir; öncelik değiştirmek yeterli değildir.
 
-Ürün/cari/kişi için **3/7 profil (%42,9)** CSV/XLSX insert/strict_line native HTTP kanıtı var. Bu devam işi `commande_lines_1 / d.description` eşlemesinin pinned Dolibarr'daki gerçek `commande_lines_2 / cd.description` ile uyuşmadığını düzeltir. Native descriptor/alan eşleşmesi yedi profil için kontrol edilir; sipariş başlık/satır CSV/XLSX proposal'ları gerçek importer/HookManager üzerinden dış transaction içinde sınanıp geri alınır. Native üründe olmayan import `p.note_private` alias'ı kaldırılır; gerçek private not alanı `p.note` korunur. Ayrıntı: [sipariş import kaydı](INPUT_ORDER_IMPORT.md).
+Ürün/cari/kişi için önceki **3/7 profil (%42,9)** CSV/XLSX insert/strict_line native HTTP kanıtına sipariş başlık/satır kabulü eklenir. [Sipariş HTTP kaydı](INPUT_ORDER_HTTP.md) gerçek upload, mapping, simülasyon, CSRF/rol, pozitif commit, native API okuması, duplicate/overflow batch rollback ve owned taslak temizliğini kapsar. İlk ticari snapshot bütün sipariş/satır tablolarını korumaya devam eder; sorgular daraltılmaz.
 
-Bu yeni CLI/DB kanıtı HTTP sayacını yükseltmez: sipariş ve fatura için kalan **4/7 profil HTTP NOT RUN**. Web/API/ORM/cron dahil global uyum iddiası yoktur. En son exact SHA ve temizlik sonucu ignored `.local/input-native-summary.json` dosyasındadır.
+Yeni `native_order_http` aşaması exact clean HEAD'de PASS olursa HTTP kapsamı **5/7 (%71,4)** olur; fatura başlık/satır **2/7 (%28,6) NOT RUN** kalır. Final kaynak SHA'sı ve sonuçlar ignored `.local/input-native-summary.json` ve `.local/input-evidence-manifest.json` içindedir. Update-key/fast_bulk, bütün web/API/ORM/cron dahil global uyum iddiası yoktur. Sıradaki bağımsız adım fatura import kabulüdür; eski 25 ürün hedefinin %28/%72 hesabı aynı kalır.
 
 ## Öncelik sırası
 
