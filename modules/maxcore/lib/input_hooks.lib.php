@@ -1,6 +1,7 @@
 <?php
 /** Supported native hook adapters; no authentication replacement or DB statements. */
 require_once dirname(__DIR__).'/class/input.class.php';
+require_once __DIR__.'/email_integrity.lib.php';
 class MaxInputHooks {
  private static $importBatchRejected=false;
  public static function importFailure($step) {if($step==5)self::$importBatchRejected=true;}
@@ -27,6 +28,7 @@ class MaxInputHooks {
   // Native GETPOST defaults to query-before-body, so normalize both sources.
   if(isset($_GET))$_GET=MaxInput::web($path,$_GET);
   if(isset($_REQUEST))$_REQUEST=MaxInput::web($path,$_REQUEST);
+  MaxInputEmail::web($path);
  }
  public static function api($parameters,$api,$method) {
   $resource=$parameters['moduleobject']??'';
@@ -34,7 +36,12 @@ class MaxInputHooks {
   $method=class_exists('Luracast\\Restler\\Util')?\Luracast\Restler\Util::getRequestMethod():($_SERVER['REQUEST_METHOD']??$method??'GET');
   if(in_array(strtoupper($method),['POST','PUT','PATCH'],true)&&isset(MaxInput::registry()['api'][$resource]))$_GET=(array)MaxInput::api($resource,$_GET);
   if((int)($_SERVER['CONTENT_LENGTH']??0)>MaxInput::MAX_BYTES&&isset(MaxInput::registry()['api'][$resource]))throw new InvalidArgumentException('MAXInputTooLong',413);
-  return MaxInput::restler($api->r,$resource,$method,$_SERVER['CONTENT_TYPE']??'');
+  $handled=MaxInput::restler($api->r,$resource,$method,$_SERVER['CONTENT_TYPE']??'');
+  if($handled&&in_array($resource,['thirdparties','contacts'],true)){
+   $stream=$api->r->getRequestStream();rewind($stream);$body=json_decode(stream_get_contents($stream),true,512,JSON_THROW_ON_ERROR);rewind($stream);
+   MaxInputEmail::api($resource,strtoupper($method),$parameters['url']??'',(array)$body,$_GET);
+  }
+  return $handled;
  }
  /** Known native datasets delegate exactly once to the native importer. */
  public static function import($parameters) {

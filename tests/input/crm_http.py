@@ -93,15 +93,14 @@ def main():
                 else:
                     check(saved['firstname']=='ÇİÇEK' and saved['lastname']=='IŞIK STRASSE' and saved['poste']=='ŞUBE YÖNETİCİSİ' and int(saved['socid'])==cid,'CRM contact API names role parent persistence')
                 check(saved['address']=='ÇİÇEK SOKAK' and saved['town']=='İZMİR','CRM address town normalization '+resource)
-                check(saved['email']==original['email'].lower(),'CRM native email lowercasing reproduced; exact persistence BLOCKED '+resource)
-                limitations=json.loads((RUN/'crm-limitations.json').read_text(encoding='utf-8'))
-                limitations.append(dict(surface=resource+' email exact-case persistence',status='BLOCKED',observed_native_behavior='CommonPeople::setUpperOrLowerCase lowercases complete email',normalizer_behavior='email remains opaque; never uppercase or rewrite in MaxInput'))
-                (RUN/'crm-limitations.json').write_text(json.dumps(limitations,indent=2),encoding='utf-8')
+                check(saved['email']==original['email'],'CRM opaque email case exact after native service '+resource)
                 check(saved['note_public']=='ÖZEL ÇİÇEK' and saved['note_private']=='GİZLİ ŞİŞLİ','CRM public private notes API normalized '+resource)
                 rich='<p>şişli <a href="https://Example.invalid/Case">çiçek</a></p>'
                 response=api('PUT',resource+'/'+str(identity),{'note_public':rich,'note_private':'yeni özel'})
                 saved=read(resource,identity)
-                check(response.ok and 'ŞİŞLİ' in saved['note_public'] and 'ÇİÇEK' in saved['note_public'] and 'https://Example.invalid/Case' in saved['note_public'] and saved['note_private']=='YENİ ÖZEL','CRM rich note update exact link '+resource)
+                check(response.ok and 'ŞİŞLİ' in saved['note_public'] and 'ÇİÇEK' in saved['note_public'] and 'https://Example.invalid/Case' in saved['note_public'] and saved['note_private']=='YENİ ÖZEL' and saved['email']==original['email'],'CRM partial note update preserves rich link and opaque email '+resource)
+                response=api('PUT',resource+'/'+str(identity),{'email':'Body.Case@Example.invalid'},params={'email':'Query.Case@Example.invalid'})
+                check(response.status==400 and read(resource,identity)==saved,'CRM ambiguous email query body rejects without write '+resource)
                 for role in (None,'denied'):
                     response=api('PUT',resource+'/'+str(identity),{'note_private':'izinsiz'},role=role)
                     check(response.status in (401,403) and read(resource,identity)==saved,'CRM API update auth role unchanged '+resource+' '+str(role))
@@ -109,7 +108,7 @@ def main():
                     boundary='ß'*(limit//2)+('a' if limit%2 else '')
                     response=api('PUT',resource+'/'+str(identity),{field:boundary})
                     accepted=read(resource,identity)
-                    check(response.ok and accepted[field]=='SS'*(limit//2)+('A' if limit%2 else ''),'CRM API exact expansion boundary '+resource+' '+field)
+                    check(response.ok and accepted[field]=='SS'*(limit//2)+('A' if limit%2 else '') and accepted['email']==original['email'],'CRM API exact expansion boundary and opaque email '+resource+' '+field)
                     response=api('PUT',resource+'/'+str(identity),{field:'ß'*(limit//2+1)})
                     check(response.status==400 and read(resource,identity)==accepted,'CRM API overflow no mutation '+resource+' '+field)
                 current=read(resource,identity)
@@ -123,7 +122,7 @@ def main():
                 payload=webdata(resource,original,identity);payload['token']=token
                 response=admin.request.post(BASE+path,form=payload)
                 saved=read(resource,identity)
-                check(response.ok and saved[field]==(UPPER if resource=='thirdparties' else 'ÇİÇEK') and saved['email']==original['email'].lower(),'CRM direct web update business persistence; native email limit recorded '+resource)
+                check(response.ok and saved[field]==(UPPER if resource=='thirdparties' else 'ÇİÇEK') and saved['email']==original['email'],'CRM direct web update server and opaque email '+resource)
                 if resource=='contacts':check(saved['note_public']=='ÖZEL ÇİÇEK' and saved['note_private']=='GİZLİ ŞİŞLİ','CRM contact web notes normalized')
                 # Query precedence also normalizes the authoritative native GETPOST value.
                 path,token=form_token(resource,identity);payload['token']=token
@@ -150,7 +149,7 @@ def main():
             page.goto(BASE+'/societe/card.php?action=create')
             form=page.locator('form:has(input[name=action][value=add])');form.locator('[name=name]').fill('web çiçek')
             check(form.locator('[name=name]').input_value()=='WEB ÇİÇEK','CRM browser company create actual uppercase')
-            form.locator('select[name=client]').select_option('1')
+            form.locator('input[name=customer]').check()
             code=form.locator('input[name=customer_code],input[name=code_client]');code.fill('Crm-WebCase')
             form.locator('input[type=submit]').first.click();page.wait_for_load_state('networkidle')
             response=api('GET','thirdparties',params={'sqlfilters':"(t.code_client:=:'Crm-WebCase')"})
@@ -165,7 +164,7 @@ def main():
             form.locator('input[type=submit]').first.click();page.wait_for_load_state('networkidle')
             response=api('GET','contacts',params={'thirdparty_ids':str(webcid)});rows=response.json() if response.status==200 else []
             check(len(rows)==1,'CRM browser contact create persisted');webpid=int(rows[0]['id']);owned.append(('contacts',webpid))
-            check(rows[0]['lastname']=='IŞIK STRASSE' and rows[0]['firstname']=='ÇİÇEK' and rows[0]['email']=='web.contact@example.invalid','CRM browser contact persistence; native email limitation confirmed')
+            check(rows[0]['lastname']=='IŞIK STRASSE' and rows[0]['firstname']=='ÇİÇEK' and rows[0]['email']=='Web.Contact@Example.invalid','CRM browser contact persistence and opaque email exact')
         finally:
             for resource,identity in sorted(owned,key=lambda row:row[0]!='contacts'):
                 response=api('DELETE',resource+'/'+str(identity))
