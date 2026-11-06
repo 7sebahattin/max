@@ -38,9 +38,11 @@ Sahibinin 6 Kasım talimatıyla **Mail sayfası, çeviri ve bütün Mail gelişt
 
 Bu erteleme 25 kabul hedefini silmez: **%28 kanıtlı altkapsam / %72 açık-kısmi** aynı kalır. Mail'e bağlı INT-01/03 son fazda; ORD-05'in bağımsız belge dedup kısmı çalışmaya devam eder. RPT-01/02'nin hangi eski ekrana dayandığı henüz doğrulanmadığından hepsi otomatik ertelenmiş veya aktif sayılmaz. İlerlemenin değişmesi için testle kabul kapanması gerekir; öncelik değiştirmek yeterli değildir.
 
-Ürün/cari/kişi için önceki **3/7 profil (%42,9)** CSV/XLSX insert/strict_line native HTTP kanıtına sipariş başlık/satır kabulü eklenir. [Sipariş HTTP kaydı](INPUT_ORDER_HTTP.md) gerçek upload, mapping, simülasyon, CSRF/rol, pozitif commit, native API okuması, duplicate/overflow batch rollback ve owned taslak temizliğini kapsar. İlk ticari snapshot bütün sipariş/satır tablolarını korumaya devam eder; sorgular daraltılmaz.
+Önceki ürün/cari/kişi/sipariş **5/7 profil (%71,4)** CSV/XLSX insert/strict_line HTTP kabulüne [fatura başlık/satır kabulü](INPUT_INVOICE_HTTP.md) eklenir. Yeni `native_invoice_http` aşaması not/açıklama ve 255 karakter label dönüşümü, gerçek native commit/API okuması, rol/CSRF, collision/overflow batch rollback ve yalnız owned sentetik draft ID'lerinin native API ile temizliğini sınar. İlk ticari snapshot bütün fatura/satır tablolarını korumaya devam eder; sorgular daraltılmaz.
 
-Yeni `native_order_http` aşaması exact clean HEAD'de PASS olursa HTTP kapsamı **5/7 (%71,4)** olur; fatura başlık/satır **2/7 (%28,6) NOT RUN** kalır. Final kaynak SHA'sı ve sonuçlar ignored `.local/input-native-summary.json` ve `.local/input-evidence-manifest.json` içindedir. Update-key/fast_bulk, bütün web/API/ORM/cron dahil global uyum iddiası yoktur. Sıradaki bağımsız adım fatura import kabulüdür; eski 25 ürün hedefinin %28/%72 hesabı aynı kalır.
+Final exact clean HEAD üzerinde tüm aşamalar PASS olduğunda mevcut registry'nin **7/7 profili (%100)** için bu dar HTTP altkapsamı tamamlanır. Fatura profilleri native BlockedLog açıkken sunulmaz; test mevcut varsayılan fixture konfigürasyonuna aittir, bir yasal modül devre dışı bırakılmaz. Bu oran tüm konfigürasyonlar/import modları veya global giriş uyumu değildir. Update-key/fast_bulk, kalan web/API/rich editor ve ORM/cron/third-party sınırları açık/BLOCKED kalır. Final SHA/sonuçlar `.local/input-native-summary.json` ve `.local/input-evidence-manifest.json` içindedir.
+
+Sıradaki bağımsız iş kalan native web/API yüzeylerinin rol/CSRF/entity ve dönüşüm sonrası sınır kabulünü envanterleyip kapatmaktır; ardından uygun ortamda ortak regresyon. Eski 25 ürün hedefinin **%28/%72** hesabı aynı kalır.
 
 ## Öncelik sırası
 
