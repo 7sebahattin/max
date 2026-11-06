@@ -1,0 +1,700 @@
+{
+  "version": 1,
+  "locale": "tr_TR",
+  "web": {
+    "societe/card.php": {
+      "nom": [
+        "text",
+        128
+      ],
+      "name_alias": [
+        "text",
+        128
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ],
+      "firstname": [
+        "text",
+        100
+      ],
+      "lastname": [
+        "text",
+        100
+      ],
+      "name": [
+        "text",
+        128
+      ],
+      "clone_name": [
+        "text",
+        128
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ]
+    },
+    "contact/card.php": {
+      "firstname": [
+        "text",
+        100
+      ],
+      "lastname": [
+        "text",
+        100
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ],
+      "poste": [
+        "text",
+        255
+      ]
+    },
+    "product/card.php": {
+      "label": [
+        "text",
+        255
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "note": [
+        "html",
+        65535
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ]
+    },
+    "commande/card.php": {
+      "label": [
+        "text",
+        255
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "dp_desc": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "line_desc": [
+        "html",
+        65535
+      ],
+      "product_desc": [
+        "html",
+        65535
+      ],
+      "subtotallinedesc": [
+        "html",
+        65535
+      ],
+      "product_label": [
+        "text",
+        255
+      ],
+      "update_label": [
+        "text",
+        255
+      ]
+    },
+    "compta/facture/card.php": {
+      "label": [
+        "text",
+        255
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "dp_desc": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "line_desc": [
+        "html",
+        65535
+      ],
+      "product_desc": [
+        "html",
+        65535
+      ],
+      "subtotallinedesc": [
+        "html",
+        65535
+      ],
+      "product_label": [
+        "text",
+        255
+      ],
+      "update_label": [
+        "text",
+        255
+      ],
+      "close_note": [
+        "text",
+        2000
+      ],
+      "note": [
+        "html",
+        65535
+      ]
+    },
+    "expedition/card.php": {
+      "label": [
+        "text",
+        255
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "dp_desc": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "line_desc": [
+        "html",
+        65535
+      ],
+      "product_desc": [
+        "html",
+        65535
+      ],
+      "subtotallinedesc": [
+        "html",
+        65535
+      ],
+      "product_label": [
+        "text",
+        255
+      ],
+      "update_label": [
+        "text",
+        255
+      ]
+    },
+    "product/stock/card.php": {
+      "libelle": [
+        "text",
+        255
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ],
+      "desc": [
+        "html",
+        65535
+      ]
+    },
+    "custom/maxcore/admin/setup.php": {
+      "MAXCORE_DISPLAY_NAME": [
+        "text",
+        80
+      ]
+    },
+    "custom/maxmail/settings.php": {
+      "label": [
+        "text",
+        80
+      ]
+    },
+    "custom/maxcustoms/index.php": {
+      "office": [
+        "text",
+        120
+      ],
+      "origin": [
+        "text",
+        120
+      ],
+      "destination": [
+        "text",
+        120
+      ],
+      "goods_summary": [
+        "text",
+        2000
+      ]
+    },
+    "custom/maxcustoms/card.php": {
+      "office": [
+        "text",
+        120
+      ],
+      "origin": [
+        "text",
+        120
+      ],
+      "destination": [
+        "text",
+        120
+      ],
+      "goods_summary": [
+        "text",
+        2000
+      ]
+    },
+    "admin/company.php": {
+      "name": [
+        "text",
+        128
+      ],
+      "MAIN_INFO_SOCIETE_ADDRESS": [
+        "text",
+        255
+      ],
+      "MAIN_INFO_SOCIETE_TOWN": [
+        "text",
+        64
+      ],
+      "MAIN_INFO_SOCIETE_MANAGERS": [
+        "text",
+        512
+      ],
+      "note": [
+        "html",
+        65535
+      ],
+      "socialobject": [
+        "text",
+        512
+      ]
+    },
+    "societe/list.php": {
+      "search_address": [
+        "text",
+        2000
+      ],
+      "search_nom": [
+        "text",
+        2000
+      ],
+      "search_nom_only": [
+        "text",
+        2000
+      ],
+      "search_note_private": [
+        "text",
+        2000
+      ],
+      "search_note_public": [
+        "text",
+        2000
+      ],
+      "search_parent_name": [
+        "text",
+        2000
+      ],
+      "search_town": [
+        "text",
+        2000
+      ]
+    },
+    "product/list.php": {
+      "search_label": [
+        "text",
+        2000
+      ]
+    },
+    "contact/list.php": {
+      "search_address": [
+        "text",
+        2000
+      ],
+      "search_firstname": [
+        "text",
+        2000
+      ],
+      "search_lastname": [
+        "text",
+        2000
+      ],
+      "search_note_private": [
+        "text",
+        2000
+      ],
+      "search_note_public": [
+        "text",
+        2000
+      ],
+      "search_town": [
+        "text",
+        2000
+      ]
+    },
+    "product/stock/list.php": {
+      "search_label": [
+        "text",
+        2000
+      ]
+    },
+    "commande/list.php": {
+      "search_note_private": [
+        "text",
+        2000
+      ],
+      "search_note_public": [
+        "text",
+        2000
+      ],
+      "search_parent_name": [
+        "text",
+        2000
+      ],
+      "search_town": [
+        "text",
+        2000
+      ]
+    },
+    "compta/facture/list.php": {
+      "search_note_private": [
+        "text",
+        2000
+      ],
+      "search_note_public": [
+        "text",
+        2000
+      ],
+      "search_parent_name": [
+        "text",
+        2000
+      ],
+      "search_town": [
+        "text",
+        2000
+      ]
+    },
+    "expedition/list.php": {
+      "search_town": [
+        "text",
+        2000
+      ]
+    }
+  },
+  "api": {
+    "thirdparties": {
+      "name_alias": [
+        "text",
+        128
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ],
+      "firstname": [
+        "text",
+        100
+      ],
+      "lastname": [
+        "text",
+        100
+      ],
+      "name": [
+        "text",
+        128
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ]
+    },
+    "contacts": {
+      "firstname": [
+        "text",
+        100
+      ],
+      "lastname": [
+        "text",
+        100
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ],
+      "poste": [
+        "text",
+        255
+      ]
+    },
+    "products": {
+      "label": [
+        "text",
+        255
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ]
+    },
+    "orders": {
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "label": [
+        "text",
+        255
+      ]
+    },
+    "invoices": {
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "label": [
+        "text",
+        255
+      ]
+    },
+    "shipments": {
+      "note_public": [
+        "html",
+        65535
+      ],
+      "note_private": [
+        "html",
+        65535
+      ],
+      "desc": [
+        "html",
+        65535
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "label": [
+        "text",
+        255
+      ]
+    },
+    "warehouses": {
+      "label": [
+        "text",
+        255
+      ],
+      "description": [
+        "html",
+        65535
+      ],
+      "address": [
+        "text",
+        255
+      ],
+      "town": [
+        "text",
+        64
+      ]
+    }
+  },
+  "imports": {
+    "societe_1": {
+      "s.nom": [
+        "text",
+        128
+      ],
+      "s.name_alias": [
+        "text",
+        128
+      ],
+      "s.address": [
+        "text",
+        255
+      ],
+      "s.town": [
+        "text",
+        64
+      ],
+      "s.note_public": [
+        "html",
+        65535
+      ],
+      "s.note_private": [
+        "html",
+        65535
+      ]
+    },
+    "societe_2": {
+      "s.firstname": [
+        "text",
+        100
+      ],
+      "s.lastname": [
+        "text",
+        100
+      ],
+      "s.address": [
+        "text",
+        255
+      ],
+      "s.town": [
+        "text",
+        64
+      ],
+      "s.poste": [
+        "text",
+        255
+      ]
+    },
+    "produit_1": {
+      "p.label": [
+        "text",
+        255
+      ],
+      "p.description": [
+        "html",
+        65535
+      ],
+      "p.note_public": [
+        "html",
+        65535
+      ],
+      "p.note_private": [
+        "html",
+        65535
+      ],
+      "p.note": [
+        "html",
+        65535
+      ]
+    },
+    "commande_1": {
+      "c.note_public": [
+        "html",
+        65535
+      ],
+      "c.note_private": [
+        "html",
+        65535
+      ]
+    },
+    "commande_lines_1": {
+      "d.description": [
+        "html",
+        65535
+      ]
+    },
+    "facture_2": {
+      "f.note_public": [
+        "html",
+        65535
+      ],
+      "f.note_private": [
+        "html",
+        65535
+      ]
+    },
+    "facture_3": {
+      "fd.label": [
+        "text",
+        255
+      ],
+      "fd.description": [
+        "html",
+        65535
+      ]
+    }
+  }
+}

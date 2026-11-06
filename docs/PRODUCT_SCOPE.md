@@ -45,3 +45,7 @@ These must be tested in a clean Dolibarr environment *before* implementing any r
 - Branding configuration separate from legal company identification.
 - One isolated customer installation per deployment initially.
 - Transparent upstream Dolibarr licensing and third-party notices.
+
+## Mandatory automatic uppercase input (owner approved 2026-11-06)
+
+All editable business text must uppercase automatically at client and authoritative server entry points, including forms, APIs, imports and new jobs/bridges. New input functions must use the shared classification/normalizer and regression contract in [INPUT_NORMALIZATION.md](INPUT_NORMALIZATION.md). Technical/secret identifiers and immutable source evidence are preserved. This is a mandatory product rule; current implementation and unverified coverage are reported separately, never advertised as universal enforcement before native acceptance. GitHub CI/publication remains paused under the owner's quota instruction.

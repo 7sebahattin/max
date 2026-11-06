@@ -1,0 +1,40 @@
+<?php
+// Actual pinned Restler public stream + Dolibarr HookManager. No installed DB/session.
+if(PHP_SAPI!=='cli')exit(2);
+define('DOL_DOCUMENT_ROOT',realpath($argv[1]));
+define('DOL_URL_ROOT','');
+require __DIR__.'/../../modules/maxcore/class/input.class.php';
+require __DIR__.'/../../modules/maxcore/lib/input_hooks.lib.php';
+require DOL_DOCUMENT_ROOT.'/includes/restler/framework/Luracast/Restler/AutoLoader.php';
+spl_autoload_register(Luracast\Restler\AutoLoader::instance());
+$checks=[];
+function nativeInputCheck($ok,$label){global $checks;if(!$ok)throw new RuntimeException('FAIL '.$label);$checks[]=['check'=>$label,'status'=>'PASS'];echo 'PASS '.$label."\n";}
+$temp=sys_get_temp_dir().'/max-input-library-'.bin2hex(random_bytes(8));mkdir($temp,0700);
+try{
+ Luracast\Restler\Defaults::$cacheDirectory=$temp;
+ $restler=new Luracast\Restler\Restler();
+ nativeInputCheck($restler->requestMethod===null,'native hook action method starts unset');
+ $_SERVER['REQUEST_METHOD']='POST';$_SERVER['CONTENT_TYPE']='application/json';$_GET=['label'=>'şişli','api_key'=>'CaseKey'];
+ $stream=$restler->getRequestStream();fwrite($stream,'{"label":"çiçek","ref":"CaseRef","email":"User@Example.com","options":{}}');
+ nativeInputCheck(MaxInputHooks::api(['moduleobject'=>'products'],(object)['r'=>$restler],null),'pre-dispatch adapter uses native method resolver before initialization');
+ nativeInputCheck($_GET['label']==='ŞİŞLİ'&&$_GET['api_key']==='CaseKey','API query fallback normalized without changing token');
+ $restler->requestMethod='POST';$restler->requestFormat=new Luracast\Restler\Format\JsonFormat();
+ $data=$restler->getRequestData(false);
+ nativeInputCheck($data['label']==='ÇİÇEK'&&$data['ref']==='CaseRef'&&$data['email']==='User@Example.com','pinned native JSON decoder sees uppercase and exact technical identifiers');
+ $raw=stream_get_contents($restler->getRequestStream());nativeInputCheck(str_contains($raw,'"options":{}'),'empty JSON object type preserved in transport');
+ $source=file_get_contents(DOL_DOCUMENT_ROOT.'/api/index.php');
+ nativeInputCheck(strpos($source,"executeHooks('beforeApiCall'")<strpos($source,'$api->r->handle()'),'supported hook precedes native request parsing');
+ $import=file_get_contents(DOL_DOCUMENT_ROOT.'/imports/import.php');
+ nativeInputCheck(str_contains($import,"'obj'                          => &\$obj")&&str_contains($import,"'nbok'                         => &\$nbok")&&str_contains($import,'if (empty($reshook))'),'native import hook retains object/counter references and replacement contract');
+ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+ $_SERVER['SCRIPT_FILENAME']=DOL_DOCUMENT_ROOT.'/societe/card.php';$_GET=['name'=>'istanbul','token'=>'CaseToken'];$_POST=['name'=>'şişli'];$_REQUEST=$_GET+$_POST;
+ MaxInputHooks::web();
+ nativeInputCheck(GETPOST('name','none',0,null,null,1,1)==='İSTANBUL'&&GETPOST('name','none',2,null,null,1,1)==='ŞİŞLİ'&&$_GET['token']==='CaseToken','actual native GETPOST query precedence cannot bypass casing');
+ unset($restler);
+}finally{
+ foreach(scandir($temp) as $file)if($file!=='.'&&$file!=='..'){if(is_dir($temp.'/'.$file))throw new RuntimeException('FAIL unexpected cache directory');unlink($temp.'/'.$file);}
+ if(!rmdir($temp))throw new RuntimeException('FAIL native library fixture cleanup');
+}
+nativeInputCheck(!is_dir($temp),'native library temporary cache removed');
+if(isset($argv[2]))file_put_contents($argv[2],json_encode(['passed'=>true,'scope'=>'pinned_native_library_only','checks'=>$checks,'installed_native'=>'NOT RUN'],JSON_PRETTY_PRINT));
+echo 'PASS '.count($checks)." native library adapter checks\n";

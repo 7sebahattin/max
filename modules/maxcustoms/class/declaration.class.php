@@ -1,5 +1,6 @@
 <?php
 /** MAX draft metadata and projections. GPL-3.0-or-later. No regulatory transport. */
+require_once dirname(__DIR__,2).'/maxcore/class/input.class.php';
 class MaxCustomsDeclaration
 {
     private $db;
@@ -45,6 +46,7 @@ class MaxCustomsDeclaration
         $result=[];
         foreach($patch as $key=>$value) {
             if(!isset(self::FIELDS[$key])) throw new InvalidArgumentException('CustomsInvalid',400);
+            if(in_array($key,['office','origin','destination','goods_summary'],true))$value=MaxInput::text($value,self::FIELDS[$key]);
             $result[$key]=self::text($value,self::FIELDS[$key],in_array($key,['goods_summary','references'],true));
             if($key==='mode' && $result[$key]!=='' && !in_array($result[$key],['road','sea','air','rail','other'],true)) throw new InvalidArgumentException('CustomsInvalid',400);
             if(str_ends_with($key,'_date') && $result[$key]!=='') {

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/branding.lib.php';
+require_once dirname(__DIR__).'/class/input.class.php';
 function maxCoreCan($actor,$right) {
  if(!empty($actor->socid)) return false;
  return $actor->hasRight('maxcore','admin') || $actor->hasRight('maxcore',$right)
@@ -16,7 +17,7 @@ function maxCoreSettings() {
 }
 function maxCoreValidate($input) {
  if(!isset($input['MAXCORE_DISPLAY_NAME']) || !is_string($input['MAXCORE_DISPLAY_NAME'])) throw new InvalidArgumentException('MAXInvalidBrand');
- $name=trim($input['MAXCORE_DISPLAY_NAME']);
+ $name=trim(MaxInput::text($input['MAXCORE_DISPLAY_NAME'],80));
  if($name==='' || mb_strlen($name,'UTF-8')>80 || preg_match('/[\\x00-\\x1f\\x7f<>]/u',$name)!==0)
   throw new InvalidArgumentException('MAXInvalidBrand');
  $out=array('MAXCORE_DISPLAY_NAME'=>$name);

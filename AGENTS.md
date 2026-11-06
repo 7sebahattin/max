@@ -25,8 +25,19 @@ Read [GitHub Issue #1](https://github.com/7sebahattin/max/issues/1) and `docs/PR
 6. Record decisions and deviations in `docs/`; keep a traceable GitHub issue/PR link.
 7. Distinguish completed work from proposals. Avoid speculative estimates and invented API behavior.
 
-## Current milestone
-PR-01 is merged and P2 local/CI native functional testing is owner-authorized (Issue #3, PR #4). Continue on feat/p2-native-dolibarr-pilot without asking for P2 approval again. No bespoke MAX modules, live deployment or merge is authorized.
+## Current owner-approved work
+Issue #36 authorizes the mandatory automatic uppercase input policy and local implementation. Earlier PR-01/P2-only restrictions are historical and superseded by the owner's later module approvals. PR #34 remains a separate draft; do not copy its unmerged Orders 0.3 code into this branch.
+
+## Mandatory business input rule (Issue #36)
+- Every new or changed business-input function must classify each field as business text, rich text, technical/opaque, or immutable source before implementation. Add the route/field rule to `modules/maxcore/input-fields.json`, use `MaxInput` at the authoritative server boundary and add bypass/normalization regressions.
+- Actual editable business values must uppercase automatically in the browser AND on the server; CSS-only casing does not comply. Use the shared fixed Turkish/Unicode/NFC contract, independent of the user's display language. No per-screen casing code or end-user off switch.
+- Passwords, API/session/CSRF tokens, signatures/hashes, email/URI/path values, case-sensitive identifiers/SKUs, machine/schema/enum keys, typed numbers/dates and immutable raw documents/history must remain exact. Protect technical spans inside prose and markup attributes. These integrity exceptions are not discretionary waivers for business names/notes.
+- Validate lengths and native uniqueness AFTER conversion; reject overflow/collisions without truncation or silent merging. Normalize imported proposals separately from byte-preserved source evidence.
+- Use supported Dolibarr hooks/APIs only. Declare unclassified, unsupported, disabled-Core and unverified native surfaces BLOCKED/NOT RUN; never claim global coverage from pure unit or synthetic-form tests.
+- See `docs/INPUT_NORMALIZATION.md`. New function review must include its input classification, server adapter, protected values, role/CSRF/entity behavior and local test evidence.
+
+## Current CI/publication hold
+The owner paused GitHub tests due exhausted quota. Do not push, create a new PR, dispatch/rerun Actions, merge, deploy, change billing or start paid services. Keep this work in local commits; run suitable local checks and report remaining integration checks honestly.
 
 ## Foundation checks
 Run `python3 scripts/check.py`, Python compilation, shell syntax and Compose validation. Use `scripts/smoke.sh` on a capable local/CI runner. Never mark a skipped or blocked test as passing. Read `upstream.lock.json` and `docs/COMPATIBILITY.md` before changing dependencies. Keep `.local/` ignored; never edit downloaded upstream. Paid extensions require explicit owner approval. PR-01 approval is required before P2; deployment always needs distinct approval.

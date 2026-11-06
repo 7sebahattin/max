@@ -10,7 +10,7 @@ class modMaxmail extends DolibarrModules
         $this->editor_name='MAX'; $this->version='0.1.0'; $this->const_name='MAIN_MODULE_MAXMAIL'; $this->picto='email';
         $this->module_parts=['moduleforexternal'=>0]; $this->langfiles=['maxmail@maxmail'];
         $this->phpmin=[8,1]; $this->need_dolibarr_version=[24,0]; $this->dirs=['/maxmail'];
-        $this->depends=[]; $this->requiredby=[]; $this->conflictwith=[]; $this->config_page_url=[]; $this->const=[];
+        $this->depends=['modMaxcore']; $this->requiredby=[]; $this->conflictwith=[]; $this->config_page_url=[]; $this->const=[];
         $this->rights=[];
         foreach(['view','poll','review','download','admin'] as $n=>$right) $this->rights[]=[61015001+$n,'MailPermission_'.$right,0,0,$right];
         $this->menu=[['fk_menu'=>'','type'=>'top','titre'=>'MailTitle','mainmenu'=>'maxmail','leftmenu'=>'','url'=>'/maxmail/index.php',
