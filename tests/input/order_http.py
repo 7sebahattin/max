@@ -92,6 +92,12 @@ def main():
                     # but it must never persist a header or line.
                     response=admin.request.post(BASE+'/imports/import.php',form=dict(params,step='5',token='InvalidToken'))
                     check(response.status in (200,403) and read(ref)==before,'orders body-only invalid token cannot write '+label)
+                    # Rendering native step 1 clears the session mapping. Restore
+                    # it through the public mapping action, never session seeding.
+                    page.goto(BASE+'/imports/import.php?'+urlencode(dict(params,step='3')))
+                    fields=LINE if is_line else HEADER
+                    response=admin.request.post(BASE+'/imports/import.php',form=dict(step=3,datatoimport=dataset,format=fmt,filetoimport=params['filetoimport'],action='saveselectorder',selectorder=','.join(['']+fields),token=token(page)))
+                    check(response.ok and response.json()=={},'orders public remapping after native CSRF reset '+label)
                     page.goto(BASE+'/imports/import.php?'+urlencode(params));simulate(label,True)
                     with page.expect_request(lambda req:req.is_navigation_request() and urlparse(req.url).path=='/imports/import.php') as navigation:
                         page.locator('a.butAction[href*="step=5"]').click()
