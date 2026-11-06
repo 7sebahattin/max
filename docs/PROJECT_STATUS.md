@@ -32,16 +32,25 @@ Issue #36 büyük harf normalizasyonu, bu eski matris dışında eklenen engelle
 | Bütün ürün | Önceki main'de tarihsel ortak 63 native kabul kaydı | Bu input HEAD'inde ortak 63, tüm yeni giriş yüzeyleri, uçtan uca Mail→Orders→Customs→HKS |
 | Staging / canlı | Runbook ve sınırlar | Host/DNS/TLS/erişim, backup/restore, lisans ve sahip dağıtım onayı; henüz deployment yok |
 
-## Bu raporun iş kolu
+## Güncel öncelik ve bu iş kolu
 
-`produit_1` CSV/XLSX HTTP wizard'ı önceki yerel commit'te kanıtlandı. Bu devam işi `societe_1` müşteri/tedarikçi ve `societe_2` kişi profillerini native HTTP yükleme, eşleme, simülasyon, token/rol, post-conversion sınırı ve rollback ile doğrular. Tam sonuç ve exact SHA [cari/kişi import kaydında](INPUT_PEOPLE_IMPORT.md) ve ignored `.local/input-native-summary.json` içinde tutulur. Her profile ait CSV ve XLSX insert/strict_line altkapsamı geçerse registry'deki **3/7 profil (%42,9)** için bu dar HTTP kanıtı bulunur; diğer **4/7 (%57,1)** profil NOT RUN kalır. Bu oran web/API/ORM/cron dahil global büyük harf uyumu değildir.
+Sahibinin 6 Kasım talimatıyla **Mail sayfası, çeviri ve bütün Mail geliştirmeleri/köprüleri son faza, gerekirse canlı sonrasına** taşındı. Eski ASYA **Raporlar sayfasındaki** çıktılar da yeniden geliştirme ihtimaliyle son fazda. Diğer ekranlardan gelen raporlar kaynak ekranı, alanları ve native karşılığı doğrulanınca aktif aday olabilir. Güncel ASYA sistemine bu işte erişilmedi; adayların kökeni doğrulanmış sayılmaz.
+
+Bu erteleme 25 kabul hedefini silmez: **%28 kanıtlı altkapsam / %72 açık-kısmi** aynı kalır. Mail'e bağlı INT-01/03 son fazda; ORD-05'in bağımsız belge dedup kısmı çalışmaya devam eder. RPT-01/02'nin hangi eski ekrana dayandığı henüz doğrulanmadığından hepsi otomatik ertelenmiş veya aktif sayılmaz. İlerlemenin değişmesi için testle kabul kapanması gerekir; öncelik değiştirmek yeterli değildir.
+
+Ürün/cari/kişi için **3/7 profil (%42,9)** CSV/XLSX insert/strict_line native HTTP kanıtı var. Bu devam işi `commande_lines_1 / d.description` eşlemesinin pinned Dolibarr'daki gerçek `commande_lines_2 / cd.description` ile uyuşmadığını düzeltir. Native descriptor/alan eşleşmesi yedi profil için kontrol edilir; sipariş başlık/satır CSV/XLSX proposal'ları gerçek importer/HookManager üzerinden dış transaction içinde sınanıp geri alınır. Native üründe olmayan import `p.note_private` alias'ı kaldırılır; gerçek private not alanı `p.note` korunur. Ayrıntı: [sipariş import kaydı](INPUT_ORDER_IMPORT.md).
+
+Bu yeni CLI/DB kanıtı HTTP sayacını yükseltmez: sipariş ve fatura için kalan **4/7 profil HTTP NOT RUN**. Web/API/ORM/cron dahil global uyum iddiası yoktur. En son exact SHA ve temizlik sonucu ignored `.local/input-native-summary.json` dosyasındadır.
 
 ## Öncelik sırası
 
-1. Aynı zorunlu MaxInput sınıflandırmasıyla kalan dört import profilini ve native web/API açıklarını kapatmak; desteklenmeyen ORM/cron/third-party yollarını ayrıca ele almak.
-2. Ücretsiz Docker-capable yerel ortamda aynı HEAD üzerinde ortak 63 ve bütün modül güvenlik/regresyonunu çalıştırmak. Windows loopback kanıtı private Docker ağı/kimliği yerine kullanılamaz.
-3. Ürün kararı gerektiren Orders önceliği/şablonlar ve rapor alanlarını kesinleştirmek; PDF/Mail köprüleri ve SMTP/approval/translation işlerini uygulamak.
-4. HKS mock/draft entegrasyonu ve tam modül köprülerini tamamlamak; canlı dış etki yalnız ayrı yetkiyle.
-5. Fiziksel cihaz, erişilebilirlik, güvenlik/lisans, backup/restore ve staging onaylarını kapatmak.
+1. Zorunlu MaxInput native import/web/API açıklarını kapatmak; ardından aynı HEAD ortak güvenlik/regresyon kabulleri.
+2. Mail'den bağımsız Orders öncelik/miktar kuralları, belge/revizyon akışı ve 4+6 sevkiyat kabulü; PR #34 ayrı uzlaştırılacak.
+3. Customs'ın manuel/native bağlantıları ve hedef teslimata dahilse HKS draft/mock güvenliği.
+4. Eski Raporlar sayfası dışındaki operasyonel çıktıların kaynak envanteri ve native-first değerlendirmesi; kanıtlı boşluklar için export.
+5. İki kurulum izolasyonu, fiziksel cihaz/erişilebilirlik, güvenlik/lisans, backup/restore ve staging hazırlığı; canlıya alma ayrı onaya bağlı.
+6. **En son:** Mail/çeviri/gönderim/köprüler ve eski Raporlar sayfasının olası yeniden tasarımı. Kritik bağımlılık somutlaşırsa etkisi ve minimum çözümü ayrıca ele alınır.
+
+Tam bağımlılık ve kabul kapıları [ROADMAP.md](ROADMAP.md) içindedir. Windows loopback kanıtı Docker ağ/kimlik izolasyonu yerine geçmez. Erteleme, uygulanan mevcut yüzeylerin güvenlik ve veri bütünlüğü yükümlülüklerini kaldırmaz.
 
 GitHub Actions/push/yeni PR, billing değişikliği, merge ve deployment askısı aynen geçerlidir. Eski CI seçim testinin NTFS satır-sonlu filename fixture hatası, Docker/WSL eksikliği ve henüz çalıştırılmayan kabuller gizlenmez. Gerçek müşteri/posta hesabı/HKS veya ücretli servis kullanılmaz.

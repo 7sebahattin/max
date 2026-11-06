@@ -662,10 +662,6 @@
         "html",
         65535
       ],
-      "p.note_private": [
-        "html",
-        65535
-      ],
       "p.note": [
         "html",
         65535
@@ -681,8 +677,8 @@
         65535
       ]
     },
-    "commande_lines_1": {
-      "d.description": [
+    "commande_lines_2": {
+      "cd.description": [
         "html",
         65535
       ]

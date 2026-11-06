@@ -1,6 +1,21 @@
 # MAX Roadmap — approved development sequence
 
-Historical baseline roadmap. Current owner-approved work is recorded in AGENTS.md; the current evidence-based development status and open acceptance percentage are in [PROJECT_STATUS.md](PROJECT_STATUS.md). The original PR-01-only state below is historical, not the current authorization boundary.
+## Current execution order — owner update, 6 November 2026
+
+1. **Mandatory input integrity:** finish native Orders header/line and invoice import acceptance, then remaining web/API surfaces. Current increment corrects the native order-line profile/alias and validates registry descriptors plus transaction-bound CSV/XLSX proposals. Full HTTP acceptance remains separately tracked.
+2. **Orders and native commercial flow:** agree effective quantity/source-priority rules; verify manual document/revision/conflict handling and the 4+6 partial-shipment scenario. Reconcile PR #34 separately, without copying unmerged code. Keep manual intake usable without Mail.
+3. **Customs and optional HKS:** strengthen manual/native order-shipment links and document validation; implement HKS draft/validator/mock idempotency and ambiguous-result handling if included in the target delivery. No live submission.
+4. **Eligible operational outputs:** inventory reports from screens outside legacy Reports, record their provenance and exact acceptance fields, assess native filtered lists/exports first, implement only proven gaps. Do not reproduce the faulty legacy Reports page.
+5. **Release acceptance:** same-HEAD shared 63 regressions on a Docker-capable environment, two-install isolation, mobile/accessibility, permission/security review, backup/restore rehearsal and staging preparation. Deployment requires separate owner approval; current publication/CI hold remains.
+6. **Final phase, possibly after launch:** Mail UI, translation, SMTP/outbox/approval, provider acceptance, Mail bridges and related reports; legacy Reports-page redesign. Deferred work is neither complete nor cancelled. It must not block independent earlier phases. Reopen priority only with a demonstrated critical dependency, impact and minimum required change recorded for owner review.
+
+Dependencies: native object integrity → Orders → Customs → optional HKS draft. Mail is an optional future intake channel for this sequence. Reports consume authoritative native/module data and do not create a second ledger. Candidate outputs from other legacy screens require a read-only inventory before implementation; current repository evidence does not prove their exact source or correctness.
+
+Progress uses the unchanged 25-case denominator in [PROJECT_STATUS.md](PROJECT_STATUS.md): 28% evidenced development sub-scope, 72% open/partial. Moving items later does not improve completion percentage. The old matrix includes Mail-dependent integration cases; their final-phase dependency is recorded in [PROJECT_STATUS.json](PROJECT_STATUS.json), while independent subflows proceed above. This roadmap sets priority, not a launch date or a claim that every old target is a mandatory launch prerequisite.
+
+## Historical baseline
+
+Current owner-approved work is recorded in AGENTS.md. The original PR-01-only state below is historical, not the current authorization boundary; Mail/legacy Reports ordering below is superseded by the sequence above.
 
 | Milestone | Goal | Evidence required | Gate |
 | --- | --- | --- | --- |

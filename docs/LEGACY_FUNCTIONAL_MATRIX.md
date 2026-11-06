@@ -2,6 +2,8 @@
 
 This is a **requirements comparison, not a code migration**. Current behavior was identified in a read-only reference repository. Its actual operating mode and live business data have not been verified on staging.
 
+Owner priority, 2026-11-06: legacy Reports-page reports are deferred to the final phase and may need redevelopment. Reports/exports from other screens remain eligible requirements. Before selecting one, record its source screen, purpose, fields, filters, permissions and native equivalent; origin is currently unverified for the generic candidates. No fresh inspection of the live ASYA installation is claimed. All Mail work, including translation and bridges, is deferred to the final phase, potentially after launch.
+
 | Capability | Observed reference behavior | MAX plan |
 | --- | --- | --- |
 | CRM and vendors | Some generic views are placeholders | Native Dolibarr |

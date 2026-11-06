@@ -75,6 +75,7 @@ $params['arrayrecord'][0]['val']='Overflow-Case';$params['arrayrecord'][1]['val'
 installedCheck($hookmanager->executeHooks('ImportInsert',$params)<0,'import expansion overflow rejected before insert');
 installedCheck(count(installedRows("SELECT rowid FROM ".MAIN_DB_PREFIX."product WHERE ref='Overflow-Case'"))===0,'import overflow leaves no row');
 require_once DOL_DOCUMENT_ROOT.'/core/modules/import/import_xlsx.modules.php';
+require __DIR__.'/order_import_native.php';
 $xlsxDriver=new ImportXlsx($db,'produit_1');$book=new PhpOffice\PhpSpreadsheet\Spreadsheet();
 $book->getActiveSheet()->fromArray([['Xlsx-SkuCase','şişli straße','0']]);$xlsx=$run.'/documents/input-source.xlsx';(new PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($xlsx);$book->disconnectWorksheets();
 $xlsxHash=hash_file('sha256',$xlsx);installedCheck($xlsxDriver->import_open_file($xlsx)>0,'native XLSX source open');$xlsxRow=$xlsxDriver->import_read_record();$xlsxDriver->import_close_file();$xlsxRaw=$xlsxRow;$xlsxOk=0;

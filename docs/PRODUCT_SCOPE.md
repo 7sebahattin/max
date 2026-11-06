@@ -21,6 +21,8 @@ These must be tested in a clean Dolibarr environment *before* implementing any r
 | Reports and Excel | Operational custom exports beyond native reports | Build only requested gaps; no redundant ERP reports |
 
 ## Deferred
+- Owner update, 2026-11-06: Mail page, translation, all Mail development and related bridges move to the last phase, possibly after launch. Only a demonstrated critical dependency reopens priority; existing Mail evidence is retained without making Mail a prerequisite for independent workflows.
+- Legacy ASYA Reports-page reports move to the last phase and may require redesign. Reports originating in other screens may still inform requirements after provenance and native-capability assessment. This does not authorize data/code migration.
 - Custom vehicle loading forms.
 - Broad export document packages not required by the advanced order process.
 - Advanced packaging/carton consumption automation.

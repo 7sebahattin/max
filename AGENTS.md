@@ -36,7 +36,10 @@ Issue #36 authorizes the mandatory automatic uppercase input policy and local im
 - Use supported Dolibarr hooks/APIs only. Declare unclassified, unsupported, disabled-Core and unverified native surfaces BLOCKED/NOT RUN; never claim global coverage from pure unit or synthetic-form tests.
 - See `docs/INPUT_NORMALIZATION.md`. New function review must include its input classification, server adapter, protected values, role/CSRF/entity behavior and local test evidence.
 
-## Current CI/publication hold
+## Owner priority update — 2026-11-06
+Mail UI, translation and all Mail development/bridges are last-phase work, potentially after launch. Revisit only a demonstrated critical dependency; independent Orders/Customs/native flows must not require Mail. Legacy ASYA's Reports-page outputs are also last-phase redesign candidates. Outputs originating in other screens remain requirements candidates, subject to native-first assessment and explicit provenance. Deferral is not completion, cancellation, or waiver of security/release gates. See `docs/ROADMAP.md`.
+
+## Current CI/publication hold (unchanged)
 The owner paused GitHub tests due exhausted quota. Do not push, create a new PR, dispatch/rerun Actions, merge, deploy, change billing or start paid services. Keep this work in local commits; run suitable local checks and report remaining integration checks honestly.
 
 ## Foundation checks
