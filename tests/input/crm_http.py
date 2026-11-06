@@ -86,7 +86,7 @@ def main():
                 saved=read(resource,identity)
                 if resource=='thirdparties':
                     check(saved['name']==UPPER and saved['name_alias']=='ŞİŞLİ','CRM company API business name alias persistence')
-                    check(saved['code_client']=='Crm-ApiCase','CRM company API code case exact')
+                    check(saved['code_client']=='CRM-APICASE','CRM native customer code validator canonicalization')
                     # Societe::update uses native clean_url(), which lowercases
                     # the DNS hostname. Path/query case must remain exact.
                     check(saved['url']=='https://example.invalid/Case?Key=aB','CRM native URL host canonicalization and exact path query')
@@ -152,7 +152,7 @@ def main():
             response=api('GET','thirdparties',params={'sqlfilters':"(t.code_client:=:'Crm-WebCase')"})
             rows=response.json() if response.status==200 else []
             check(len(rows)==1,'CRM browser company create persisted');webcid=int(rows[0]['id']);owned.append(('thirdparties',webcid))
-            check(rows[0]['name']=='WEB ÇİÇEK' and rows[0]['code_client']=='Crm-WebCase','CRM browser company persistence and code exact')
+            check(rows[0]['name']=='WEB ÇİÇEK' and rows[0]['code_client']=='CRM-WEBCASE','CRM browser company persistence and native canonical code')
             page.goto(BASE+'/contact/card.php?'+urlencode(dict(action='create',socid=webcid)))
             form=page.locator('form:has(input[name=action][value=add])')
             form.locator('[name=lastname]').fill('ışık straße');form.locator('[name=firstname]').fill('çiçek');form.locator('[name=email]').fill('Web.Contact@Example.invalid')
