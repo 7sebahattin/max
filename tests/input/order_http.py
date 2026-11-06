@@ -6,6 +6,7 @@ No SQL/session seeding; owned drafts are removed through the native API.
 """
 import hashlib
 import json
+import re
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 from playwright.sync_api import sync_playwright
 from wizard_http import RUN, BASE, ACCOUNTS, source_bytes
@@ -96,7 +97,13 @@ def main():
                         page.locator('a.butAction[href*="step=5"]').click()
                     page.wait_for_load_state('networkidle')
                     check(navigation.value.method=='POST' and 'token' not in parse_qs(urlparse(navigation.value.url).query),'orders real commit uses token POST '+label)
-                    saved=read(ref);check(saved is not None,'orders commit persisted '+label)
+                    saved=read(ref)
+                    if saved is None:
+                        # Private local stage log only; redact long opaque values.
+                        text=re.sub(r'[A-Za-z0-9_-]{20,}','[OPAQUE]',page.locator('body').inner_text())
+                        posted=parse_qs(navigation.value.post_data or '')
+                        print(json.dumps({'commit_status':navigation.value.response().status,'posted_keys':sorted(posted),'posted_step':posted.get('step'),'native_result_tail':text[-2500:]}),flush=True)
+                    check(saved is not None,'orders commit persisted '+label)
                     if is_line:
                         rows=saved['lines'];check(len(rows)==1 and rows[0]['desc']==EXPECTED,'orders line Unicode NFC and URI exact '+fmt)
                         check(float(rows[0]['qty'])==2 and float(rows[0]['subprice'])==12.34 and float(rows[0]['total_ht'])==24.68,'orders line typed amounts exact '+fmt)
