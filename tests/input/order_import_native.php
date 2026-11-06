@@ -19,7 +19,7 @@ foreach(['csv','xlsx'] as $format){
   $map=$isLine?[1=>'cd.fk_commande',2=>'cd.description',3=>'cd.qty',4=>'cd.product_type']:[1=>'c.ref',2=>'c.fk_soc',3=>'c.date_commande',4=>'c.fk_statut',5=>'c.note_public',6=>'c.note_private'];
   $path=$run.'/documents/'.$code.'.'.$format;
   if($format==='csv'){$handle=fopen($path,'wb');fputcsv($handle,$values);fclose($handle);$driver=new ImportCsv($db,$code);}
-  else{$book=new PhpOffice\PhpSpreadsheet\Spreadsheet();$book->getActiveSheet()->fromArray([$values]);(new PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);$book->disconnectWorksheets();$driver=new ImportXlsx($db,$code);}
+  else{$driver=new ImportXlsx($db,$code);$book=new PhpOffice\PhpSpreadsheet\Spreadsheet();$book->getActiveSheet()->fromArray([$values]);(new PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save($path);$book->disconnectWorksheets();}
   $hash=hash_file('sha256',$path);installedCheck($driver->import_open_file($path)>0,$code.' '.$format.' source open');$record=$driver->import_read_record();$driver->import_close_file();$raw=$record;
   $descriptor=new Import($db);$descriptor->load_arrays($user,$code);$ok=0;
   $parameters=['datatoimport'=>$code,'obj'=>$driver,'arrayrecord'=>$record,'array_match_file_to_database'=>$map,'objimport'=>$descriptor,'fieldssource'=>array_values($map),'importid'=>'OrderInputCase','updatekeys'=>[],'nbok'=>&$ok];
