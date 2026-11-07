@@ -25,6 +25,8 @@ Hedefli geliştirme: standart [Windows native komutuna](INPUT_NATIVE_WINDOWS.md)
 
 İlk dirty geliştirme koşusunda API kontrolleri geçtikten sonra doğrudan `editnote_public` GET'i token taşımadığı için native CSRF 403 verdi. Test native sayfadaki token'lı düzenleme bağlantısını takip edecek şekilde düzeltildi; native güvenlik gevşetilmedi. O koşunun snapshot/cleanup kontrolleri geçti, ancak koşu FAIL'dir ve final kabul sayılmaz.
 
+İkinci hedefli geliştirme koşusunda native kalem bağlantısı hover öncesi gizli olduğu için Playwright click zaman aşımı verdi. Test aynı native bağlantının exact href'ine gider; formun gerçek browser submit kontrolü korunur. Bu ara koşu da final kabul sayılmaz.
+
 Manuel doğrulama: sentetik staging'de taslak siparişin iki notunu ve Incoterms yerini küçük harfle düzenleyip gerçek uppercase değeri ve native API persistence'ını kontrol edin; müşteri referansı/URI/fiyat/miktarları karşılaştırın; denied kullanıcı ve eksik CSRF yazmamalıdır. Staging manuel kontrolü NOT RUN; yerel otomasyon ayrı raporlanır.
 
 Rollback: bu artımın registry/test/runner/fixture değişikliklerini geri alın; not/konum casing açığı geri gelir. Upstream/schema/üretim veri migrasyonu yoktur. Yayın/merge ayrı sahip onayı gerektirir. 25 ürün hedefinin %28 kanıtlı / %72 açık-kısmi hesabı değişmez; bu süre/kod yüzdesi değildir.

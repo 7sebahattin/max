@@ -52,7 +52,9 @@ def main():
             # they only show a form. Follow the supported link, never seed it.
             link=page.locator('a[href*="action='+action+'"]')
             check(link.count()==1,'order write native edit link '+action)
-            link.click();page.wait_for_load_state('networkidle')
+            # Native pencil links can be hidden until hover; navigate their exact
+            # native href. The editable form itself is submitted in the browser.
+            page.goto(link.get_attribute('href'));page.wait_for_load_state('networkidle')
             return page.locator('meta[name=anti-csrf-newtoken]').get_attribute('content')
         def integrity(record):
             return (record['ref'],record['ref_ext'],record['ref_client'],record['socid'],record['date'],record['status'],record['total_ht'],record['total_tva'],record['total_ttc'],record['lines'])
