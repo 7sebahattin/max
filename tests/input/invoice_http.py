@@ -35,7 +35,7 @@ def main():
                 if urlparse(route.request.url).netloc==urlparse(BASE).netloc:route.continue_()
                 else:external.append(route.request.resource_type);route.abort()
             ctx.route('**/*',guard);ctx.add_cookies([dict(name=ACCOUNTS['privacy'],value='1',url=BASE)])
-            page=ctx.new_page();page.on('pageerror',lambda err:errors.append(type(err).__name__))
+            page=ctx.new_page();page.on('pageerror',lambda err:errors.append(dict(type=type(err).__name__,message=re.sub(r'[A-Za-z0-9_-]{20,}','[OPAQUE]',str(err))[:600])))
             page.goto(BASE+'/index.php');page.locator('[name=username]').fill(ACCOUNTS[role]['login']);page.locator('[name=password]').fill(ACCOUNTS[role]['password']);page.locator('[name=password]').press('Enter');page.wait_for_load_state('networkidle')
             check(page.locator('[name=password]').count()==0,'invoices native login '+role)
             return ctx,page
@@ -157,6 +157,9 @@ def main():
         for filename,expected in hashes.items():
             check(hashlib.sha256((RUN/'documents/import/temp'/filename).read_bytes()).hexdigest()==expected,'invoices retained source hash '+filename.split('-',1)[-1])
         (RUN/'invoice-source-hashes.json').write_text(json.dumps(hashes,indent=2),encoding='utf-8')
+        if errors or external:
+            # Value-redacted diagnostics only, no DOM/config/credentials or URLs.
+            print(json.dumps({'invoice_js_errors':errors,'external_resource_types':external}),flush=True)
         check(not errors and not external,'invoices no JavaScript errors or external browser requests')
         check(True,'invoices final source integrity network and owned draft cleanup')
         browser.close()
