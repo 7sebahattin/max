@@ -27,6 +27,8 @@ Fixture'a entity=2 boş depo eklendi. Immutable ticari snapshot **bütün entrep
 
 ## Kanıt ve kalan kapsam
 
+İlk hedefli depo koşusu PASS oldu. `051902f` tam koşusunda fatura grubunun bütün persistence/rollback/hash kontrolleri geçti, ancak son JS/dış browser isteği kontrolü FAIL verdi. Eski collector yalnız hata sınıfını tuttuğundan ilk olayın nedeni ayrıştırılamadı. Fatura testine value-redacted hata mesajı ve external resource type teşhisi eklendi; kontrol gevşetilmedi, hata yutma/otomatik başarı veya skip eklenmedi. Bu başarısız koşu final kanıtı sayılmaz; final aynı clean HEAD'de yeniden üretilmelidir.
+
 Windows runner `native_warehouse_http` aşamasında `warehouse-checks.json` terminal assertion'ı olmadan PASS vermez. Hedefli geliştirme: standart komuta `--http-suite warehouses`; diğer HTTP grupları NOT RUN kalır. Final teslim aynı clean HEAD'de varsayılan `--http-suite all`, yerel kontroller ve owned cleanup ile doğrulanır. Son exact SHA/sonuçlar `.local/input-native-summary.json` ve `.local/input-evidence-manifest.json` içindedir; raw/log/config/session/credential ZIP'e girmez.
 
 Bu kapsam depo metadata girişleridir; stok hareketleri, parent/hierarchy özel aksiyonları, tüm rich editor etkileşimleri, bütün konfigürasyonlar veya global uppercase uyumu değildir. Sipariş/fatura/sevkiyat write yüzeyleri, update/bulk import, ORM/cron/Core-off, Contacts entity sınırı ve Docker ortak 63 ayrı açık/BLOCKED kalır. 25 ürün hedefinin %28 kanıtlı / %72 açık-kısmi hesabı değişmez. Rollback: bu registry/test/runner/fixture commit'ini geri almak eski lieu/town açığını geri getirir; üretim veri/schema migrasyonu yoktur.
