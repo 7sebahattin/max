@@ -1,6 +1,6 @@
 # MAX — proje durum raporu, 7 Kasım 2026
 
-**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Çalışma yerel `feat/max-uppercase-inputs` dalında; remote main/PR durumunu güncel sayan bir sorgu yapılmadı. PR #34 içeriği bu dala alınmadı.
+**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Çalışma yerel `codex/order-write-inputs` dalında; remote main/PR durumunu güncel sayan bir sorgu yapılmadı. PR #34 içeriği bu dala alınmadı.
 
 ## Yüzde hesabı
 
@@ -47,6 +47,8 @@ Bu devam işi [cari/kişi web/API kabulünü](INPUT_CRM_HTTP.md) ekler: eksik co
 7 Kasım devam işi [depo web/API metadata kabulünü](INPUT_WAREHOUSE_HTTP.md) ekler. Eksik lieu alanı 64 sınırıyla sınıflandırılır, town gerçek SQL'e göre 50'ye düzeltilir. Yeni boş depolarla native API/browser create/update, rol/CSRF/entity, post-conversion sınır/unique collision ve boşluk doğrulamalı native cleanup sınanır. Bütün entrepot tablosu immutable snapshot'a eklendi; stoklu mevcut depo dahil hiçbir eski satır değişemez. Final native sonuç ayrı `native_warehouse_http` aşamasında izlenir.
 
 Sırada order/invoice/shipment web/API write ve rich editor/özel aksiyon açıkları vardır. Önceki Contacts entity sınırı BLOCKED, iki kurulum izolasyonu ve ortak Docker 63 NOT RUN kalır. Eski 25 ürün hedefinin **%28/%72** hesabı aynı kalır.
+
+7 Kasım sipariş yazma artımı [ayrı native not rotası ve Incoterms teslim yerini](INPUT_ORDER_WRITES.md) sınıflandırır. Yeni `native_order_write_http` aşaması sentetik taslak sipariş header/nested line ve bağımsız line API yazımları, gerçek browser not gönderimi, JS-less not/Incoterms POST, rol/CSRF/query-precedence ve dönüşüm sonrası overflow sınırlarını bağımsız API okumalarıyla sınar. Native generic Orders PUT Incoterms alanlarını saklamaz; bu uç için destek iddia edilmez. Fatura/sevkiyat yazma ve web satır/rich editor/special-action kapsamı sonraki işlerdir. Exact final HEAD ve sonuçlar yerel kanıt manifestinde tutulur; bu artım eski 25 hedefin yüzdesini değiştirmez.
 
 ## Öncelik sırası
 

@@ -27,7 +27,7 @@ function installedSnapshot($ids){
 }
 $user->fetch('','maxadmin');$user->getrights('',1);
 if(($argv[1]??'')==='fixture'){
- foreach(['Societe','Product','Stock','Commande','Expedition','Facture','Banque','Api','Import','Maxcore','Maxmobile','Maxorders','Maxcustoms','Maxmail'] as $module)installedCheck(empty(activateModule('mod'.$module,1,1)['errors']),'activate '.$module);
+ foreach(['Societe','Product','Stock','Commande','Expedition','Facture','Banque','Api','Import','Incoterm','Maxcore','Maxmobile','Maxorders','Maxcustoms','Maxmail'] as $module)installedCheck(empty(activateModule('mod'.$module,1,1)['errors']),'activate '.$module);
  foreach(['MAIN_MONNAIE'=>'EUR','MAIN_INFO_SOCIETE_NOM'=>'Synthetic Legal Case Ltd','MAIN_INFO_SOCIETE_COUNTRY'=>'1:FR:France','MAIN_INFO_SOCIETE_IDPROF1'=>'CaseTax123','MAIN_DISABLE_ALL_MAILS'=>'1','MAIN_CHECK_DUPLICATE_COMPANY'=>'1'] as $key=>$value)installedResult(dolibarr_set_const($db,$key,$value,'chaine',0,'',1),'synthetic constant '.$key);
  $conf->setValues($db);$user->getrights('',1);
  $user->api_key=bin2hex(random_bytes(24));installedResult($user->update($user,1),'native admin API credential');
