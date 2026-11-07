@@ -1,4 +1,4 @@
-# MAX — proje durum raporu, 6 Kasım 2026
+# MAX — proje durum raporu, 7 Kasım 2026
 
 **Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Çalışma yerel `feat/max-uppercase-inputs` dalında; remote main/PR durumunu güncel sayan bir sorgu yapılmadı. PR #34 içeriği bu dala alınmadı.
 
@@ -16,7 +16,7 @@ Mevcut [çapraz modül kabul matrisindeki](specs/ACCEPTANCE_MATRIX.md) **25 sena
 
 **Raporlanabilir kalan oran: kabul kapsamının %72'si açık.** Bu bir süre/maliyet veya kalan kod miktarı tahmini değildir. Ağırlıkları ürün sahibiyle belirlenmemiş taslak kabul matrisi kullanılır; HKS bu paydanın içindedir. Yedi kanıtlı kalem, mevcut depo testleri ve kayıtlı eski native kanıtlarla eşleştirilmiş geliştirme altkapsamlarıdır. Güncel HEAD için tüm ürünün yeniden kabulü veya üretim onayı sayılmaz. Sonraki raporlarda aynı 25 ID korunmalı; payda değişirse gerekçesi kaydedilmelidir.
 
-Issue #36 büyük harf normalizasyonu, bu eski matris dışında eklenen engelleyici kalite kapısıdır. Cari/kişi testlerinin tamamlanması eski 25 hedefin yüzdesini yapay olarak artırmaz; native HTTP import altkapsamı 1/7'den 3/7 profile ilerler. Matrisin tamamı kapansa bile bu yeni kalite kapısı ve staging onayları ayrıca tamamlanmalıdır.
+Issue #36 büyük harf normalizasyonu, bu eski matris dışında eklenen engelleyici kalite kapısıdır. Cari/kişi testlerinin tamamlanması eski 25 hedefin yüzdesini yapay olarak artırmaz; native CSV/XLSX insert/strict_line HTTP altkapsamı yedi profile ulaştı; tüm giriş yüzeyleri ayrıca izlenir. Matrisin tamamı kapansa bile bu yeni kalite kapısı ve staging onayları ayrıca tamamlanmalıdır.
 
 ## Modül bazında konum
 
@@ -44,7 +44,9 @@ Final exact clean HEAD üzerinde tüm aşamalar PASS olduğunda mevcut registry'
 
 Bu devam işi [cari/kişi web/API kabulünü](INPUT_CRM_HTTP.md) ekler: eksik contact public/private not kuralları tamamlanır, cari town sınırı gerçek SQL ile 64→50 düzeltilir. API create/update ve native browser create/edit, doğrudan POST, rol/CSRF, cari entity=2 read/update reddi ve Contacts entity filtresi için ayrı BLOCKED native bulgu ve desteklenen trigger/native ORM ile e-posta case koruması, uzunluk sınırları ve owned temizliği ayrı `native_crm_http` aşamasında izlenir. Entity=2 müşteri/kişi de immutable snapshot'a eklenir. Tüm CRM aksiyonları veya bütün API kaynakları tamamlanmış sayılmaz.
 
-Sıradaki bağımsız yüzeyler warehouse/order/invoice/shipment web/API yazma kabulleri ve rich editor/özel aksiyon açıklarıdır; ardından uygun ortamda ortak regresyon. Eski 25 ürün hedefinin **%28/%72** hesabı aynı kalır.
+7 Kasım devam işi [depo web/API metadata kabulünü](INPUT_WAREHOUSE_HTTP.md) ekler. Eksik lieu alanı 64 sınırıyla sınıflandırılır, town gerçek SQL'e göre 50'ye düzeltilir. Yeni boş depolarla native API/browser create/update, rol/CSRF/entity, post-conversion sınır/unique collision ve boşluk doğrulamalı native cleanup sınanır. Bütün entrepot tablosu immutable snapshot'a eklendi; stoklu mevcut depo dahil hiçbir eski satır değişemez. Final native sonuç ayrı `native_warehouse_http` aşamasında izlenir.
+
+Sırada order/invoice/shipment web/API write ve rich editor/özel aksiyon açıkları vardır. Önceki Contacts entity sınırı BLOCKED, iki kurulum izolasyonu ve ortak Docker 63 NOT RUN kalır. Eski 25 ürün hedefinin **%28/%72** hesabı aynı kalır.
 
 ## Öncelik sırası
 

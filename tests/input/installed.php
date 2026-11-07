@@ -16,7 +16,7 @@ function installedRows($sql){global $db;$q=$db->query($sql);if(!$q)throw new Run
 function installedResult($result,$label){installedCheck($result>0,$label);return $result;}
 function installedSnapshot($ids){
  $out=[];
- foreach(['product_stock','product_batch','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture'] as $table)$out[$table]=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.$table.' ORDER BY rowid');
+ foreach(['entrepot','product_stock','product_batch','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture'] as $table)$out[$table]=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.$table.' ORDER BY rowid');
  foreach(['product','societe'] as $table)$out[$table]=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.$table.' WHERE rowid='.(int)$ids[$table]);
  $out['protected_contact']=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.'socpeople WHERE rowid='.(int)$ids['socpeople']);
  $out['other_entity_product']=installedRows('SELECT * FROM '.MAIN_DB_PREFIX.'product WHERE rowid='.(int)$ids['other_product']);
@@ -43,11 +43,12 @@ if(($argv[1]??'')==='fixture'){
  $invoice=new Facture($db);$invoice->socid=$soc->id;$invoice->date=dol_now();$invoice->type=0;installedResult($invoice->create($user),'draft invoice fixture');installedResult($invoice->addline('PROTECTED GOODS',10,2,0),'draft invoice line');
  $bank=new Account($db);$bank->ref='Input-Bank';$bank->label='SYNTHETIC NONBANK';$bank->country_id=1;$bank->currency_code='EUR';$bank->type=1;$bank->date_solde=dol_now();installedResult($bank->create($user),'fictional bank fixture');$bank->iban='TEST-IBAN-CaseOnly';installedResult($bank->update_bban($user),'fictional IBAN fixture');installedResult($bank->addline(dol_now(),'VIR','SYNTHETIC RECEIPT',40,'',0,$user),'fictional receipt fixture');
  $conf->entity=2;$other=new Product($db);$other->ref='Other-EntityCase';$other->label='OTHER ENTITY';$other->type=0;installedResult($other->create($user),'entity two native fixture');
+ $otherWarehouse=new Entrepot($db);$otherWarehouse->label='OTHER ENTITY WAREHOUSE';$otherWarehouse->statut=1;installedResult($otherWarehouse->create($user),'entity two warehouse fixture');
  $otherSoc=new Societe($db);$otherSoc->name='OTHER ENTITY CUSTOMER';$otherSoc->client=1;$otherSoc->code_client='Other-Customer';installedResult($otherSoc->create($user),'entity two customer fixture');
  $otherContact=new Contact($db);$otherContact->entity=2;$otherContact->socid=$otherSoc->id;$otherContact->lastname='OTHER ENTITY CONTACT';installedResult($otherContact->create($user),'entity two contact fixture');$conf->entity=1;
  installedCheck((int)installedRows('SELECT entity FROM '.MAIN_DB_PREFIX.'socpeople WHERE rowid='.(int)$otherContact->id)[0]['entity']===2,'foreign contact fixture really belongs to entity two');
  require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
- $accounts=['admin'=>['login'=>'maxadmin','password'=>getenv('MAX_INPUT_ADMIN_PASS'),'key'=>$user->api_key],'denied'=>['login'=>'input-denied','password'=>$deniedPass,'key'=>$denied->api_key],'fixture_customer'=>$soc->id,'other_product'=>$other->id,'other_societe'=>$otherSoc->id,'other_contact'=>$otherContact->id,'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
+ $accounts=['admin'=>['login'=>'maxadmin','password'=>getenv('MAX_INPUT_ADMIN_PASS'),'key'=>$user->api_key],'denied'=>['login'=>'input-denied','password'=>$deniedPass,'key'=>$denied->api_key],'fixture_customer'=>$soc->id,'other_product'=>$other->id,'other_societe'=>$otherSoc->id,'other_contact'=>$otherContact->id,'other_warehouse'=>$otherWarehouse->id,'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
  file_put_contents($run.'/accounts.json',json_encode($accounts));
  $ids=['product'=>$product->id,'societe'=>$soc->id,'socpeople'=>$contact->id,'other_product'=>$other->id,'other_societe'=>$otherSoc->id,'other_contact'=>$otherContact->id];file_put_contents($run.'/protected-ids.json',json_encode($ids));
  $snapshot=installedSnapshot($ids);installedCheck($snapshot['counts']['bank']>0&&$snapshot['counts']['facturedet']>0&&$snapshot['counts']['stock_mouvement']>0,'populated immutable boundary after commercial fixtures');

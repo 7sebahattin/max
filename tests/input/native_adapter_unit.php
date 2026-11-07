@@ -33,6 +33,9 @@ try{
  nativeInputCheck((bool)preg_match('/\btown\s+varchar\(50\)/i',$companySchema)&&MaxInput::registry()['web']['societe/card.php']['town'][1]===50&&MaxInput::registry()['api']['thirdparties']['town'][1]===50&&MaxInput::registry()['imports']['societe_1']['s.town'][1]===50,'company town web API import bounds match pinned SQL');
  $invoiceLineSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_facturedet.sql');
  nativeInputCheck((bool)preg_match('/\blabel\s+varchar\(255\)/i',$invoiceLineSchema)&&MaxInput::registry()['imports']['facture_3']['fd.label']===['text',255],'invoice import line label length matches pinned native SQL');
+ $warehouseSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_entrepot.sql');$warehouseBounds=true;
+ foreach(['lieu'=>64,'town'=>50] as $field=>$limit)$warehouseBounds=$warehouseBounds&&(bool)preg_match('/\b'.$field.'\s+varchar\('.$limit.'\)/i',$warehouseSchema)&&MaxInput::registry()['web']['product/stock/card.php'][$field]===['text',$limit]&&MaxInput::registry()['api']['warehouses'][$field]===['text',$limit];
+ nativeInputCheck($warehouseBounds,'warehouse location and town web API bounds match pinned SQL');
  nativeInputCheck(strpos($source,"executeHooks('beforeApiCall'")<strpos($source,'$api->r->handle()'),'supported hook precedes native request parsing');
  $import=file_get_contents(DOL_DOCUMENT_ROOT.'/imports/import.php');
  nativeInputCheck(str_contains($import,"'obj'                          => &\$obj")&&str_contains($import,"'nbok'                         => &\$nbok")&&str_contains($import,'if (empty($reshook))'),'native import hook retains object/counter references and replacement contract');

@@ -251,11 +251,15 @@
       ],
       "town": [
         "text",
-        64
+        50
       ],
       "desc": [
         "html",
         65535
+      ],
+      "lieu": [
+        "text",
+        64
       ]
     },
     "custom/maxcore/admin/setup.php": {
@@ -606,6 +610,10 @@
         255
       ],
       "town": [
+        "text",
+        50
+      ],
+      "lieu": [
         "text",
         64
       ]

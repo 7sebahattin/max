@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-06",
+  "as_of": "2026-11-07",
   "basis": "docs/specs/ACCEPTANCE_MATRIX.md",
   "metric": "equal_weight_development_evidence_coverage",
   "release_ready": false,

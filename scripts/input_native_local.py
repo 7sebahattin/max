@@ -59,6 +59,7 @@ def verify_stage_report(run,label):
         'native_order_http':('order-checks.json','orders final source integrity network and owned draft cleanup'),
         'native_invoice_http':('invoice-checks.json','invoices final source integrity network and owned draft cleanup'),
         'native_crm_http':('crm-checks.json','CRM final owned cleanup and network checks'),
+        'native_warehouse_http':('warehouse-checks.json','warehouse final owned empty cleanup and network checks'),
         'native_import_lifecycle_snapshot':('verify-checks.json','commercial bank IBAN stock order invoice payment and legal snapshot unchanged'),
     }
     if label not in required:return
@@ -105,7 +106,7 @@ def main():
     parser.add_argument('--php-ini', required=True, type=Path)
     parser.add_argument('--dolibarr', required=True, type=Path)
     parser.add_argument('--mariadb', required=True, type=Path, help='Portable bin directory')
-    parser.add_argument('--http-suite', choices=('all','orders','invoices','crm'), default='all', help='Targeted development run; unselected HTTP stages stay NOT RUN')
+    parser.add_argument('--http-suite', choices=('all','orders','invoices','crm','warehouses'), default='all', help='Targeted development run; unselected HTTP stages stay NOT RUN')
     parser.add_argument('--recover-run', type=Path, help='Only clean a stopped manifest-owned interrupted run, then exit')
     args = parser.parse_args()
     if os.name != 'nt':
@@ -160,7 +161,7 @@ def main():
     report = dict(**identity,
                   scope='portable_windows_installed_native', http_suite=args.http_suite, run_id=run.name,
                   upstream_sha256=lock['sha256'], preflight='PASS',
-                  checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_wizard_http','native_people_http','native_order_http','native_invoice_http','native_crm_http','native_import_lifecycle_snapshot')},
+                  checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_wizard_http','native_people_http','native_order_http','native_invoice_http','native_crm_http','native_warehouse_http','native_import_lifecycle_snapshot')},
                   original_shared_63='NOT RUN (Docker identity/network contract unavailable)',
                   github_ci='NOT RUN (owner hold)', cleanup='NOT RUN')
 
@@ -232,6 +233,9 @@ def main():
         web = start(php+['-S',f'127.0.0.1:{httpport}','-t',str(native),str(ROOT/'tests/input/router.php')], 'http',native)
         ready(web,httpport)
         http_passed=True
+        if args.http_suite in ('all','warehouses'):
+            try: command('native_warehouse_http', [sys.executable,str(ROOT/'tests/input/warehouse_http.py')],timeout=600)
+            except RuntimeError: http_passed=False
         if args.http_suite in ('all','crm'):
             try:
                 command('native_crm_http', [sys.executable,str(ROOT/'tests/input/crm_http.py')],timeout=600)
