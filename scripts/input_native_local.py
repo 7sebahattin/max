@@ -164,7 +164,7 @@ def main():
                   upstream_sha256=lock['sha256'], preflight='PASS',
                   checks={name:'NOT RUN' for name in ('database_init','database_create','installer_schema','installer_admin','native_fixture','native_http','native_wizard_http','native_people_http','native_order_http','native_invoice_http','native_crm_http','native_warehouse_http','native_order_write_http','native_import_lifecycle_snapshot')},
                   original_shared_63='NOT RUN (Docker identity/network contract unavailable)',
-                  github_ci='NOT RUN (owner hold)', cleanup='NOT RUN')
+                  github_ci='NOT RUN (this local runner does not execute GitHub Actions)', cleanup='NOT RUN')
 
     def save():
         summary.write_text(json.dumps(report, indent=2), encoding='utf-8')

@@ -4,9 +4,15 @@ Notes/descriptions are rich business text; Incoterms location and line label are
 business text. Refs, IDs, dates, prices, quantities, enum keys and tokens are exact.
 """
 import json
+import os
+from pathlib import Path
 from urllib.parse import urlencode, urlparse
 from playwright.sync_api import sync_playwright
-from wizard_http import RUN, BASE, ACCOUNTS
+
+RUN=Path(os.environ['MAX_INPUT_NATIVE_RUN'])
+BASE='http://127.0.0.1:'+os.environ['MAX_INPUT_NATIVE_HTTP']
+ACCOUNTS=json.loads(Path(os.environ.get('MAX_INPUT_NATIVE_ACCOUNTS',str(RUN/'accounts.json'))).read_text(encoding='utf-8'))
+CHECKS_PATH=Path(os.environ.get('MAX_INPUT_NATIVE_CHECKS',str(RUN/'order-write-checks.json')))
 
 TEXT='istanbul ıslak c\u0327ic\u0327ek straße'
 UPPER='İSTANBUL ISLAK ÇİÇEK STRASSE'
@@ -17,7 +23,7 @@ CHECKS=[]
 
 def check(ok,label):
     CHECKS.append(dict(check=label,status='PASS' if ok else 'FAIL'))
-    (RUN/'order-write-checks.json').write_text(json.dumps(CHECKS,indent=2),encoding='utf-8')
+    CHECKS_PATH.write_text(json.dumps(CHECKS,indent=2),encoding='utf-8')
     print(('PASS ' if ok else 'FAIL ')+label,flush=True)
     if not ok:raise AssertionError(label)
 

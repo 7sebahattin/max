@@ -23,6 +23,12 @@ class TriggerCoverage(unittest.TestCase):
             self.assertTrue(required(['tests/'+folder+'/nested/fixture.py']))
         for prefix in ('coenabled','maxcore','mobile','orders','customs','mailintake','branding'):
             self.assertTrue(required(['scripts/'+prefix+'_test.sh']))
+        for path in ('tests/input/order_write_http.py','scripts/input_native_local.py'):
+            with self.subTest(path=path): self.assertTrue(required([path]))
+
+    def test_order_write_native_suite_is_required_in_shared_installation(self):
+        self.assertIn('tests/input/order_write_http.py', (ROOT/'tests/coenabled/run.py').read_text())
+        self.assertIn('order-write-checks.json', (ROOT/'tests/coenabled/evidence.py').read_text())
 
     def test_real_install_build_and_compatibility_inputs(self):
         for name in ('compose.yaml','.dockerignore','upstream.lock.json','scripts/p2_install.sh','scripts/prepare.py',

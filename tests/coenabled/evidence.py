@@ -39,7 +39,10 @@ def collect():
         for file in Path('.local').glob(pattern):shutil.copyfile(file,out/file.name)
     for lane,rows in results.items():
         (out/(lane+'-strict.json')).write_text(json.dumps(rows,indent=2))
-    report={'passed':True,'source':json.loads((out/'source.json').read_text()),'shared_db':json.loads((out/'identity.json').read_text()),'counts':{lane:len(rows) for lane,rows in results.items()},'strict_total':sum(map(len,results.values())),'manual_gates':['physical-device','WSL2-workstation','provider-TLS-OAuth','PDF-extraction-and-release','HKS','commercial-distribution-a11y-review']}
+    order_writes=json.loads((out/'order-write-checks.json').read_text())
+    assert order_writes and all(row.get('status')=='PASS' for row in order_writes),'Native order-write HTTP assertion failed or incomplete'
+    assert order_writes[-1].get('check')=='order write final owned draft cleanup and network checks','Missing native order-write terminal assertion'
+    report={'passed':True,'source':json.loads((out/'source.json').read_text()),'shared_db':json.loads((out/'identity.json').read_text()),'counts':{**{lane:len(rows) for lane,rows in results.items()},'native_order_write_http':len(order_writes)},'strict_total':sum(map(len,results.values())),'manual_gates':['physical-device','WSL2-workstation','provider-TLS-OAuth','PDF-extraction-and-release','HKS','commercial-distribution-a11y-review']}
     assert report['strict_total']==63
     (out/'acceptance.json').write_text(json.dumps(report,indent=2));print('PASS all 63 exact per surface STRICT viewport checks with shared DB evidence')
 if __name__=='__main__':collect()
