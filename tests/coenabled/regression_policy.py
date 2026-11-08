@@ -13,10 +13,10 @@ PATHS = (
     'modules/maxcustoms/**', 'modules/maxmail/**',
     'tests/coenabled/**', 'tests/maxcore/**', 'tests/mobile/**',
     'tests/orders/**', 'tests/customs/**', 'tests/mailintake/**',
-    'tests/branding/**', 'tests/p2_*',
+    'tests/branding/**', 'tests/input/**', 'tests/p2_*',
     'scripts/coenabled_*', 'scripts/maxcore_*', 'scripts/mobile_*',
     'scripts/orders_*', 'scripts/customs_*', 'scripts/mailintake_*', 'scripts/branding_*',
-    'scripts/p2_install.sh', 'scripts/prepare.py', 'scripts/check.py',
+    'scripts/input_*', 'scripts/p2_install.sh', 'scripts/prepare.py', 'scripts/check.py',
     'scripts/max_source_audit.py', 'deployment/local/**', 'compose.yaml', '.dockerignore',
     'upstream.lock.json', '.github/workflows/max-coenabled.yml',
 )

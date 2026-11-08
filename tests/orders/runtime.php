@@ -32,6 +32,8 @@ if($mode==='toggle') {
 if($mode==='off' || $mode==='on') { $result=$mode==='off'?unActivateModule('modMaxorders'):activateModule('modMaxorders',1,1); ok(empty($result['errors']),'browser toggle'); exit; }
 if($mode==='verify') { ok(snapshotO()===file_get_contents(DOL_DATA_ROOT.'/orders-before'),'HTTP preserves native ERP and legal identity'); echo "PASS Orders final verification\n"; exit; }
 ok(empty(activateModule('modMaxorders',1,1)['errors']),'actual module installation'); $conf->setValues($db); $user->getrights('',1);
+foreach(['Api','Incoterm'] as $name) ok(empty(activateModule('mod'.$name,1,1)['errors']),'native '.$name.' module');
+$conf->setValues($db); $user->getrights('',1);
 ok(isModEnabled('maxorders'),'module enabled');
 ok(count(rowsO("SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE module='maxorders'"))===3,'three native permissions');
 ok(count(rowsO("SELECT rowid FROM ".MAIN_DB_PREFIX."menu WHERE module='maxorders'"))===1,'native unified menu');
@@ -41,6 +43,11 @@ $native=[];
 foreach([[$c->id,'PACK-100'],[$other->id,'PACK-100'],[$c->id,'WRONG-REF']] as [$soc,$ref]) {
  $o=new Commande($db); $o->socid=$soc; $o->date=dol_now(); $o->ref_client=$ref; ok($o->create($user)>0,'native draft fixture'); $native[]=$o->id;
 }
+$originalEntity=$conf->entity; $conf->entity=2;
+$foreign=new Societe($db); $foreign->name='Orders Foreign Entity Customer'; $foreign->client=1; $foreign->code_client='ORDERS-ENTITY2'; ok($foreign->create($user)>0,'native foreign customer fixture');
+$conf->entity=$originalEntity; $conf->setValues($db); $user->getrights('',1);
+ok((int)rowsO('SELECT entity FROM '.MAIN_DB_PREFIX.'societe WHERE rowid='.(int)$foreign->id)[0]->entity===2,'foreign customer fixture entity');
+$user->api_key=bin2hex(random_bytes(24)); ok($user->update($user,1)>0,'native admin API key');
 $accounts=[]; $actors=[];
 foreach(['denied'=>0,'reader'=>61014001,'intake'=>61014002,'reviewer'=>61014003,'no-native'=>61014003] as $role=>$permission) {
  $a=new User($db); $a->login='orders-'.$role; $a->lastname='Synthetic '.$role; $pass=bin2hex(random_bytes(24)); $a->pass=$pass;
@@ -50,6 +57,7 @@ foreach(['denied'=>0,'reader'=>61014001,'intake'=>61014002,'reviewer'=>61014003,
   $r=rowsO("SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE module='".$module."' AND perms='".$perms."'".($sub?" AND subperms='".$sub."'":" AND (subperms IS NULL OR subperms='')"));
   ok(count($r)===1,'native right lookup'); ok($a->addrights($r[0]->id)>0,'grant native read scope');
  }
+ if($role==='denied') { $a->api_key=bin2hex(random_bytes(24)); ok($a->update($user,1)>0,'native denied API key'); }
  $a->getrights('',1); $actors[$role]=$a; $accounts[$role]=['login'=>$a->login,'password'=>$pass];
 }
 $before=snapshotO(); $service=new MaxOrdersPacket($db);
@@ -104,5 +112,11 @@ $originalEntity=$conf->entity; $conf->entity=2; $isolated=new MaxOrdersPacket($d
 deniesO(fn()=>$isolated->detail($user,$id),404,'entity isolation'); $conf->entity=$originalEntity;
 ok(snapshotO()===$before,'intake preserves native legal finance products stock orders');
 file_put_contents(DOL_DATA_ROOT.'/orders-before',$before);
-file_put_contents(DOL_DATA_ROOT.'/orders-accounts.json',json_encode(['accounts'=>$accounts,'packet'=>$id,'customer'=>$c->id,'order'=>$native[0]])); chmod(DOL_DATA_ROOT.'/orders-accounts.json',0600);
+require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
+$accounts['denied']['key']=$actors['denied']->api_key;
+$httpAccounts=['accounts'=>$accounts,'packet'=>$id,'customer'=>$c->id,'order'=>$native[0],
+ 'admin'=>['login'=>$user->login,'key'=>$user->api_key],'denied'=>$accounts['denied'],
+ 'fixture_customer'=>$c->id,'other_societe'=>$foreign->id,
+ 'privacy'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256')];
+file_put_contents(DOL_DATA_ROOT.'/orders-accounts.json',json_encode($httpAccounts)); chmod(DOL_DATA_ROOT.'/orders-accounts.json',0600);
 echo "PASS Orders installed vertical slice\n";

@@ -1,6 +1,6 @@
-# MAX — proje durum raporu, 7 Kasım 2026
+# MAX — proje durum raporu, 8 Kasım 2026
 
-**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Çalışma yerel `feat/max-uppercase-inputs` dalında; remote main/PR durumunu güncel sayan bir sorgu yapılmadı. PR #34 içeriği bu dala alınmadı.
+**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Zorunlu input politikası draft PR #37'de; native sipariş notları/Incoterms aşaması draft PR #38 olarak `codex/max-uppercase-inputs` üstüne yığılmıştır. PR #38 exact-head Actions kanıtı ayrıca raporlanır. PR #34 içeriği bu dala alınmadı. Mail ve eski Raporlar işleri son fazda kalır.
 
 ## Yüzde hesabı
 
@@ -46,7 +46,9 @@ Bu devam işi [cari/kişi web/API kabulünü](INPUT_CRM_HTTP.md) ekler: eksik co
 
 7 Kasım devam işi [depo web/API metadata kabulünü](INPUT_WAREHOUSE_HTTP.md) ekler. Eksik lieu alanı 64 sınırıyla sınıflandırılır, town gerçek SQL'e göre 50'ye düzeltilir. Yeni boş depolarla native API/browser create/update, rol/CSRF/entity, post-conversion sınır/unique collision ve boşluk doğrulamalı native cleanup sınanır. Bütün entrepot tablosu immutable snapshot'a eklendi; stoklu mevcut depo dahil hiçbir eski satır değişemez. Final native sonuç ayrı `native_warehouse_http` aşamasında izlenir.
 
-Sırada order/invoice/shipment web/API write ve rich editor/özel aksiyon açıkları vardır. Önceki Contacts entity sınırı BLOCKED, iki kurulum izolasyonu ve ortak Docker 63 NOT RUN kalır. Eski 25 ürün hedefinin **%28/%72** hesabı aynı kalır.
+Sipariş notları/Incoterms native write kabulü PR #38'de yığılmıştır; sonraki input işleri fatura/sevkiyat web/API yazımları, rich editor ve özel aksiyonlardır. Önceki Contacts entity sınırı BLOCKED, iki kurulum izolasyonu ve ortak Docker 63 NOT RUN kalır. Bu branch'in 25 ürün hedefi önceki rapor anındaki **%28/%72** hesabıdır.
+
+7 Kasım sipariş yazma artımı [ayrı native not rotası ve Incoterms teslim yerini](INPUT_ORDER_WRITES.md) sınıflandırır. Yeni `native_order_write_http` aşaması sentetik taslak sipariş header/nested line ve bağımsız line API yazımları, gerçek browser not gönderimi, JS-less not/Incoterms POST, rol/CSRF/query-precedence ve dönüşüm sonrası overflow sınırlarını bağımsız API okumalarıyla sınar. Native generic Orders PUT Incoterms alanlarını saklamaz; bu uç için destek iddia edilmez. Fatura/sevkiyat yazma ve web satır/rich editor/special-action kapsamı sonraki işlerdir. Exact final HEAD ve sonuçlar yerel kanıt manifestinde tutulur; bu artım eski 25 hedefin yüzdesini değiştirmez.
 
 ## Öncelik sırası
 
@@ -59,4 +61,4 @@ Sırada order/invoice/shipment web/API write ve rich editor/özel aksiyon açık
 
 Tam bağımlılık ve kabul kapıları [ROADMAP.md](ROADMAP.md) içindedir. Windows loopback kanıtı Docker ağ/kimlik izolasyonu yerine geçmez. Erteleme, uygulanan mevcut yüzeylerin güvenlik ve veri bütünlüğü yükümlülüklerini kaldırmaz.
 
-GitHub Actions/push/yeni PR, billing değişikliği, merge ve deployment askısı aynen geçerlidir. Eski CI seçim testinin NTFS satır-sonlu filename fixture hatası, Docker/WSL eksikliği ve henüz çalıştırılmayan kabuller gizlenmez. Gerçek müşteri/posta hesabı/HKS veya ücretli servis kullanılmaz.
+Sahip 8 Kasım'da standard hosted Actions ve scoped draft PR yayınını yetkilendirdi. PR #37 exact head'inde 18/18 kontrol geçti; sipariş yazma PR #38 draft durumunda. Merge, ücretli runner ve deployment ayrı onay kapılarıdır. Eski CI seçim testinin NTFS satır-sonlu filename fixture hatası, Docker/WSL eksikliği ve henüz çalıştırılmayan kabuller gizlenmez. Gerçek müşteri/posta hesabı/HKS veya ücretli servis kullanılmaz.

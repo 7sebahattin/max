@@ -9,13 +9,25 @@ import sys
 
 OUT=Path('.local/coenabled-evidence'); OUT.mkdir(exist_ok=True)
 STAGES=[]
-def command(label,args):
+def failure_details(output):
+    details=[]
+    kinds=re.findall(r'(?m)^(?:[A-Za-z0-9_.]+\.)?([A-Za-z][A-Za-z0-9]*(?:Error|Exception)):',output)
+    if kinds: details.append('FAILTYPE '+kinds[-1])
+    for filename,line in re.findall(r'File "([^"]+)", line ([0-9]+)',output)[-6:]:
+        name=Path(filename).name
+        if re.fullmatch(r'[A-Za-z0-9_.-]{1,80}',name): details.append('FAILTRACE '+name+':'+line)
+    return details
+
+def command(label,args,env=None):
     row={'stage':label,'passed':False}; STAGES.append(row)
     try:
-        r=subprocess.run(args,capture_output=True,text=True,timeout=600)
-        safe=[x for x in (r.stdout+'\n'+r.stderr).splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        r=subprocess.run(args,capture_output=True,text=True,timeout=600,env=env)
+        output=r.stdout+'\n'+r.stderr
+        safe=[x for x in output.splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:|FAILBROWSER) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        if r.returncode: safe.extend(failure_details(output))
         for line in r.stderr.splitlines():
             if line.startswith('COENABLED_NATIVE_ERROR '): row['native_error']=json.loads(line.split(' ',1)[1])
+            if line.startswith('COENABLED_NATIVE_DIFF '): row['native_diff']=json.loads(line.split(' ',1)[1])
         row.update(exit_code=r.returncode,log=safe[-18:]); print(('PASS' if r.returncode==0 else 'FAIL')+' '+label,flush=True)
         if r.returncode: raise RuntimeError('Stage failed: '+label)
         row['passed']=True
@@ -39,9 +51,24 @@ def main():
     command('private IMAP seed transfer',['docker','compose','cp','.local/mailintake-state/seed.json','web:/var/lib/dolibarr/documents/mailintake-input.json'])
     command('private seed ownership',['docker','compose','exec','-T','web','chown','www-data:www-data','/var/lib/dolibarr/documents/mailintake-input.json'])
     php('mailintake/native.php','setup')
+    copy('orders-accounts.json','orders-accounts.json')
+    order_accounts=Path('.local/orders-accounts.json')
+    private=json.loads(order_accounts.read_text())
+    private['admin']['password']=Path('.local/p2-admin-secret').read_text().strip()
+    order_accounts.write_text(json.dumps(private),encoding='utf-8');order_accounts.chmod(0o600)
+    order_env=os.environ.copy()
+    order_env.update(MAX_INPUT_NATIVE_RUN=str(OUT.resolve()),MAX_INPUT_NATIVE_HTTP='8080',
+                     MAX_INPUT_NATIVE_ACCOUNTS=str(order_accounts.resolve()),
+                     MAX_INPUT_NATIVE_CHECKS=str((OUT/'order-write-checks.json').resolve()),
+                     MAX_INPUT_BROWSER_EXECUTABLE='/usr/bin/chromium')
+    checkpoint('before-order-writes')
+    command('native order notes and Incoterms HTTP acceptance',
+            [sys.executable,'tests/input/order_write_http.py'],env=order_env)
+    checkpoint('after-order-writes')
+    # Freeze after owned draft cleanup: native order HTTP acceptance changes actioncomm.
     checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json'); copy('coenabled-core-roles.json','coenabled-evidence/core-roles.json')
     checkpoint('chain'); copy('coenabled-chain.json','coenabled-evidence/chain.json')
-    for source,target in [('coenabled-privacy.json','coenabled-privacy.json'),('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('orders-accounts.json','orders-accounts.json'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
+    for source,target in [('coenabled-privacy.json','coenabled-privacy.json'),('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
     for lane in ('core','orders','customs'):
         checkpoint('before-'+lane)
         python('tests/coenabled/observe.py',lane)

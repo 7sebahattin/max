@@ -103,6 +103,7 @@
       ]
     },
     "commande/card.php": {
+      "location_incoterms": ["text", 255],
       "label": [
         "text",
         255
@@ -143,6 +144,10 @@
         "text",
         255
       ]
+    },
+    "commande/note.php": {
+      "note_public": ["html", 65535],
+      "note_private": ["html", 65535]
     },
     "compta/facture/card.php": {
       "label": [
@@ -531,6 +536,7 @@
       ]
     },
     "orders": {
+      "location_incoterms": ["text", 255],
       "note_public": [
         "html",
         65535

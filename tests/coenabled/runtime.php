@@ -18,7 +18,15 @@ function snapshotE(array $tables,string $legalPosition='last'): string {
     if($legalPosition==='last') $out['legal']=rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity");
     return hash('sha256',json_encode($out));
 }
-function nativeE(): string { $hash=snapshotE(['societe','socpeople','product','product_stock','product_batch','product_lot','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture','emailcollector_emailcollector','actioncomm']); return hash('sha256',$hash.json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity"))); }
+function nativeTablesE(): array { return ['societe','socpeople','product','product_stock','product_batch','product_lot','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture','emailcollector_emailcollector','actioncomm']; }
+function nativePartsE(): array {
+    $parts=[];
+    foreach(nativeTablesE() as $table) $parts[$table]=hash('sha256',json_encode(rowsE('SELECT * FROM '.MAIN_DB_PREFIX.$table.' ORDER BY '.($table==='actioncomm'?'id':'rowid'))));
+    $parts['legal_constants']=hash('sha256',json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity")));
+    $parts['brand_constants']=hash('sha256',json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity")));
+    return $parts;
+}
+function nativeE(): string { $hash=snapshotE(nativeTablesE()); return hash('sha256',$hash.json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity"))); }
 function moduleStateE(): string {
     return snapshotE(['maxorders_packet','maxorders_revision','maxorders_fact','maxorders_current','maxorders_lock','maxorders_conflict','maxorders_audit','maxcustoms_declaration','maxcustoms_private','maxcustoms_shipment','maxcustoms_history','maxcustoms_evidence'],'none');
 }
@@ -90,8 +98,8 @@ if($mode==='freeze') {
     require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
     $privacy=[['name'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256'),'value'=>'1','domain'=>'127.0.0.1','path'=>'/','sameSite'=>'Lax']];
     file_put_contents($root.'/coenabled-privacy.json',json_encode($privacy)); chmod($root.'/coenabled-privacy.json',0600);
-    // Every commercial fixture is now complete. Rebase original helper hashes ONCE
-    // to this populated DB, before any acceptance/UI/intake action. No source edits.
+    // Every commercial fixture and owned draft-write cleanup is complete. The native
+    // order acceptance can leave actioncomm rows; freeze once before remaining lanes.
     $contracts=[
         'orders-before'=>snapshotE(['societe','commande','commandedet','product','stock_mouvement','product_stock','expedition','facture','bank','paiement']),
         'customs-native-before'=>snapshotE(['societe','commande','commandedet','expedition','expeditiondet','product','product_stock','stock_mouvement','facture','facturedet','bank_account','bank','paiement']),
@@ -99,10 +107,29 @@ if($mode==='freeze') {
         'coenabled-native-before'=>nativeE()
     ];
     foreach($contracts as $name=>$hash) {file_put_contents($root.'/'.$name,$hash); chmod($root.'/'.$name,0400);}
+    file_put_contents($root.'/coenabled-native-parts.json',json_encode(nativePartsE())); chmod($root.'/coenabled-native-parts.json',0400);
     needE(str_starts_with(rowsE('SELECT VERSION() AS version')[0]['version'],'11.4.13'),'pinned MariaDB version');
     $identity=['version'=>DOL_VERSION,'php'=>PHP_VERSION,'database'=>'max_demo','host'=>'db','database_server'=>rowsE('SELECT VERSION() AS version,@@hostname AS host')[0], 'entity'=>(int)$conf->entity,'installation_fingerprint'=>hash('sha256',$conf->file->instance_unique_id),'baseline'=>nativeE(),'modules'=>activationE()];
     file_put_contents($root.'/coenabled-identity.json',json_encode($identity)); echo "PASS immutable populated single DB baseline frozen\n"; exit;
 }
+if($mode==='before-order-writes') {
+    needE(!is_file($root.'/coenabled-native-before-order-writes.json'),'owned order-write snapshot created once');
+    file_put_contents($root.'/coenabled-native-before-order-writes.json',json_encode(nativePartsE())); chmod($root.'/coenabled-native-before-order-writes.json',0400);
+    echo "PASS pre-write native table hashes frozen\n"; exit;
+}
+if($mode==='after-order-writes') {
+    $before=json_decode(file_get_contents($root.'/coenabled-native-before-order-writes.json'),true);
+    $after=nativePartsE(); $changed=[];
+    foreach($after as $name=>$hash) if($name!=='actioncomm' && ($before[$name]??null)!==$hash) $changed[]=$name;
+    if(($before['actioncomm']??null)!==($after['actioncomm']??null)) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode(['actioncomm'])."\n");
+    if($changed) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode($changed)."\n");
+    needE(!$changed,'owned order write preserves all native tables except actioncomm');
+    echo "PASS owned order write preserves native commercial and identity tables\n"; exit;
+}
+$nativeParts=json_decode(file_get_contents($root.'/coenabled-native-parts.json'),true);
+$changedParts=[];
+foreach(nativePartsE() as $name=>$hash) if(($nativeParts[$name]??null)!==$hash) $changedParts[]=$name;
+if($changedParts) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode($changedParts)."\n");
 needE(nativeE()===file_get_contents($root.'/coenabled-native-before'),'immutable native legal bank stock order invoice finance snapshot');
 $identity=json_decode(file_get_contents($root.'/coenabled-identity.json'),true);
 needE(hash('sha256',$conf->file->instance_unique_id)===$identity['installation_fingerprint'] && rowsE('SELECT @@hostname AS host')[0]['host']===$identity['database_server']['host'],'same installed DB identity at every phase');

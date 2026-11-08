@@ -36,6 +36,8 @@ try{
  $warehouseSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_entrepot.sql');$warehouseBounds=true;
  foreach(['lieu'=>64,'town'=>50] as $field=>$limit)$warehouseBounds=$warehouseBounds&&(bool)preg_match('/\b'.$field.'\s+varchar\('.$limit.'\)/i',$warehouseSchema)&&MaxInput::registry()['web']['product/stock/card.php'][$field]===['text',$limit]&&MaxInput::registry()['api']['warehouses'][$field]===['text',$limit];
  nativeInputCheck($warehouseBounds,'warehouse location and town web API bounds match pinned SQL');
+ $orderSchema=file_get_contents(DOL_DOCUMENT_ROOT.'/install/mysql/tables/llx_commande.sql');
+ nativeInputCheck((bool)preg_match('/\blocation_incoterms\s+varchar\(255\)/i',$orderSchema)&&MaxInput::registry()['web']['commande/card.php']['location_incoterms']===['text',255]&&MaxInput::registry()['api']['orders']['location_incoterms']===['text',255]&&MaxInput::registry()['web']['commande/note.php']===['note_public'=>['html',65535],'note_private'=>['html',65535]],'order native location bound and separate notes route classified');
  nativeInputCheck(strpos($source,"executeHooks('beforeApiCall'")<strpos($source,'$api->r->handle()'),'supported hook precedes native request parsing');
  $import=file_get_contents(DOL_DOCUMENT_ROOT.'/imports/import.php');
  nativeInputCheck(str_contains($import,"'obj'                          => &\$obj")&&str_contains($import,"'nbok'                         => &\$nbok")&&str_contains($import,'if (empty($reshook))'),'native import hook retains object/counter references and replacement contract');
