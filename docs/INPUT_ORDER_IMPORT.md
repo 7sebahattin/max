@@ -1,6 +1,6 @@
 # Sipariş import eşlemesi — Issue #36
 
-6 Kasım 2026: Mail/çeviri ve eski ASYA Raporlar sayfası son faza taşınırken bağımsız zorunlu input bütünlüğü işi sürdürülür. Başlangıç yerel HEAD `31f6abfb3ef203931cdb991d1ab4bd31ce9855ac`. GitHub/CI/yayın askısı değişmez; yalnız sentetik yerel disposable kurulum kullanılır.
+6 Kasım 2026: Mail/çeviri ve eski ASYA Raporlar sayfası son faza taşınırken bağımsız zorunlu input bütünlüğü işi sürdürülür. Başlangıç yerel HEAD `31f6abfb3ef203931cdb991d1ab4bd31ce9855ac`. Bu yerel kayıt yeni Actions sonucu değildir; 8 Kasım owner update scoped draft PR ve standart hosted Actions'ı yetkilendirdi. Yalnız sentetik yerel disposable kurulum kullanılır.
 
 ## Hata ve düzeltme
 

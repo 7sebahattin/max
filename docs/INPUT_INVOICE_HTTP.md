@@ -1,6 +1,6 @@
 # Native fatura import HTTP kabulü — Issue #36
 
-Başlangıç yerel commit'i `9ba1bb9d0e1446142a3ca2a9ae88518ee3544040`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazda kalır. Bu adım yalnız ücretsiz, disposable yerel Dolibarr 24.0.1 üzerinde sentetik **taslak** fatura importunu doğrular. Fatura validate edilmez, gönderilmez, ödeme alınmaz; GitHub/CI/push/PR/merge/yayın askısı sürer.
+Başlangıç yerel commit'i `9ba1bb9d0e1446142a3ca2a9ae88518ee3544040`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazda kalır. Bu adım yalnız ücretsiz, disposable yerel Dolibarr 24.0.1 üzerinde sentetik **taslak** fatura importunu doğrular. Fatura validate edilmez, gönderilmez, ödeme alınmaz. Bu yerel kanıt yeni hosted Actions sonucu değildir; 8 Kasım owner update scoped draft PR ve standart runner'ları yetkilendirdi. Merge ve deployment kısıtları sürer.
 
 ## Native sözleşme ve sınıflandırma
 

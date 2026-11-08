@@ -60,7 +60,7 @@ Geliştirme koşusunda gerçek native kurulumda **37 fixture + 50 HTTP/browser +
 | Eski CI seçim testi | FAIL/ERROR: 14 PASS + 1 NTFS filename hatası; test aynen korunur |
 | Ortak 63 / Docker Compose validation / smoke | NOT RUN: bu bilgisayarda Docker/WSL yok |
 | Bilinmeyen girişler / ORM-CLI-cron bypass / Core kapalı native | BLOCKED; genel ürün uyumu ilan edilmez |
-| GitHub push/Actions/PR/merge/deployment | NOT RUN; sahip askısı korunur |
+| GitHub push/Actions/PR/merge/deployment | Windows local run sırasında NOT RUN; owner later authorized a scoped draft PR and standard hosted runners on 2026-11-08. Merge/deployment remain unapproved until their gates |
 
 Gerekli araçları önceden yerel ücretsiz kaynaklardan hazırlayın; runner download/kurulum/Actions başlatmaz. Sistem PHP ini'sini değiştirmeden gerekli uzantıları içeren `.local/php.ini` sağlayın. Aşağıdaki yollar bu Windows bilgisayarında kullanılan yollardır:
 
@@ -85,6 +85,6 @@ Runner yalnız kendi PID'lerini durdurur ve kendi run dizininin çözümlenmiş 
 
 İlk Windows denemelerinde native 12 karakter banka ref sınırını aşan fixture ve installer'ın salt okunur lock/conf dosyaları nedeniyle teardown hatası bulundu. Fixture düzeltildi; kontrollü readonly temizliği eklendi. Kesilen iki deneme `--recover-run` ile marker, root, DB port ve varsa config/module hash sahipliği doğrulanarak temizlendi. Native süreçler yeniden kullanılmadı. Recovery yabancı config, açık DB portu, parent/sibling ağaç ve değişmiş modül üzerinde durur; unit testleri bunu doğrular.
 
-Mevcut `tests/coenabled/test_ci_policy.py` Windows koşusunda 14 PASS + 1 ERROR verdi: satır sonu içeren gerçek Git filename fixture'ı NTFS'de oluşturulamıyor (`WinError 123`). Test değiştirilmedi, skip veya tolerans eklenmedi; suite PASS ilan edilmez. Diğer yerel kanıt/cleanup testleri ayrı raporlanır. Compose validation/smoke ve ortak 63 NOT RUN; GitHub Actions/push/PR/billing/merge/deployment askısı aynen geçerlidir.
+Mevcut `tests/coenabled/test_ci_policy.py` Windows koşusunda 14 PASS + 1 ERROR verdi: satır sonu içeren gerçek Git filename fixture'ı NTFS'de oluşturulamıyor (`WinError 123`). Test değiştirilmedi, skip veya tolerans eklenmedi; suite PASS ilan edilmez. Diğer yerel kanıt/cleanup testleri ayrı raporlanır. Compose validation/smoke ve ortak 63 NOT RUN. Sahip 2026-11-08 tarihinde scoped draft PR ve standart hosted Actions yetkilendirdi; bu PR'ın exact-head runner sonuçları ayrı kaydedilmelidir. Merge, ücretli runner ve deployment onayı yoktur.
 
 HTTP import wizard devamı ve yeni CSRF/profil/batch hata bildirimi [INPUT_IMPORT_WIZARD.md](INPUT_IMPORT_WIZARD.md) içinde kayıtlıdır. Sonraki somut iş, aynı zorunlu sınıflandırma/MaxInput kuralıyla diğer native import profillerini doğrulamaktır; ortak 63 ücretsiz Docker-capable yerel ortam gerektirir.

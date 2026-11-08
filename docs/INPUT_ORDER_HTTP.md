@@ -1,6 +1,6 @@
 # Native sipariş import HTTP kabulü — Issue #36
 
-Başlangıç yerel commit'i `4d3cf82d61a068962ac89bd5b05218e7a750b2b2`. Mail ve eski ASYA Raporlar sayfası son fazda kalır. Bu adım, önceki [dataset/alan düzeltmesini](INPUT_ORDER_IMPORT.md) gerçek native upload → mapping → simulation → commit akışında sınar. Upstream ve ticari snapshot kapsamı değiştirilmez; GitHub/CI/yayın askısı korunur.
+Başlangıç yerel commit'i `4d3cf82d61a068962ac89bd5b05218e7a750b2b2`. Mail ve eski ASYA Raporlar sayfası son fazda kalır. Bu adım, önceki [dataset/alan düzeltmesini](INPUT_ORDER_IMPORT.md) gerçek native upload → mapping → simulation → commit akışında sınar. Upstream ve ticari snapshot kapsamı değiştirilmez. Bu yerel kaydı 8 Kasım owner update'i izler: scoped draft PR ve standart hosted Actions yetkilidir; merge/yayın kısıtları sürer.
 
 ## Sınıflandırma ve uygulama
 

@@ -39,8 +39,8 @@ Issue #36 authorizes the mandatory automatic uppercase input policy and local im
 ## Owner priority update — 2026-11-06
 Mail UI, translation and all Mail development/bridges are last-phase work, potentially after launch. Revisit only a demonstrated critical dependency; independent Orders/Customs/native flows must not require Mail. Legacy ASYA's Reports-page outputs are also last-phase redesign candidates. Outputs originating in other screens remain requirements candidates, subject to native-first assessment and explicit provenance. Deferral is not completion, cancellation, or waiver of security/release gates. See `docs/ROADMAP.md`.
 
-## Current CI/publication hold (unchanged)
-The owner paused GitHub tests due exhausted quota. Do not push, create a new PR, dispatch/rerun Actions, merge, deploy, change billing or start paid services. Keep this work in local commits; run suitable local checks and report remaining integration checks honestly.
+## Owner publication and CI update — 2026-11-08
+At the owner's request, `7sebahattin/max` was changed from private to public to resume standard GitHub-hosted Actions. Standard hosted-runner checks and scoped draft PR publication are authorized. This authorization does not include paid/larger runners, billing changes, merge, deployment, external integrations, historical-data import, real HKS/SMTP or live financial actions. Publish only a reviewed, incremental stage; do not push the separate 65-commit fast-pilot branch wholesale. PR #34 remains separate. The owner requests one isolated pilot only after its readiness gates pass; host plan/access and working DNS are not yet verified. See `docs/FAST_PILOT_RELEASE.md`.
 
 ## Foundation checks
 Run `python3 scripts/check.py`, Python compilation, shell syntax and Compose validation. Use `scripts/smoke.sh` on a capable local/CI runner. Never mark a skipped or blocked test as passing. Read `upstream.lock.json` and `docs/COMPATIBILITY.md` before changing dependencies. Keep `.local/` ignored; never edit downloaded upstream. Paid extensions require explicit owner approval. PR-01 approval is required before P2; deployment always needs distinct approval.

@@ -1,6 +1,6 @@
 # Cari/kişi native HTTP import kabulü — Issue #36
 
-Başlangıç yerel commit'i `089b2abf1a9760f763924bb2ac6b7f396038fd57`; aynı `feat/max-uppercase-inputs` dalı. Sahibinin sonraki işi uygulama ve proje durum raporu talimatı kapsamında yalnız ücretsiz, disposable, sentetik yerel kaynaklar kullanılır. GitHub/CI/push/PR, ücretli servis, merge ve deployment askısı devam eder.
+Başlangıç yerel commit'i `089b2abf1a9760f763924bb2ac6b7f396038fd57`; aynı `feat/max-uppercase-inputs` dalı. Sahibinin sonraki işi uygulama ve proje durum raporu talimatı kapsamında yalnız ücretsiz, disposable, sentetik yerel kaynaklar kullanılır. 8 Kasım owner update scoped draft PR ve standart hosted Actions'ı yetkilendirdi; ücretli servis, merge ve deployment kısıtları devam eder.
 
 ## Alan sınıflandırması ve düzeltmeler
 

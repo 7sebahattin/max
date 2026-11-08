@@ -1,6 +1,6 @@
 # Native HTTP import wizard — Issue #36
 
-Bu devam çalışması `ed2a3b52d8e74b00bb7f43eba01845634e68b57a` üzerine, aynı yerel `feat/max-uppercase-inputs` dalında uygulanır. Sahibinin “sonraki işe geçelim” talimatı, önceki teslimde önerilen HTTP wizard rol/CSRF/rollback işini yetkilendirir. GitHub push/Actions/PR/billing/merge/deployment askısı devam eder; native çekirdek değiştirilmez.
+Bu devam çalışması `ed2a3b52d8e74b00bb7f43eba01845634e68b57a` üzerine, aynı yerel `feat/max-uppercase-inputs` dalında uygulanır. Sahibinin “sonraki işe geçelim” talimatı, önceki teslimde önerilen HTTP wizard rol/CSRF/rollback işini yetkilendirir. 8 Kasım owner update scoped draft PR ve standart hosted Actions'ı yetkilendirdi; billing, merge ve deployment kısıtları sürer. Native çekirdek değiştirilmez.
 
 ## Giriş sınıflandırması
 
@@ -78,7 +78,7 @@ Final yerel commit sonrasında temiz worktree ile aynı komut tekrar çalıştı
 - Wizard telefon geometri/erişilebilirlik suite'i ve gerçek CKEditor NOT RUN; önceki dokuz native viewport bu wizard için kullanılamaz.
 - Core kapalıyken bu yeni guard/normalizasyon sağlanmaz: BLOCKED. Kapatma, ürün uyumu istisnası değildir.
 - Ortak 63, Compose validation ve smoke NOT RUN: Docker/WSL yoktur. Windows loopback runtime, Docker private-network/identity sözleşmesiyle eşdeğer sayılmaz.
-- Değişmemiş CI seçim unit suite'inde NTFS satır-sonlu filename fixture hatası devam eder; skip/tolerans eklenmez. GitHub CI/push/PR/merge/deployment yapılmaz.
+- Değişmemiş CI seçim unit suite'inde NTFS satır-sonlu filename fixture hatası devam eder; skip/tolerans eklenmez. Bu Windows sonucu 8 Kasım'da yetkilendirilen hosted runner'daki exact-head PR sonucunun yerine geçmez. Merge/deployment yapılmaz.
 
 Rollback: yayınlanmamış bu devam commit'ini yerelde geri almak, önceki import davranışını (step-5 koruma açığı ve eksik batch hata bildirimi dahil) geri getirir; uyumlu dağıtım olarak sunulmaz. Disposable test DB'si zaten silinir; native müşteri verisi dönüştürülmez.
 

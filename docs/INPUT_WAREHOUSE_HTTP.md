@@ -1,6 +1,6 @@
 # Depo web/API yazma kabulü — 7 Kasım 2026, Issue #36
 
-Başlangıç yerel HEAD `c05d2a959980a8fd9be6c2f5d20a3524e11fdd6a`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazda; CI/push/yeni PR/merge/yayın askısı sürer. GitHub Issue #1 için salt-okunur web erişimi 404 döndü, GitHub CLI bulunamadı; bu iş güncel AGENTS.md, yerel PRODUCT_SCOPE ve sahibinin Issue #36 kapsamında sonraki işe devam talimatına dayanır. Issue #1 içeriği yeniden okunmuş sayılmaz.
+Başlangıç yerel HEAD `c05d2a959980a8fd9be6c2f5d20a3524e11fdd6a`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazdadır. Bu aşama sırasında Issue #1 web görünümü ve GitHub CLI kullanılamamıştı; 8 Kasım'da public GitHub API üzerinden Issue #1 yeniden okundu. Owner update scoped draft PR ve standart hosted Actions'ı yetkilendirdi; merge/yayın kısıtları sürer.
 
 ## Native audit ve merkezi düzeltmeler
 

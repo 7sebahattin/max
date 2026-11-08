@@ -1,6 +1,6 @@
 # Zorunlu otomatik büyük harf giriş sözleşmesi
 
-Yetki: [Issue #36](https://github.com/7sebahattin/max/issues/36), sahibinin 2026-11-06 tarihli devam ve uygulama talimatı. Başlangıç: `main` / `1d473fe8bea6de3035fcdf02b5a27d0dcccf437c`. Yerel dal: `feat/max-uppercase-inputs`. GitHub CI/push/yeni PR hâlâ askıdadır; merge veya dağıtım yapılmaz.
+Yetki: [Issue #36](https://github.com/7sebahattin/max/issues/36), sahibinin 2026-11-06 tarihli devam ve uygulama talimatı. Başlangıç: `main` / `1d473fe8bea6de3035fcdf02b5a27d0dcccf437c`. Çalışma `feat/max-uppercase-inputs` dalında geliştirildi. Sahibinin 2026-11-08 tarihli güncellemesiyle scoped draft PR ve standart hosted Actions yetkilendirildi; bu dalın PR kontrolleri aşağıda ayrı ve exact-head olarak kaydedilmelidir. Merge veya dağıtım yapılmaz.
 
 Bu geliştirme, merkezi normalizer ve desteklenen giriş adaptörlerini gerçek kodla ekler. **Bütün Dolibarr girişlerinin kurulu ortamda doğrulandığı anlamına gelmez.** Aşağıdaki kapsam/engel tablosu ürünün genel kabul kapısıdır. PR #34'ün henüz birleşmemiş Orders 0.3 dosyaları kopyalanmaz; bu dal main'deki Orders 0.2 üzerine kuruludur ve #34 sonrasında açıkça uzlaştırılmalıdır.
 
@@ -92,11 +92,11 @@ Geliştirme sırasında native GETPOST query önceliği ve API hook'undaki null 
 | Mevcut CI seçim / doctor / audit unit | PASS 15/15 + 14/14 + 26/26 | Yalnız yerel hafif testler |
 | Repository policy, PHP lint, JS syntax, kaynak taraması | PASS | Kaynak taramasında bulgu yok |
 | Kurulu native DB/HTTP/rol/CSRF ve ortak 63 | NOT RUN | Yayın öncesi kapı açık |
-| GitHub Actions / push / yeni PR | NOT RUN | Sahibinin kota askısı korunur |
+| GitHub Actions / push / yeni PR | Bu yerel kanıt kesitinde NOT RUN | Sahip 2026-11-08 tarihinde scoped draft PR ve standart hosted runner'ları yetkilendirdi; yeni exact-head CI sonucunu draft PR kaydı izler |
 | GitHub Issue #36 sonuç yorumu | BLOCKED | Bu ortamda GitHub API okuması `Forbidden`; yazma denenmedi |
 
 Yerel runner `.local/input-local-summary.json` içinde çalıştırılan HEAD'i kaydeder; commit sonrası aynı komutla kaynak SHA'sı doğrulanır. Yerel sonuçlar uzakta yayınlanmış CI kanıtı değildir. Sonraki iş: kurulu sentetik Dolibarr'da form/API/import, rol/CSRF/entity/unique ve değişmez finansal kayıt regresyonları; henüz sınıflandırılmamış girişlerin envanteri ve PR #34 birleşmesinden sonra Orders 0.3 uzlaştırması. Zorunlu büyük-harf sözleşmesi bu çalışmalarda da geçerlidir.
 
-**GitHub CI/push/yeni PR: NOT RUN / sahibinin kota askısı.** Mevcut shared 63 native case bu SHA'da çalıştırılmadı; önceki PR sonucunu burada PASS diye kullanmayın. Tam kurulumda rol/CSRF/entity, unique collision, marka-yasal kimlik ayrımı, yeni Core bağımlılıklarının lifecycle ve UI beklentileri, aynı DB'de bank/stok/fatura değişmezliği ve tüm native/mobile yüzeyler yayın öncesi zorunludur. Eski fixture'ların business text case beklentileri yeni sözleşmeye uyarlanmalı; strict overflow/permission/immutability koşulları korunmalıdır.
+**Bu yerel kanıt kesitinde GitHub CI/push/yeni PR: NOT RUN.** Sahip 2026-11-08 tarihinde scoped draft PR ve standart hosted runner'ları yetkilendirdi; exact-head PR sonuçları ayrı kaydedilir. Mevcut shared 63 native case bu yerel SHA'da çalıştırılmadı; önceki PR sonucunu burada PASS diye kullanmayın. Tam kurulumda rol/CSRF/entity, unique collision, marka-yasal kimlik ayrımı, yeni Core bağımlılıklarının lifecycle ve UI beklentileri, aynı DB'de bank/stok/fatura değişmezliği ve tüm native/mobile yüzeyler yayın öncesi zorunludur. Eski fixture'ların business text case beklentileri yeni sözleşmeye uyarlanmalı; strict overflow/permission/immutability koşulları korunmalıdır.
 
 Rollback: henüz yayınlanmamış yerel branch/commit'i bırakın; kurulum/migration/data rewrite yapılmadı. Gelecekte yayınlanmış olursa onaylı önceki kaynak paketlerini birlikte geri alın; teknik/native kayıtları veya ham belge geçmişini topluca dönüştürmeyin. Native Core kapalı kalırsa bu bir uyumlu ürün kabulü değildir. Merge, deployment, gerçek SMTP/HKS veya ücretli işlem bu iş kapsamında yoktur.

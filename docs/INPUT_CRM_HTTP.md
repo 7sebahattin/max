@@ -1,6 +1,6 @@
 # Cari/kişi web ve API yazma kabulü — Issue #36
 
-Başlangıç yerel commit'i `b5026d9059d3abe4ab3cce65a36754213596bdd2`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazda kalır. Yalnız disposable, sentetik yerel Dolibarr 24.0.1 kullanılır. GitHub/CI/push/PR/billing/merge/yayın askısı değişmez.
+Başlangıç yerel commit'i `b5026d9059d3abe4ab3cce65a36754213596bdd2`. Mail/çeviri ve eski ASYA Raporlar sayfası son fazda kalır. Yalnız disposable, sentetik yerel Dolibarr 24.0.1 kullanılır. Bu 6 Kasım yerel kayıt yeni Actions sonucu değildir; 8 Kasım owner update scoped draft PR ve standart hosted runner'ları yetkilendirdi. Billing, merge ve deployment kısıtları sürer.
 
 ## Sınıflandırma ve merkezi düzeltmeler
 
