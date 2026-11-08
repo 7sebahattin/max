@@ -29,6 +29,9 @@ def set_brand(page,name):
     page.locator('[name=brand_logo]').set_input_files({'name':'synthetic.jpg','mimeType':'image/jpeg','buffer':Path('.local/coenabled-logo.jpg').read_bytes()+b'INERT_COENABLED_TAIL'})
     with page.expect_response(lambda r:'/custom/maxcore/admin/setup.php' in r.url and r.request.method=='POST') as saved: page.locator('button[type=submit]').click()
     page.wait_for_load_state('networkidle'); need(saved.value.status==303,'Raster brand upload')
+    expected=name.upper()
+    need(page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==expected,'Business brand input normalized')
+    return expected
 
 def hooks(page,name):
     need(name in page.title(),'Shared title brand')
@@ -52,7 +55,7 @@ def measure(page,width,path,phase):
 def main():
     with sync_playwright() as p:
         browser=p.chromium.launch(); c,page=login(browser,{'login':'maxadmin','password':Path('.local/p2-admin-secret').read_text().strip()})
-        set_brand(page,'Coenabled North'); logo=c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo')
+        brand=set_brand(page,'Coenabled North'); logo=c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo')
         need(logo.status==200 and logo.body().startswith(b'\x89PNG') and b'INERT_COENABLED_TAIL' not in logo.body(),'Raster normalization removed tail')
         need(c.request.post(BASE+'/custom/maxcore/asset.php?kind=logo').status==405,'Artwork GET only')
         need(c.request.get(BASE+'/custom/maxcore/asset.php?kind=favicon').body()==logo.body(),'Central favicon artwork')
@@ -61,11 +64,11 @@ def main():
             page.set_viewport_size({'width':width,'height':900})
             for path in PAGES:
                 need(page.goto(BASE+'/'+path+'?lang=tr_TR').status==200,'Native baseline page'); measure(page,width,path,'before')
-        cli('on'); set_brand(page,'Coenabled South')
+        cli('on'); brand=set_brand(page,'Coenabled South')
         for width in (360,390,768):
             page.set_viewport_size({'width':width,'height':900})
             for path in PAGES:
-                need(page.goto(BASE+'/'+path+'?lang=tr_TR').status==200,'Native coenabled page'); page.locator('.maxmobile-table-scroll').first.wait_for(); hooks(page,'Coenabled South')
+                need(page.goto(BASE+'/'+path+'?lang=tr_TR').status==200,'Native coenabled page'); page.locator('.maxmobile-table-scroll').first.wait_for(); hooks(page,brand)
                 region=page.locator('.maxmobile-table-scroll').first
                 need(region.get_attribute('role')=='region' and region.get_attribute('aria-label'),'Table local accessible scroll')
                 region.focus(); need(region.evaluate('(n)=>n===document.activeElement'),'Keyboard table focus')
@@ -92,7 +95,7 @@ def main():
                 need('Fatal error' not in r.text() and 'Parse error' not in r.text(),'Native role page has no runtime error')
                 role_checks.append({'role':role,'surface':path,'status':r.status,'denial':role=='denied'})
             c.close()
-        guest=browser.new_context();opt_out(guest);guest.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort());page=guest.new_page();page.goto(BASE+'/');need('Coenabled South' in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
+        guest=browser.new_context();opt_out(guest);guest.route('**/*',lambda r:r.continue_() if r.request.url.startswith(BASE+'/') else r.abort());page=guest.new_page();page.goto(BASE+'/');need(brand in page.title() and '@ 24.0.1' in page.title(),'Login product and native version preserved');need('Dolibarr 24.0.1' in page.locator('.maxcore-origin').inner_text(),'Upstream origin retained');guest.close()
         browser.close()
     (OUT/'native-browser.json').write_text(json.dumps({'passed':not errors,'errors':errors,'strict_checks':15,'baseline_checks':15,'brand_changes':2,'hooks_same_page':True,'roles':role_checks},indent=2));need(not errors,'No JavaScript or missing asset failures')
     print('PASS shared native hooks two brands assets roles and 15 STRICT viewport cases')

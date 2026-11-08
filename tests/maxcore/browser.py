@@ -51,7 +51,7 @@ def run():
                 if allowed:
                     assert_allowed(response.status,response.text(),kind)
                 else:
-                    assert_denied(response.status,response.text(),['Synthetic Display'])
+                    assert_denied(response.status,response.text(),['SYNTHETIC DISPLAY'])
                     print('PASS denied GET body '+role+'/'+kind)
             if role in ['denied','reader','editor']:
                 # Obtain a real session token even for the no-MAX-rights native user.
@@ -62,7 +62,7 @@ def run():
                     page.goto(BASE+'/')
                     token=page.locator('meta[name=anti-csrf-newtoken]').get_attribute('content')
                     response=context.request.post(BASE+'/custom/maxcore/'+target,form={'token':token,'MAXCORE_DISPLAY_NAME':'Forbidden'})
-                    assert_denied(response.status,response.text(),['Synthetic Display'])
+                    assert_denied(response.status,response.text(),['SYNTHETIC DISPLAY'])
                     print('PASS denied POST body '+role+'/'+target)
             if role in ['editor','owner']:
                 page.goto(BASE+'/custom/maxcore/admin/setup.php')
@@ -71,11 +71,14 @@ def run():
                 assert_denied(reply.status,reply.text(),[before])
                 page.goto(BASE+'/custom/maxcore/admin/setup.php')
                 assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==before,'Invalid CSRF mutated brand'
-                page.locator('[name=MAXCORE_DISPLAY_NAME]').fill('MAX Demo '+role)
+                brand_input='MAX Demo '+role
+                expected_brand=brand_input.upper()
+                page.locator('[name=MAXCORE_DISPLAY_NAME]').fill(brand_input)
+                assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==expected_brand,'Brand input was not normalized in browser'
                 page.locator('button[type=submit]').click(); page.wait_for_load_state('networkidle')
-                assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()=='MAX Demo '+role,'Brand save failed'
+                assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==expected_brand,'Brand save failed'
             if role=='owner':
-                current_brand='MAX Demo owner'
+                current_brand='MAX DEMO OWNER'
                 for width in [360,390,768]:
                     page.set_viewport_size(dict(width=width,height=900))
                     response=page.goto(BASE+'/custom/maxcore/index.php?lang=tr_TR&mainmenu=maxcore')
@@ -89,8 +92,8 @@ def run():
                     measure(page,width,'settings')
                     field=page.locator('[name=MAXCORE_DISPLAY_NAME]')
                     field.focus(); field.press('ControlOrMeta+A'); field.press('Backspace')
-                    current_brand=f'MAX Mobile {width}'
-                    field.press_sequentially(current_brand)
+                    current_brand=f'MAX MOBILE {width}'
+                    field.press_sequentially(f'MAX Mobile {width}')
                     field.press('Tab')
                     assert page.evaluate('document.activeElement.id')=='MAXCORE_LOGO','Form keyboard order'
                     page.locator('button[type=submit]').focus()

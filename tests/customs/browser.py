@@ -67,7 +67,7 @@ with sync_playwright() as p:
         assert set(result.get('restricted',{}))==expected,'Unexpected field projection'
         if role=='viewer':
             assert page.evaluate('typeof window.customsLeak')=='undefined','Stored source text executed script'
-            assert '<script>window.customsLeak=1</script>' in page.locator('main.maxcustoms-shell').inner_text(),'Stored source text not escaped'
+            assert '<SCRIPT>WINDOW.CUSTOMSLEAK=1</SCRIPT>' in page.locator('main.maxcustoms-shell').inner_text(),'Business text normalizes and remains escaped'
             english=page.goto(BASE+f'/custom/maxcustoms/card.php?id={fixture["id"]}&lang=en_US')
             assert english.status==200 and 'Local unsubmitted draft' in page.locator('body').inner_text(),'English surface failed'
             private_absent(english.text())
@@ -96,7 +96,7 @@ with sync_playwright() as p:
             page.locator('section[data-maxcustoms=edit] [name=office]').fill('Browser synthetic office')
             page.locator('section[data-maxcustoms=edit] [name=goods_summary]').fill('Browser synthetic goods')
             page.locator('section[data-maxcustoms=edit] button').click(); page.wait_for_load_state('networkidle')
-            assert api(context)['fields']['office']=='Browser synthetic office','Valid public edit failed'
+            assert api(context)['fields']['office']=='BROWSER SYNTHETIC OFFICE','Valid public edit normalized'
             assert page.evaluate('typeof window.customsLeak')=='undefined','Source text executed script'
         if role=='matcher':
             page.reload(); page.wait_for_load_state('networkidle')
