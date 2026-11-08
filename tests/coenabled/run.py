@@ -27,6 +27,7 @@ def command(label,args,env=None):
         if r.returncode: safe.extend(failure_details(output))
         for line in r.stderr.splitlines():
             if line.startswith('COENABLED_NATIVE_ERROR '): row['native_error']=json.loads(line.split(' ',1)[1])
+            if line.startswith('COENABLED_NATIVE_DIFF '): row['native_diff']=json.loads(line.split(' ',1)[1])
         row.update(exit_code=r.returncode,log=safe[-18:]); print(('PASS' if r.returncode==0 else 'FAIL')+' '+label,flush=True)
         if r.returncode: raise RuntimeError('Stage failed: '+label)
         row['passed']=True

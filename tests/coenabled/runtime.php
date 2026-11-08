@@ -18,7 +18,15 @@ function snapshotE(array $tables,string $legalPosition='last'): string {
     if($legalPosition==='last') $out['legal']=rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity");
     return hash('sha256',json_encode($out));
 }
-function nativeE(): string { $hash=snapshotE(['societe','socpeople','product','product_stock','product_batch','product_lot','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture','emailcollector_emailcollector','actioncomm']); return hash('sha256',$hash.json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity"))); }
+function nativeTablesE(): array { return ['societe','socpeople','product','product_stock','product_batch','product_lot','stock_mouvement','commande','commandedet','expedition','expeditiondet','facture','facturedet','bank_account','bank','paiement','paiement_facture','emailcollector_emailcollector','actioncomm']; }
+function nativePartsE(): array {
+    $parts=[];
+    foreach(nativeTablesE() as $table) $parts[$table]=hash('sha256',json_encode(rowsE('SELECT * FROM '.MAIN_DB_PREFIX.$table.' ORDER BY '.($table==='actioncomm'?'id':'rowid'))));
+    $parts['legal_constants']=hash('sha256',json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name LIKE 'MAIN_INFO_SOCIETE_%' ORDER BY name,entity")));
+    $parts['brand_constants']=hash('sha256',json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity")));
+    return $parts;
+}
+function nativeE(): string { $hash=snapshotE(nativeTablesE()); return hash('sha256',$hash.json_encode(rowsE("SELECT name,value,entity FROM ".MAIN_DB_PREFIX."const WHERE name IN ('MAIN_APPLICATION_TITLE','MAIN_HTML_TITLE','MAIN_FAVICON_URL') ORDER BY name,entity"))); }
 function moduleStateE(): string {
     return snapshotE(['maxorders_packet','maxorders_revision','maxorders_fact','maxorders_current','maxorders_lock','maxorders_conflict','maxorders_audit','maxcustoms_declaration','maxcustoms_private','maxcustoms_shipment','maxcustoms_history','maxcustoms_evidence'],'none');
 }
@@ -99,10 +107,15 @@ if($mode==='freeze') {
         'coenabled-native-before'=>nativeE()
     ];
     foreach($contracts as $name=>$hash) {file_put_contents($root.'/'.$name,$hash); chmod($root.'/'.$name,0400);}
+    file_put_contents($root.'/coenabled-native-parts.json',json_encode(nativePartsE())); chmod($root.'/coenabled-native-parts.json',0400);
     needE(str_starts_with(rowsE('SELECT VERSION() AS version')[0]['version'],'11.4.13'),'pinned MariaDB version');
     $identity=['version'=>DOL_VERSION,'php'=>PHP_VERSION,'database'=>'max_demo','host'=>'db','database_server'=>rowsE('SELECT VERSION() AS version,@@hostname AS host')[0], 'entity'=>(int)$conf->entity,'installation_fingerprint'=>hash('sha256',$conf->file->instance_unique_id),'baseline'=>nativeE(),'modules'=>activationE()];
     file_put_contents($root.'/coenabled-identity.json',json_encode($identity)); echo "PASS immutable populated single DB baseline frozen\n"; exit;
 }
+$nativeParts=json_decode(file_get_contents($root.'/coenabled-native-parts.json'),true);
+$changedParts=[];
+foreach(nativePartsE() as $name=>$hash) if(($nativeParts[$name]??null)!==$hash) $changedParts[]=$name;
+if($changedParts) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode($changedParts)."\n");
 needE(nativeE()===file_get_contents($root.'/coenabled-native-before'),'immutable native legal bank stock order invoice finance snapshot');
 $identity=json_decode(file_get_contents($root.'/coenabled-identity.json'),true);
 needE(hash('sha256',$conf->file->instance_unique_id)===$identity['installation_fingerprint'] && rowsE('SELECT @@hostname AS host')[0]['host']===$identity['database_server']['host'],'same installed DB identity at every phase');
