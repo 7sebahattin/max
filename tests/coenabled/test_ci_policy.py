@@ -27,7 +27,11 @@ class TriggerCoverage(unittest.TestCase):
             with self.subTest(path=path): self.assertTrue(required([path]))
 
     def test_order_write_native_suite_is_required_in_shared_installation(self):
-        self.assertIn('tests/input/order_write_http.py', (ROOT/'tests/coenabled/run.py').read_text())
+        runner=(ROOT/'tests/coenabled/run.py').read_text()
+        self.assertIn('tests/input/order_write_http.py', runner)
+        self.assertLess(runner.index("command('native order notes and Incoterms HTTP acceptance'"), runner.index("checkpoint('freeze')"))
+        self.assertLess(runner.index("checkpoint('before-order-writes')"), runner.index("command('native order notes and Incoterms HTTP acceptance'"))
+        self.assertLess(runner.index("command('native order notes and Incoterms HTTP acceptance'"), runner.index("checkpoint('after-order-writes')"))
         self.assertIn('order-write-checks.json', (ROOT/'tests/coenabled/evidence.py').read_text())
         self.assertIn('COENABLED_NATIVE_DIFF', (ROOT/'tests/coenabled/run.py').read_text())
         self.assertIn('nativePartsE()', (ROOT/'tests/coenabled/runtime.php').read_text())

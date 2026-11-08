@@ -51,9 +51,7 @@ def main():
     command('private IMAP seed transfer',['docker','compose','cp','.local/mailintake-state/seed.json','web:/var/lib/dolibarr/documents/mailintake-input.json'])
     command('private seed ownership',['docker','compose','exec','-T','web','chown','www-data:www-data','/var/lib/dolibarr/documents/mailintake-input.json'])
     php('mailintake/native.php','setup')
-    checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json'); copy('coenabled-core-roles.json','coenabled-evidence/core-roles.json')
-    checkpoint('chain'); copy('coenabled-chain.json','coenabled-evidence/chain.json')
-    for source,target in [('coenabled-privacy.json','coenabled-privacy.json'),('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('orders-accounts.json','orders-accounts.json'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
+    copy('orders-accounts.json','orders-accounts.json')
     order_accounts=Path('.local/orders-accounts.json')
     private=json.loads(order_accounts.read_text())
     private['admin']['password']=Path('.local/p2-admin-secret').read_text().strip()
@@ -63,8 +61,14 @@ def main():
                      MAX_INPUT_NATIVE_ACCOUNTS=str(order_accounts.resolve()),
                      MAX_INPUT_NATIVE_CHECKS=str((OUT/'order-write-checks.json').resolve()),
                      MAX_INPUT_BROWSER_EXECUTABLE='/usr/bin/chromium')
+    checkpoint('before-order-writes')
     command('native order notes and Incoterms HTTP acceptance',
             [sys.executable,'tests/input/order_write_http.py'],env=order_env)
+    checkpoint('after-order-writes')
+    # Freeze after owned draft cleanup: native order HTTP acceptance changes actioncomm.
+    checkpoint('freeze'); copy('coenabled-identity.json','coenabled-evidence/identity.json'); copy('coenabled-core-roles.json','coenabled-evidence/core-roles.json')
+    checkpoint('chain'); copy('coenabled-chain.json','coenabled-evidence/chain.json')
+    for source,target in [('coenabled-privacy.json','coenabled-privacy.json'),('coenabled-logo.jpg','coenabled-logo.jpg'),('maxcore-accounts.json','maxcore-accounts.json'),('coenabled-core-admin','maxcore-admin'),('customs-session.json','customs-session.json'),('mobile-accounts.json','mobile-accounts.json')]: copy(source,target)
     for lane in ('core','orders','customs'):
         checkpoint('before-'+lane)
         python('tests/coenabled/observe.py',lane)

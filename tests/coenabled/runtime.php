@@ -98,8 +98,8 @@ if($mode==='freeze') {
     require_once DOL_DOCUMENT_ROOT.'/blockedlog/lib/blockedlog.lib.php';
     $privacy=[['name'=>'DOLINSTALLNOPING_'.getHashUniqueIdOfRegistration('sha256'),'value'=>'1','domain'=>'127.0.0.1','path'=>'/','sameSite'=>'Lax']];
     file_put_contents($root.'/coenabled-privacy.json',json_encode($privacy)); chmod($root.'/coenabled-privacy.json',0600);
-    // Every commercial fixture is now complete. Rebase original helper hashes ONCE
-    // to this populated DB, before any acceptance/UI/intake action. No source edits.
+    // Every commercial fixture and owned draft-write cleanup is complete. The native
+    // order acceptance can leave actioncomm rows; freeze once before remaining lanes.
     $contracts=[
         'orders-before'=>snapshotE(['societe','commande','commandedet','product','stock_mouvement','product_stock','expedition','facture','bank','paiement']),
         'customs-native-before'=>snapshotE(['societe','commande','commandedet','expedition','expeditiondet','product','product_stock','stock_mouvement','facture','facturedet','bank_account','bank','paiement']),
@@ -111,6 +111,20 @@ if($mode==='freeze') {
     needE(str_starts_with(rowsE('SELECT VERSION() AS version')[0]['version'],'11.4.13'),'pinned MariaDB version');
     $identity=['version'=>DOL_VERSION,'php'=>PHP_VERSION,'database'=>'max_demo','host'=>'db','database_server'=>rowsE('SELECT VERSION() AS version,@@hostname AS host')[0], 'entity'=>(int)$conf->entity,'installation_fingerprint'=>hash('sha256',$conf->file->instance_unique_id),'baseline'=>nativeE(),'modules'=>activationE()];
     file_put_contents($root.'/coenabled-identity.json',json_encode($identity)); echo "PASS immutable populated single DB baseline frozen\n"; exit;
+}
+if($mode==='before-order-writes') {
+    needE(!is_file($root.'/coenabled-native-before-order-writes.json'),'owned order-write snapshot created once');
+    file_put_contents($root.'/coenabled-native-before-order-writes.json',json_encode(nativePartsE())); chmod($root.'/coenabled-native-before-order-writes.json',0400);
+    echo "PASS pre-write native table hashes frozen\n"; exit;
+}
+if($mode==='after-order-writes') {
+    $before=json_decode(file_get_contents($root.'/coenabled-native-before-order-writes.json'),true);
+    $after=nativePartsE(); $changed=[];
+    foreach($after as $name=>$hash) if($name!=='actioncomm' && ($before[$name]??null)!==$hash) $changed[]=$name;
+    if(($before['actioncomm']??null)!==($after['actioncomm']??null)) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode(['actioncomm'])."\n");
+    if($changed) fwrite(STDERR,'COENABLED_NATIVE_DIFF '.json_encode($changed)."\n");
+    needE(!$changed,'owned order write preserves all native tables except actioncomm');
+    echo "PASS owned order write preserves native commercial and identity tables\n"; exit;
 }
 $nativeParts=json_decode(file_get_contents($root.'/coenabled-native-parts.json'),true);
 $changedParts=[];
