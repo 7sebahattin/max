@@ -63,8 +63,32 @@ jobs:
           PYENV
           python3 -m pip install playwright==1.56.0
           python3 -m playwright install --with-deps chromium
+      - name: Enable Chromium user namespace sandbox for this job
+        run: |
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            value="$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns)"
+            echo "MAX_COENABLED_APPARMOR_USERNS=$value" >> "$GITHUB_ENV"
+            if [ "$value" = 1 ]; then sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0; fi
+          fi
+          if [ -e /proc/sys/kernel/unprivileged_userns_clone ]; then
+            value="$(cat /proc/sys/kernel/unprivileged_userns_clone)"
+            echo "MAX_COENABLED_USERNS_CLONE=$value" >> "$GITHUB_ENV"
+            if [ "$value" = 0 ]; then sudo sysctl -w kernel.unprivileged_userns_clone=1; fi
+          fi
+          if [ -e /proc/sys/user/max_user_namespaces ]; then
+            value="$(cat /proc/sys/user/max_user_namespaces)"
+            echo "MAX_COENABLED_USERNS_LIMIT=$value" >> "$GITHUB_ENV"
+            if [ "$value" = 0 ]; then sudo sysctl -w user.max_user_namespaces=15000; fi
+          fi
+          unshare --user --map-root-user true
       - name: ONE native installation and shared DB for all five enabled modules
         run: bash scripts/coenabled_test.sh
+      - name: Restore runner user namespace policy
+        if: always()
+        run: |
+          if [ -n "${MAX_COENABLED_APPARMOR_USERNS:-}" ]; then sudo sysctl -w "kernel.apparmor_restrict_unprivileged_userns=$MAX_COENABLED_APPARMOR_USERNS"; fi
+          if [ -n "${MAX_COENABLED_USERNS_CLONE:-}" ]; then sudo sysctl -w "kernel.unprivileged_userns_clone=$MAX_COENABLED_USERNS_CLONE"; fi
+          if [ -n "${MAX_COENABLED_USERNS_LIMIT:-}" ]; then sudo sysctl -w "user.max_user_namespaces=$MAX_COENABLED_USERNS_LIMIT"; fi
       - name: Sanitized evidence including failures and cleanup
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
