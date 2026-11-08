@@ -23,7 +23,7 @@ def command(label,args,env=None):
     try:
         r=subprocess.run(args,capture_output=True,text=True,timeout=600,env=env)
         output=r.stdout+'\n'+r.stderr
-        safe=[x for x in output.splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        safe=[x for x in output.splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:|FAILBROWSER) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
         if r.returncode: safe.extend(failure_details(output))
         for line in r.stderr.splitlines():
             if line.startswith('COENABLED_NATIVE_ERROR '): row['native_error']=json.loads(line.split(' ',1)[1])

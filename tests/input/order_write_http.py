@@ -28,10 +28,31 @@ def check(ok,label):
     if not ok:raise AssertionError(label)
 
 
+def launch_browser(pw):
+    try:
+        return pw.chromium.launch(headless=True,chromium_sandbox=True)
+    except Exception as error:
+        message=str(error).lower()
+        categories=(
+            ('sandbox_root','running as root without --no-sandbox'),
+            ('sandbox_unavailable','no usable sandbox'),
+            ('sandbox_namespace','failed to move to new namespace'),
+            ('missing_library','error while loading shared libraries'),
+            ('permission_denied','permission denied'),
+            ('resource_limit','resource temporarily unavailable'),
+            ('resource_limit','out of memory'),
+            ('executable_missing','executable doesn’t exist'),
+            ('executable_missing','executable does not exist'),
+        )
+        category=next((name for name,marker in categories if marker in message),'browser_closed_unclassified')
+        print('FAILBROWSER '+category,flush=True)
+        raise
+
+
 def main():
     owned=[];errors=[];external=[]
     with sync_playwright() as pw:
-        browser=pw.chromium.launch(headless=True,chromium_sandbox=True)
+        browser=launch_browser(pw)
         def login(role):
             ctx=browser.new_context(base_url=BASE)
             def guard(route):
