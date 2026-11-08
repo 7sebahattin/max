@@ -9,11 +9,22 @@ import sys
 
 OUT=Path('.local/coenabled-evidence'); OUT.mkdir(exist_ok=True)
 STAGES=[]
+def failure_details(output):
+    details=[]
+    kinds=re.findall(r'(?m)^(?:[A-Za-z0-9_.]+\.)?([A-Za-z][A-Za-z0-9]*(?:Error|Exception)):',output)
+    if kinds: details.append('FAILTYPE '+kinds[-1])
+    for filename,line in re.findall(r'File "([^"]+)", line ([0-9]+)',output)[-6:]:
+        name=Path(filename).name
+        if re.fullmatch(r'[A-Za-z0-9_.-]{1,80}',name): details.append('FAILTRACE '+name+':'+line)
+    return details
+
 def command(label,args,env=None):
     row={'stage':label,'passed':False}; STAGES.append(row)
     try:
         r=subprocess.run(args,capture_output=True,text=True,timeout=600,env=env)
-        safe=[x for x in (r.stdout+'\n'+r.stderr).splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        output=r.stdout+'\n'+r.stderr
+        safe=[x for x in output.splitlines() if re.fullmatch(r'(PASS|FAIL|ASSERT|AssertionError:) [A-Za-z0-9 /_+.,:()=-]{1,180}',x)]
+        if r.returncode: safe.extend(failure_details(output))
         for line in r.stderr.splitlines():
             if line.startswith('COENABLED_NATIVE_ERROR '): row['native_error']=json.loads(line.split(' ',1)[1])
         row.update(exit_code=r.returncode,log=safe[-18:]); print(('PASS' if r.returncode==0 else 'FAIL')+' '+label,flush=True)
