@@ -1,6 +1,6 @@
 # MAX — proje durum raporu, 7 Kasım 2026
 
-**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Çalışma yerel `codex/order-write-inputs` dalında; remote main/PR durumunu güncel sayan bir sorgu yapılmadı. PR #34 içeriği bu dala alınmadı.
+**Bulunduğumuz yer: fonksiyonel modül MVP'leri ve yerel entegrasyon sertleştirmesi. Ürün yayına hazır değildir.** Native ERP tabanı, Core marka/kimlik ayrımı, sınırlı Mobile, Orders 0.2, Customs ve read-only Mail intake kaynakları var. Şu an Issue #36 zorunlu Türkçe büyük harf politikasının gerçek native giriş kabullerini kapatıyoruz. Sipariş notları/Incoterms altkabulü `codex/max-order-writes` dalında, draft PR #37 üstünde yığılmıştır; remote `main` ve PR durumu public API üzerinden kontrol edilmiştir. PR #34 içeriği bu dala alınmadı. Mail ve eski Raporlar işleri son fazda kalır.
 
 ## Yüzde hesabı
 

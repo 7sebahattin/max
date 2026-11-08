@@ -1,6 +1,6 @@
 # Native sipariş web/API yazma kabulü — 7 Kasım 2026
 
-Issue [#36](https://github.com/7sebahattin/max/issues/36), başlangıç `626b022f0053182d8409f9ad712acc9990f07fd9`. Issue #1 salt-okunur erişimi yeniden 404 döndü; içerik okunmuş sayılmaz. Güncel AGENTS.md ve PRODUCT_SCOPE uygulanır. Yerel `codex/order-write-inputs` dalı; CI/push/yeni PR askısı nedeniyle draft PR açılmaz. Mail ve eski Raporlar sayfası son fazda kalır.
+Issue [#36](https://github.com/7sebahattin/max/issues/36), başlangıç `626b022f0053182d8409f9ad712acc9990f07fd9`. Issue #1 içeriği 8 Kasım'da public GitHub API üzerinden yeniden okundu; güncel `AGENTS.md` ve `PRODUCT_SCOPE.md` uygulanır. Owner 8 Kasım'da public depoda scoped draft PR ve standart hosted Actions'ı yetkilendirdi. Bu stage `codex/max-order-writes` dalında, [PR #37](https://github.com/7sebahattin/max/pull/37) üstünde yığılmıştır; base input-policy PR exact head'inde 18/18 Actions kontrolü geçti. Bu PR'ın kendi exact-head kontrolleri ayrıca raporlanır. Merge/deployment yapılmaz. Mail ve eski Raporlar sayfası son fazda kalır.
 
 ## Native audit ve sınıflandırma
 
