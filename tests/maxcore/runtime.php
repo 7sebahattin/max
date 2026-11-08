@@ -29,7 +29,7 @@ $r=$db->query("SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE module='maxcore
 ok($r && $db->num_rows($r)===3,'three native permissions');
 maxCoreSave(array('MAXCORE_DISPLAY_NAME'=>'Synthetic Display','MAXCORE_LOGO'=>'max.svg','MAXCORE_FAVICON'=>'max-icon.svg','MAIN_INFO_SOCIETE_NOM'=>'Must not write'),$user);
 $conf->setValues($db);
-ok(maxCoreSettings()['MAXCORE_DISPLAY_NAME']==='SYNTHETIC DISPLAY','brand persistence and uppercase policy');
+ok(maxCoreSettings()['MAXCORE_DISPLAY_NAME']==='SYNTHETİC DİSPLAY','brand persistence and Turkish uppercase policy');
 ok($before===legalSnapshot(),'native legal and commercial records unchanged');
 foreach(array('<script>','',str_repeat('X',81)) as $name) {
  try { maxCoreValidate(array('MAXCORE_DISPLAY_NAME'=>$name)); ok(false,'reject bad name'); }
@@ -55,7 +55,7 @@ ok(!maxCoreCan($external,'read'),'reject external identity');
 $r=unActivateModule('modMaxcore'); ok(empty($r['errors']),'actual deactivation');
 $conf->setValues($db); ok(!isModEnabled('maxcore'),'disabled state');
 $r=$db->query("SELECT rowid FROM ".MAIN_DB_PREFIX."menu WHERE module='maxcore'"); ok($db->num_rows($r)===0,'menus removed');
-ok(maxCoreSettings()['MAXCORE_DISPLAY_NAME']==='SYNTHETIC DISPLAY','brand survives disable');
+ok(maxCoreSettings()['MAXCORE_DISPLAY_NAME']==='SYNTHETİC DİSPLAY','brand survives disable');
 $r=activateModule('modMaxcore',1,1); ok(empty($r['errors']),'actual reactivation');
 ok($before===legalSnapshot(),'toggle preserves native identity and business records');
 file_put_contents(DOL_DATA_ROOT.'/maxcore-accounts.json',json_encode($accounts)); chmod(DOL_DATA_ROOT.'/maxcore-accounts.json',0600);
