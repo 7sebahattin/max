@@ -30,7 +30,10 @@ def check(ok,label):
 
 def launch_browser(pw):
     try:
-        return pw.chromium.launch(headless=True,chromium_sandbox=True)
+        options=dict(headless=True,chromium_sandbox=True)
+        executable=os.environ.get('MAX_INPUT_BROWSER_EXECUTABLE')
+        if executable:options['executable_path']=executable
+        return pw.chromium.launch(**options)
     except Exception as error:
         message=str(error).lower()
         categories=(

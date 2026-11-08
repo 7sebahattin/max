@@ -60,7 +60,8 @@ def main():
     order_env=os.environ.copy()
     order_env.update(MAX_INPUT_NATIVE_RUN=str(OUT.resolve()),MAX_INPUT_NATIVE_HTTP='8080',
                      MAX_INPUT_NATIVE_ACCOUNTS=str(order_accounts.resolve()),
-                     MAX_INPUT_NATIVE_CHECKS=str((OUT/'order-write-checks.json').resolve()))
+                     MAX_INPUT_NATIVE_CHECKS=str((OUT/'order-write-checks.json').resolve()),
+                     MAX_INPUT_BROWSER_EXECUTABLE='/usr/bin/chromium')
     command('native order notes and Incoterms HTTP acceptance',
             [sys.executable,'tests/input/order_write_http.py'],env=order_env)
     for lane in ('core','orders','customs'):
