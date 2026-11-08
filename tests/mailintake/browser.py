@@ -105,8 +105,9 @@ with sync_playwright() as p:
     form=pm.locator('form:has(input[value="account"])')
     values={'label':'Synthetic HTTP only','host':'fakeimap','username':'third@intake.invalid','folder':'INBOX','port':'1143','password':secrets.token_hex(24)}
     for key,value in values.items(): form.locator('[name="'+key+'"]').fill(value)
+    check(form.locator('[name="label"]').input_value()=='SYNTHETİC HTTP ONLY','Browser normalizes account label')
     form.locator('select').select_option('synthetic'); form.locator('button').click(); pm.wait_for_load_state('networkidle')
-    check('Synthetic HTTP only' in pm.locator('.maxmail-shell').inner_text(),'Native admin account form')
+    check('SYNTHETİC HTTP ONLY' in pm.locator('.maxmail-shell').inner_text(),'Native admin account form')
     # Revocation takes effect in an existing native session, without logout.
     for enabled in (False,True):
         pm.goto(path('settings'))

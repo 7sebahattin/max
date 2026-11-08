@@ -8,7 +8,7 @@ class modMaxorders extends DolibarrModules {
   $this->editor_name='MAX'; $this->version='0.2.0'; $this->const_name='MAIN_MODULE_MAXORDERS'; $this->picto='order';
   $this->module_parts=['moduleforexternal'=>0]; $this->config_page_url=[]; $this->langfiles=['maxorders@maxorders'];
   $this->phpmin=[8,1]; $this->need_dolibarr_version=[24,0]; $this->dirs=[];
-  $this->depends=['modSociete','modCommande']; $this->requiredby=[]; $this->conflictwith=[]; $this->const=[];
+  $this->depends=['modMaxcore','modSociete','modCommande']; $this->requiredby=[]; $this->conflictwith=[]; $this->const=[];
   $this->rights=[];
   foreach(['read'=>'OrdersRead','intake'=>'OrdersIntake','review'=>'OrdersReview'] as $key=>$label) {
    $i=count($this->rights); $this->rights[]= [61014001+$i,$label,0,0,$key];

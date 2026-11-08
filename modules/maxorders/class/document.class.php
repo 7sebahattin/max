@@ -72,7 +72,7 @@ class MaxOrdersDocument {
   foreach($customers as $customer) {
    try {
     if(!empty($v['customer_reference']) && MaxOrdersPacket::normalized($customer->code_client?:'∅')!==MaxOrdersPacket::normalized($v['customer_reference'])) continue;
-    if(!empty($v['customer_name']) && MaxOrdersPacket::normalized($customer->nom)!==MaxOrdersPacket::normalized($v['customer_name'])) continue;
+    if(!empty($v['customer_name']) && MaxInput::text(preg_replace('/\s+/u',' ',trim($customer->nom)),255)!==MaxInput::text(preg_replace('/\s+/u',' ',trim($v['customer_name'])),255)) continue;
    } catch(InvalidArgumentException $e) { continue; }
    foreach($this->rows('SELECT * FROM '.MAIN_DB_PREFIX.'maxorders_packet WHERE entity='.$this->entity.' AND fk_soc='.(int)$customer->rowid.' AND match_key='.$this->s(hash('sha256',MaxOrdersPacket::normalized($v['order_reference']))).' ORDER BY rowid LIMIT 2') as $packet) $out[]=$packet;
   }

@@ -1,0 +1,242 @@
+{
+  "as_of": "2026-11-07",
+  "basis": "docs/specs/ACCEPTANCE_MATRIX.md",
+  "metric": "equal_weight_development_evidence_coverage",
+  "release_ready": false,
+  "scope_note": "HKS dahil mevcut 25 taslak kabul senaryosu. Kanıtlı durum geliştirme altkapsamına ait depo/test kanıtıdır; bu HEAD için tüm ürünün yeniden kabulü değildir. Kısmi kalemler kapanmış sayılmaz. Süre, maliyet veya kalan kod yüzdesi hesaplanmaz.",
+  "cases": [
+    {
+      "id": "MAX-CORE-01",
+      "module": "Core",
+      "name": "Marka ve yasal kimlik",
+      "status": "partial",
+      "evidence": "docs/BRAND_COVERAGE.md",
+      "gap": "Tek kurulumda ayrım var; iki ayrı kurulumun aynı fixture ile kabulü açık.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-CORE-02",
+      "module": "Core",
+      "name": "Ortak yetki ve gizlilik",
+      "status": "partial",
+      "evidence": "docs/COENABLED_ACCEPTANCE.md",
+      "gap": "Mevcut uçlarda rol kanıtları var; yeni input HEAD'inde tüm 63 ve gelecekteki approve/send/export uçları tamamlanmadı.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-ORD-01",
+      "module": "Orders",
+      "name": "LL önce, PO sonra",
+      "status": "evidenced",
+      "evidence": "tests/orders/runtime.php",
+      "gap": "Manuel paket altkapsamı; native sipariş üretme iddiası yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-ORD-02",
+      "module": "Orders",
+      "name": "Eski revizyonun arşivlenmesi",
+      "status": "evidenced",
+      "evidence": "tests/orders/runtime.php",
+      "gap": "Mevcut manuel revizyon kontratının kanıtı.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-ORD-03",
+      "module": "Orders",
+      "name": "Manuel kilit ve çakışma",
+      "status": "evidenced",
+      "evidence": "tests/orders/runtime.php",
+      "gap": "Mevcut manuel facts/lock kontratının kanıtı.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-ORD-04",
+      "module": "Orders",
+      "name": "Etkin miktar ve öncelik politikası",
+      "status": "partial",
+      "evidence": "docs/MAX_ORDERS_IMPLEMENTATION.md",
+      "gap": "Kaynak değerler korunuyor; onaylı otomatik etkin miktar/öncelik politikası seçilmedi.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-ORD-05",
+      "module": "Orders",
+      "name": "Belge ve mailbox tekrarları",
+      "status": "partial",
+      "evidence": "docs/MAX_ORDERS_IMPLEMENTATION.md",
+      "gap": "Belge ve Mail ayrı ayrı dedup yapıyor; Mail→Orders bileşik akışı yok, genel PDF extraction kapalı.",
+      "delivery_priority": "split_native_document_dedup_active_mail_bridge_final"
+    },
+    {
+      "id": "MAX-ORD-06",
+      "module": "Orders",
+      "name": "İki parçalı sevkiyatın tamamlanması",
+      "status": "partial",
+      "evidence": "tests/p2_business.php",
+      "gap": "4/10 native partial shipment kanıtı var; 4+6 tam senaryosu için yeni kabul gerekli.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-MAIL-01",
+      "module": "Mail",
+      "name": "IMAP UID tekrar güvenliği",
+      "status": "evidenced",
+      "evidence": "docs/MAX_MAIL_INTAKE.md",
+      "gap": "Fake IMAP/read-only intake kanıtı; gerçek provider sertifikası yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-MAIL-02",
+      "module": "Mail",
+      "name": "Bilinmeyen PDF karantinası",
+      "status": "evidenced",
+      "evidence": "docs/MAX_MAIL_INTAKE.md",
+      "gap": "Negatif güvenlik senaryosu karşılanıyor; genel PDF sınıflandırıcı/extractor uygulanmış sayılmaz.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-MAIL-03",
+      "module": "Mail",
+      "name": "SMTP belirsiz sonuç yönetimi",
+      "status": "not_implemented",
+      "evidence": "docs/specs/MAIL.md",
+      "gap": "SMTP outbox/approval/send ve mock timeout akışı yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-MAIL-04",
+      "module": "Mail",
+      "name": "Gönderim onayı yetkileri",
+      "status": "partial",
+      "evidence": "docs/MAX_MAIL_INTAKE.md",
+      "gap": "Intake rol ve mailbox scope var; approve/send uçları henüz yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-MAIL-05",
+      "module": "Mail",
+      "name": "Çeviri hata akışı",
+      "status": "not_implemented",
+      "evidence": "docs/specs/MAIL.md",
+      "gap": "Provider/mock translation ve onay akışı yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-CUS-01",
+      "module": "Customs",
+      "name": "Sipariş ve sevkiyat bağlantılı taslak",
+      "status": "evidenced",
+      "evidence": "docs/MAX_CUSTOMS_IMPLEMENTATION.md",
+      "gap": "Yerel beyan taslağı; resmî gönderim kabulü yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-CUS-02",
+      "module": "Customs",
+      "name": "Hassas alan maskeleme",
+      "status": "evidenced",
+      "evidence": "docs/MAX_CUSTOMS_IMPLEMENTATION.md",
+      "gap": "Mevcut UI/API/export alan yetkileri ve geçmiş native kanıt.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-CUS-03",
+      "module": "Customs",
+      "name": "Belgeden güvenli veri çıkarma",
+      "status": "partial",
+      "evidence": "docs/MAX_CUSTOMS_IMPLEMENTATION.md",
+      "gap": "Opaque kaynak ve uyarı korunuyor; genel parser/extraction tamamlanmadı.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-HKS-01",
+      "module": "HKS",
+      "name": "Beyandan HKS taslağı",
+      "status": "not_implemented",
+      "evidence": "docs/specs/HKS.md",
+      "gap": "HKS modülü ve draft bridge yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-HKS-02",
+      "module": "HKS",
+      "name": "Ortak HKS doğrulayıcı",
+      "status": "not_implemented",
+      "evidence": "docs/specs/HKS.md",
+      "gap": "Mock katalog ve ortak validator yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-HKS-03",
+      "module": "HKS",
+      "name": "Eşzamanlı gönderim koruması",
+      "status": "not_implemented",
+      "evidence": "docs/specs/HKS.md",
+      "gap": "Mock SOAP/idempotency akışı yok; canlı gönderim yetkisi yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-HKS-04",
+      "module": "HKS",
+      "name": "HKS belirsiz sonuç yönetimi",
+      "status": "not_implemented",
+      "evidence": "docs/specs/HKS.md",
+      "gap": "Mock timeout/reconciliation akışı yok.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-RPT-01",
+      "module": "Reports",
+      "name": "Çakışma listesi XLSX raporu",
+      "status": "not_implemented",
+      "evidence": "docs/specs/REPORTS.md",
+      "gap": "Özel rapor modülü ve kabul edilmiş çıktı kontratı yok.",
+      "delivery_priority": "provenance_review_legacy_reports_page_final_other_screens_eligible"
+    },
+    {
+      "id": "MAX-RPT-02",
+      "module": "Reports",
+      "name": "Rapor formula injection koruması",
+      "status": "not_implemented",
+      "evidence": "docs/specs/REPORTS.md",
+      "gap": "Özel rapor export hattı yok; native export testi yerine sayılmaz.",
+      "delivery_priority": "provenance_review_legacy_reports_page_final_other_screens_eligible"
+    },
+    {
+      "id": "MAX-INT-01",
+      "module": "Integration",
+      "name": "Mail→Orders→Customs→HKS zinciri",
+      "status": "not_implemented",
+      "evidence": "docs/specs/ACCEPTANCE_MATRIX.md",
+      "gap": "Tam bridge zinciri ve HKS draft sonu yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    },
+    {
+      "id": "MAX-INT-02",
+      "module": "Integration",
+      "name": "İki kurulumun izolasyonu",
+      "status": "not_verified",
+      "evidence": "docs/DELIVERY_MODEL.md",
+      "gap": "İki ayrı branded kurulumun aynı fixture kabulü NOT RUN.",
+      "delivery_priority": "active_roadmap"
+    },
+    {
+      "id": "MAX-INT-03",
+      "module": "Integration",
+      "name": "Onay sonrası revizyon güvenliği",
+      "status": "not_implemented",
+      "evidence": "docs/specs/CONTRACTS.md",
+      "gap": "SMTP/HKS onay snapshot köprüsü yok.",
+      "delivery_priority": "final_phase_mail_dependency"
+    }
+  ],
+  "priority_update": {
+    "date": "2026-11-06",
+    "mail": "final_phase_possibly_after_launch",
+    "legacy_reports_page": "final_phase_redesign_candidate",
+    "other_screen_reports": "eligible_after_provenance_and_native_assessment",
+    "critical_dependency": "review_only_if_demonstrated",
+    "percentage_denominator_unchanged": true
+  }
+}

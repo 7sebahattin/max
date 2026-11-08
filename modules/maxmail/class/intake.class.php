@@ -1,6 +1,7 @@
 <?php
 /** Mailbox-scoped private ledger. GPL-3.0-or-later. No downstream business actions. */
 require_once __DIR__.'/protocol.class.php';
+require_once dirname(__DIR__,2).'/maxcore/class/input.class.php';
 class MaxMailIntake
 {
     private $db;
@@ -95,7 +96,7 @@ class MaxMailIntake
     {
         $this->globalGuard($actor,'admin');
         if(array_diff(array_keys($data),['label','host','port','transport','username','password','folder'])) throw new InvalidArgumentException('MailInvalid',400);
-        $label=self::text($data['label']??null,80); $host=strtolower(self::text($data['host']??null,253));
+        $label=self::text(MaxInput::text($data['label']??null,80),80); $host=strtolower(self::text($data['host']??null,253));
         $username=self::text($data['username']??null,128); $folder=self::text($data['folder']??null,128);
         $port=$data['port']??0; $transport=$data['transport']??''; $password=$data['password']??null;
         if(!preg_match('/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/D',$host) || !is_int($port) || $port<1 || $port>65535 || !in_array($transport,['ssl','tls','synthetic'],true)

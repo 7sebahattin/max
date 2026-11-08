@@ -10,8 +10,9 @@ from playwright.sync_api import sync_playwright
 
 BASE='http://127.0.0.1:8080'
 VARIANT=os.environ['BRANDING_VARIANT']
-NAME='North Demo' if VARIANT=='a' else 'South Demo'
-OTHER='South Demo' if VARIANT=='a' else 'North Demo'
+RAW_NAME='North Demo' if VARIANT=='a' else 'South Demo'
+NAME=RAW_NAME.upper()
+OTHER=('South Demo' if VARIANT=='a' else 'North Demo').upper()
 accounts=json.loads(Path('.local/maxcore-accounts.json').read_text())
 accounts['owner']=dict(login='maxcore-test',password=Path('.local/maxcore-admin').read_text())
 secrets=[x['password'] for x in accounts.values()]
@@ -35,7 +36,7 @@ def login(browser,account):
 def post(c,page,data,upload=None,token=None):
     page.goto(BASE+'/custom/maxcore/admin/setup.php')
     value=token if token is not None else page.locator('[name=token]').input_value()
-    payload={'token':value,'MAXCORE_DISPLAY_NAME':NAME,'MAXCORE_LOGO':'max.svg','MAXCORE_FAVICON':'logo',**data}
+    payload={'token':value,'MAXCORE_DISPLAY_NAME':RAW_NAME,'MAXCORE_LOGO':'max.svg','MAXCORE_FAVICON':'logo',**data}
     if upload is not None:
         payload['brand_logo']={'name':upload[0],'mimeType':upload[1],'buffer':upload[2]}
     return c.request.post(BASE+'/custom/maxcore/admin/setup.php',multipart=payload,max_redirects=0)
@@ -51,7 +52,7 @@ def run():
         page.goto(BASE+'/')
         page.screenshot(path=f'.local/branding-{VARIANT}-before.png',full_page=True)
         page.goto(BASE+'/custom/maxcore/admin/setup.php')
-        page.locator('[name=MAXCORE_DISPLAY_NAME]').fill(NAME)
+        page.locator('[name=MAXCORE_DISPLAY_NAME]').fill(RAW_NAME)
         page.locator('[name=MAXCORE_FAVICON]').select_option('logo')
         page.locator('[name=brand_logo]').set_input_files({'name':'brand.png','mimeType':'image/png','buffer':png()+b'<?php inert_payload ?>'})
         with page.expect_response(lambda r: '/custom/maxcore/admin/setup.php' in r.url and r.request.method=='POST') as saving:
@@ -59,6 +60,7 @@ def run():
         page.wait_for_load_state('networkidle')
         assert saving.value.status==303, 'Valid UI upload did not save'
         page.goto(BASE+'/custom/maxcore/admin/setup.php')
+        assert page.locator('[name=MAXCORE_DISPLAY_NAME]').input_value()==NAME, 'Brand business text was not normalized'
         saved=page.locator('[name=MAXCORE_LOGO]').input_value()
         assert saved.startswith('upload:') and len(saved)==75, 'Sanitized asset token missing'
         asset=c.request.get(BASE+'/custom/maxcore/asset.php?kind=logo')

@@ -1,5 +1,6 @@
 <?php
 /** Bounded proposals, never commercial truth. GPL-3.0-or-later. */
+require_once dirname(__DIR__,2).'/maxcore/class/input.class.php';
 class MaxOrdersExtraction {
  const MAX_BYTES=2097152;
  const FIELDS=['document_kind','order_reference','document_reference','document_date','customer_reference','customer_name','product_reference','description','quantity','unit','unit_price','currency','packaging'];
@@ -46,7 +47,10 @@ class MaxOrdersExtraction {
      $value=$cell->getDataType()==='n'?($raw['numbers']['B'.$row]??''):$cell->getValue();
      if(!is_string($value)) $value='';
      $truncated=mb_strlen($value)>255; $rawValue=mb_substr($value,0,255);
-     $value=trim($rawValue); $valid=!$truncated && self::valid($key,$value);
+     $value=trim($rawValue);
+     $normalizationInvalid=false;
+     if(in_array($key,['description','customer_name','packaging','unit'],true)&&!$truncated)try{$value=MaxInput::text($value,$key==='description'?255:80);}catch(InvalidArgumentException $e){$normalizationInvalid=true;}
+     $valid=!$truncated && !$normalizationInvalid && self::valid($key,$value);
      $result['fields'][]=['field'=>$key,'value'=>$value,'raw'=>$rawValue,'truncated'=>$truncated,'state'=>$valid?'suggested':'uncertain',
       'source'=>['sheet'=>$sheet->getTitle(),'cell'=>'B'.$row,'label_cell'=>'A'.$row]];
      $seen[$key]=($seen[$key]??0)+1;

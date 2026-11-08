@@ -34,3 +34,11 @@ MAXAssetLogo=MAX logo
 MAXAssetIcon=MAX icon
 MAXAssetUploaded=Uploaded logo
 MAXUseLogoFavicon=Use current or newly uploaded logo
+
+# Mandatory input policy
+MAXInputInvalid=Invalid text input.
+MAXInputTooLong=Text is too long after uppercase conversion.
+MAXInputUnavailable=Text normalization is unavailable.
+MAXInputJsonRequired=This entry point requires JSON.
+MAXInputImportReview=Review the import row.
+MAXInputImportBatchRejected=The import failed. No records from this batch were saved. Check the file and try again.

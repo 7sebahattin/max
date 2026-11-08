@@ -1,11 +1,14 @@
 <?php
 require_once dirname(__DIR__).'/lib/maxcore.lib.php';
+require_once dirname(__DIR__).'/lib/input_hooks.lib.php';
 class ActionsMaxcore {
  public $resprints='';
+ public $error='';
+ public $errors=[];
  public function __construct($db) {}
  // Native menus resolve their labels before llxHeader; apply our own key earlier.
  public function updateSession($parameters,&$object,&$action,$hookmanager) {
-  maxCoreApplyBrand(); return 0;
+  try{MaxInputHooks::web();}catch(Throwable $e){http_response_code(in_array($e->getCode(),[400,403],true)?$e->getCode():503);print 'MAXInputInvalid';exit;} maxCoreApplyBrand(); return 0;
  }
  public function afterLogin($parameters,&$object,&$action,$hookmanager) {
   maxCoreApplyBrand(); return 0;
@@ -18,7 +21,31 @@ class ActionsMaxcore {
  }
  public function addHtmlHeader($parameters,&$object,&$action,$hookmanager) {
   $this->resprints=isModEnabled('maxcore')?'<link rel="stylesheet" href="'.dol_buildpath('/maxcore/css/branding.css',1).'">':'';
+  $this->resprints.=isModEnabled('maxcore')?MaxInputHooks::header():'';
   return 0;
+ }
+ public function beforeApiCall($parameters,&$object,&$action,$hookmanager) {
+  try {MaxInputHooks::api($parameters,$object,$action);} catch(Throwable $e) {
+   $status=in_array($e->getCode(),[400,413,415,503],true)?$e->getCode():503;
+   http_response_code($status);header('Content-Type: application/json');print json_encode(['error'=>'MAXInputInvalid']);exit;
+  }return 0;
+ }
+ public function ImportInsert($parameters,&$object,&$action,$hookmanager) {
+  try{return MaxInputHooks::import($parameters);}catch(Throwable $e){
+   MaxInputHooks::importFailure($parameters['step']??null);
+   // Diagnose adapter/native integration failures without source values, SQL,
+   // credentials or exception arguments in the log or user-facing response.
+   error_log('MAXInputImportReview '.get_class($e).' '.basename($e->getFile()).':'.$e->getLine());
+   $this->error='MAXInputImportReview';return -1;
+  }
+ }
+ public function beforeBodyClose($parameters,&$object,&$action,$hookmanager) {
+  $this->resprints='';
+  if(!MaxInputHooks::importBatchRejected())return 0;
+  global $langs;
+  $langs->load('maxcore@maxcore');
+  $this->resprints='<div class="error" role="alert" data-max-input-import="rejected">'.dol_escape_htmltag($langs->trans('MAXInputImportBatchRejected')).'</div>';
+  return 1;
  }
  public function printTopRightMenu($parameters,&$object,&$action,$hookmanager) {
   $this->resprints=isModEnabled('maxcore')?maxCoreBrandMarkup():'';

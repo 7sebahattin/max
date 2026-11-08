@@ -1,0 +1,15 @@
+/* Native product/third-party input cards only. Reflow, never clip content. */
+@media (max-width:768px) {
+ body.max-input-layout #id-container{display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:0}
+ body.max-input-layout #id-left,body.max-input-layout #id-right{display:block;box-sizing:border-box;position:static;float:none;width:100%;max-width:100%;min-width:0}
+ body.max-input-layout .side-nav{box-sizing:border-box;position:static;max-width:100%;min-width:0}
+ body.max-input-layout div.fiche{box-sizing:border-box;min-width:0;margin-left:9px;margin-right:10px}
+ body.max-input-layout .max-input-form table.border,
+ body.max-input-layout .max-input-form table.border>tbody,
+ body.max-input-layout .max-input-form table.border>tbody>tr,
+ body.max-input-layout .max-input-form table.border>tbody>tr>td{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
+ body.max-input-layout .max-input-form input:not([type=hidden]):not([type=checkbox]):not([type=radio]),
+ body.max-input-layout .max-input-form textarea,
+ body.max-input-layout .max-input-form select,
+ body.max-input-layout .max-input-form .select2-container{box-sizing:border-box;max-width:100%;min-width:0}
+}

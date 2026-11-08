@@ -1,5 +1,7 @@
 # PR-01 progress and verification
 
+Historical PR-01 record. Current whole-project status, remaining acceptance scope and evidence limitations: [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
 2026-11-03 — resumed existing draft [PR #2](https://github.com/7sebahattin/max/pull/2), branch `chore/pr-01-bootstrap`; [Issue #1](https://github.com/7sebahattin/max/issues/1) read in full including comments. Existing scaffold preserved and expanded; no duplicate PR.
 
 Completed: P0/P1 architecture, ADR, native-first scope, read-only source audit, product/legal identity boundaries, isolated-customer model, safe local preparation, source/image pins, CI, acceptance criteria and staging runbook. No functional MAX module or upstream core modification.

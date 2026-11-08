@@ -34,3 +34,11 @@ MAXAssetLogo=MAX logosu
 MAXAssetIcon=MAX simgesi
 MAXAssetUploaded=Yüklenen logo
 MAXUseLogoFavicon=Mevcut veya yeni yüklenen logoyu kullan
+
+# Mandatory input policy
+MAXInputInvalid=Metin girdisi geçersiz.
+MAXInputTooLong=Büyük harfe dönüşüm sonrası metin çok uzun.
+MAXInputUnavailable=Metin normalleştirme kullanılamıyor.
+MAXInputJsonRequired=Bu giriş noktası için JSON gerekli.
+MAXInputImportReview=İçe aktarma satırını inceleyin.
+MAXInputImportBatchRejected=İçe aktarma tamamlanamadı. Bu partideki kayıtlar kaydedilmedi. Dosyayı kontrol edip yeniden deneyin.

@@ -20,7 +20,7 @@ class modMaxcustoms extends DolibarrModules
         $this->phpmin=[8,1];
         $this->need_dolibarr_version=[24,0];
         $this->dirs=['/maxcustoms'];
-        $this->depends=['modSociete','modCommande','modExpedition'];
+        $this->depends=['modMaxcore','modSociete','modCommande','modExpedition'];
         $this->requiredby=[];
         $this->conflictwith=[];
         $this->config_page_url=[];

@@ -5,9 +5,9 @@ class modMaxcore extends DolibarrModules {
  public function __construct($db) {
   $this->db=$db; $this->numero=610120; $this->rights_class='maxcore';
   $this->family='interface'; $this->module_position='10'; $this->name='Maxcore';
-  $this->description='ModuleMaxcoreDesc'; $this->editor_name='MAX'; $this->version='0.2.0';
+  $this->description='ModuleMaxcoreDesc'; $this->editor_name='MAX'; $this->version='0.3.1';
   $this->const_name='MAIN_MODULE_MAXCORE'; $this->picto='fa-cubes';
-  $this->module_parts=array('moduleforexternal'=>0,'hooks'=>array('all')); $this->config_page_url=array('setup.php@maxcore');
+  $this->module_parts=array('moduleforexternal'=>0,'hooks'=>array('all'),'triggers'=>1); $this->config_page_url=array('setup.php@maxcore');
   $this->langfiles=array('maxcore@maxcore'); $this->phpmin=array(8,1); $this->need_dolibarr_version=array(24,0);
   $this->dirs=array(); $this->depends=array(); $this->requiredby=array(); $this->conflictwith=array(); $this->const=array();
   $this->rights=array();

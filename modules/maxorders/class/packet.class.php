@@ -1,5 +1,6 @@
 <?php
 /** MAX-owned provenance only. GPL-3.0-or-later. No effective quantity or ERP writes. */
+require_once dirname(__DIR__,2).'/maxcore/class/input.class.php';
 class MaxOrdersPacket {
  private $db;
  private $entity;
@@ -31,6 +32,8 @@ class MaxOrdersPacket {
   foreach(get_object_vars($data) as $key=>$value) {
    if(!in_array($key,['quantity','unit_price','sku','variant','packaging','currency'],true) || !is_string($value)) throw new InvalidArgumentException('OrdersInvalid',400);
    if(trim($value)==='') { $out[$key]=''; continue; }
+   if(in_array($key,['variant','packaging'],true))$value=MaxInput::text($value,80);
+   if($key==='currency')$value=strtoupper($value);
    $value=self::text($value,80);
    if(in_array($key,['quantity','unit_price'],true)) {
     $places=$key==='quantity'?3:4;

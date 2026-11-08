@@ -7,6 +7,8 @@
 - No hardcoded customer logo, company name, bank or address; use centralized brand and legal issuer configuration and preserve source-of-truth information.
 
 ## Initial gap candidates
+Owner priority (2026-11-06): these are candidates, not an accepted implementation queue. Legacy ASYA Reports-page outputs are last-phase redesign work. Other screens' exports remain eligible after source-screen provenance and native assessment; the candidates below have not been matched to those origins. Mail-related reporting follows the deferred Mail phase. Deferral never waives export authorization, source immutability or formula-injection protection for any export implemented earlier.
+
 1. Advanced Orders: document processing backlog, source conflicts, manually locked fields, PO/LL/PC value comparison and shipment reconciliation.
 2. Mail: message intake counts, classified documents, duplicate/skip causes, send approvals/outcome status with no exposed content.
 3. Customs: declaration statuses, document completeness, shipment associations and HKS draft readiness.
